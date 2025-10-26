@@ -48,6 +48,7 @@ $user = $result->fetch_assoc();
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .logo {
@@ -88,6 +89,59 @@ $user = $result->fetch_assoc();
         .user-info {
             color: var(--white);
             text-align: right;
+        }
+
+        /* Mobile responsive styles */
+        @media screen and (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+                padding: 0.5rem;
+            }
+
+            .logo {
+                margin-bottom: 0.5rem;
+                font-size: 1.2rem;
+            }
+
+            .user-info {
+                text-align: center;
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .nav-button {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 15px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .nav-button:last-child {
+                border-bottom: none;
+            }
+
+            .nav-button i {
+                width: 25px;
+            }
+        }
+
+        /* Small screen adjustments */
+        @media screen and (max-width: 480px) {
+            .logo {
+                font-size: 1rem;
+            }
+
+            .nav-button {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
