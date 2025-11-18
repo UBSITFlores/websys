@@ -7,7 +7,7 @@
         header("Location: login.php");
     }
     if(isset($_POST['apply'])){
-        header("Location: apply.php");
+        header("Location: ../management/apply.php");
     }
 ?>
 
