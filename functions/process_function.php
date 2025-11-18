@@ -13,6 +13,7 @@ class PersonalInfoHandler {
             $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
             $connection = new PDO($dsn, $user, $pass);
             $this->pdo = $connection;
+            echo "Connected successfully";
         } catch(PDOException $e){
             die("Connection Failed! " . $e->getMessage());
         }
