@@ -5,6 +5,14 @@
 ?>
 
 <?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['account_id']) || $_SESSION['role'] != 'student') {
+    header("Location: ../account/login.php");
+    exit();
+}
+
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -16,10 +24,14 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Example query to get user data
-$query = "SELECT * FROM account WHERE id = 1"; // Replace with actual user authentication
-$result = $conn->query($query);
+// Use session data instead of hardcoding id = 1
+$query = "SELECT * FROM account WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $_SESSION['id']);
+$stmt->execute();
+$result = $stmt->get_result();
 $user = $result->fetch_assoc();
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -150,7 +162,7 @@ $user = $result->fetch_assoc();
     <div class="header">
         <div class="logo">University of Saint Louis</div>
         <div class="user-info">
-            <div><?php echo isset($user['fname']) ? $user['fname'] . ' ' . $user['lname'] : 'Student Name'; ?></div>
+            <div><?php echo $_SESSION['fname'] . ' ' . $_SESSION['lname']; ?></div>
             <div>Student</div>
         </div>
     </div>

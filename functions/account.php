@@ -19,8 +19,8 @@
             }
         }
 
-        public function login($account_id,$password){
-            $fetch = $this->pdo->prepare("SELECT * FROM account WHERE account_id= :account_id AND password= :password");
+        public function login($account_id, $password){
+            $fetch = $this->pdo->prepare("SELECT * FROM account WHERE account_id = :account_id AND password = :password");
             $fetch->execute([
                 ':account_id' => $account_id,
                 ':password' => $password 
@@ -31,18 +31,20 @@
                 PDO::ATTR_EMULATE_PREPARES => false
             ];
             $user = $fetch->fetch(PDO::FETCH_ASSOC);
+            
             if (!$user) {
                 echo "
                     <script>
                         alert('Provide Correct Credentials...');
-                        window.location.href = 'index.php';
+                        window.location.href = 'login.php';
                     </script>
                 ";
             } else {
+                $_SESSION['account_id'] = $user['id'];
                 $_SESSION['ACCOUNTID'] = $user['account_id'];
-                $_SESSION['FNAME'] = $user['fname'];
-                $_SESSION['LNAME'] = $user['lname'];
-                $_SESSION['ROLE'] = $user['role'];
+                $_SESSION['fname'] = $user['fname'];  // lowercase
+                $_SESSION['lname'] = $user['lname'];  // lowercase
+                $_SESSION['role'] = $user['role'];    // lowercase
 
                 if ($user['role'] == 'management') {
                     header("Location: ../admin/index.php");
@@ -50,7 +52,7 @@
                     header("Location: ../instructor/index.php");
                 }
                 else {
-                    header("Location: ../student/index.php");
+                    header("Location: ../portal/index.php");
                 }
                 exit();
             }

@@ -1,11 +1,12 @@
 <?php 
+    session_start();
     include "../functions/account.php";
     $account = new account();
 
     if(isset($_POST['submit'])){
         $accountid = $_POST['accountid'];
         $password = $_POST['password'];
-        $account->login($accountid,$password);
+        $account->login($accountid, $password);
     }
 ?>
 <!DOCTYPE html>
