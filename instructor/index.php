@@ -40,18 +40,22 @@ if (isset($_POST['logout'])) {
         </div>
     </div>
 
-    <script>
-    // AJAX loader function unchanged
+   <script>
     function loadContent(page) {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            if (this.responseText.includes("__SESSION_EXPIRED__")) {
+                // Redirect the whole browser to login
+                window.location.href = "../account/login.php";
+            } else {
                 document.getElementById("center-content").innerHTML = this.responseText;
             }
-        };
-        xhttp.open("GET", page, true);
-        xhttp.send();
-    }
+        }
+    };
+    xhttp.open("GET", page, true);
+    xhttp.send();
+}
     </script>
 </body>
 </html>
