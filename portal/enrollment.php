@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 if (!isset($_SESSION['ACCOUNTID']) || ($_SESSION['ROLE'] ?? '') !== 'student') {
     header('Location: ../account/login.php');
@@ -37,10 +36,9 @@ if ($fname === '' || $lname === '') {
 
 // Mock enrollment data
 $mockEnrollment = [
-    ['course' => 'Web Systems and Technologies', 'units' => '3', 'status' => 'Enrolled', 'dateEnrolled' => '2024-08-15'],
-    ['course' => 'Database Management', 'units' => '3', 'status' => 'Enrolled', 'dateEnrolled' => '2024-08-15'],
-    ['course' => 'Software Engineering', 'units' => '4', 'status' => 'Enrolled', 'dateEnrolled' => '2024-08-16'],
-    ['course' => 'Mobile App Development', 'units' => '3', 'status' => 'Enrolled', 'dateEnrolled' => '2024-08-16'],
+    ['code' => 'CS101', 'course' => 'Data Structures', 'units' => 3, 'status' => 'Enrolled'],
+    ['code' => 'CS102', 'course' => 'Web Development', 'units' => 4, 'status' => 'Enrolled'],
+    ['code' => 'CS103', 'course' => 'Database Management', 'units' => 3, 'status' => 'Enrolled'],
 ];
 ?>
 
@@ -78,61 +76,53 @@ $mockEnrollment = [
             background: rgba(255,255,255,0.08);
         }
 
-        .enrollment-container {
+        .enrollment-card {
+            background-color: white;
+            border-radius: 10px;
             padding: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             max-width: 900px;
             margin: 0 auto;
         }
 
         .enrollment-title {
-            color: var(--royal-blue);
-            font-size: 2rem;
+            color: #002D72;
+            font-size: 1.8rem;
             margin-bottom: 2rem;
         }
 
         .enrollment-table {
-            background-color: var(--white);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        thead {
-            background-color: var(--royal-blue);
-            color: var(--white);
-        }
-
-        th {
+        .enrollment-table th {
+            background-color: #002D72;
+            color: white;
             padding: 1rem;
             text-align: left;
-            font-weight: bold;
         }
 
-        td {
+        .enrollment-table td {
             padding: 1rem;
             border-bottom: 1px solid #eee;
         }
 
-        tbody tr:hover {
-            background-color: #f9f9f9;
+        .enrollment-table tr:hover {
+            background-color: #f5f5f5;
         }
 
         .status-badge {
-            background-color: #28a745;
-            color: var(--white);
+            display: inline-block;
             padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            border-radius: 5px;
+            background-color: #d4edda;
+            color: #155724;
             font-weight: bold;
         }
 
         @media screen and (max-width: 768px) {
-            .enrollment-container {
+            .enrollment-card {
                 padding: 1rem;
             }
 
@@ -140,65 +130,39 @@ $mockEnrollment = [
                 font-size: 1.5rem;
             }
 
-            table {
+            .enrollment-table {
                 font-size: 0.9rem;
             }
 
-            th, td {
+            .enrollment-table th, .enrollment-table td {
                 padding: 0.75rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header" style="background-color:var(--royal-blue); color:var(--white); padding:1rem; display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <a class="back-button" href="index.php">← Home</a>
-            <div class="logo">University of Saint Louis</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div class="user-info">
-                <div><?php echo htmlspecialchars(trim($fname . ' ' . $lname)); ?></div>
-                <div>Student</div>
-            </div>
-            <form action="../account/logout.php" method="post" style="margin:0;">
-                <button type="submit" name="logout" class="logout-button">Logout</button>
-            </form>
-        </div>
-    </div>
-
-<?php 
-if(isset($_POST['logout'])){
-            header("Location: ../account/login.php");
-            exit();
-    }
-
-?>
-    <div class="enrollment-container">
-        <h1 class="enrollment-title">Course Enrollment</h1>
-        
-        <div class="enrollment-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Course</th>
-                        <th>Units</th>
-                        <th>Status</th>
-                        <th>Date Enrolled</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach($mockEnrollment as $enrollment): ?>
-                    <tr>
-                        <td><?php echo $enrollment['course']; ?></td>
-                        <td><?php echo $enrollment['units']; ?></td>
-                        <td><span class="status-badge"><?php echo $enrollment['status']; ?></span></td>
-                        <td><?php echo $enrollment['dateEnrolled']; ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+    <div class="enrollment-card">
+        <h2 class="enrollment-title">Enrollment</h2>
+        <table class="enrollment-table">
+            <thead>
+                <tr>
+                    <th>Course Code</th>
+                    <th>Course Name</th>
+                    <th>Units</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($mockEnrollment as $enrollment): ?>
+                <tr>
+                    <td><?php echo $enrollment['code']; ?></td>
+                    <td><?php echo $enrollment['course']; ?></td>
+                    <td><?php echo $enrollment['units']; ?></td>
+                    <td><span class="status-badge"><?php echo $enrollment['status']; ?></span></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

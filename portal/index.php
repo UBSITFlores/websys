@@ -1,6 +1,13 @@
 <?php
 session_start();
 
+// Check logout FIRST before anything else
+if(isset($_POST['logout'])){
+    session_destroy();
+    header("Location: ../account/logout.php");
+    exit();
+}
+
 // Check if user is logged in and has the student role
 if (!isset($_SESSION['ACCOUNTID']) || ($_SESSION['ROLE'] ?? '') !== 'student') {
     header("Location: ../account/login.php");
@@ -39,6 +46,14 @@ if ($fname === '' || $lname === '') {
         }
         $conn->close();
     }
+}
+
+// Get the page to display (default is dashboard)
+$page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+$allowed_pages = ['dashboard', 'profile', 'schedule', 'grades', 'enrollment'];
+
+if (!in_array($page, $allowed_pages)) {
+    $page = 'dashboard';
 }
 ?>
 
@@ -102,6 +117,11 @@ if ($fname === '' || $lname === '') {
             border-radius: 5px;
         }
 
+        .nav-button.active {
+            background-color: #e8e8e8;
+            border-bottom: 3px solid var(--royal-blue);
+        }
+
         .nav-button i {
             font-size: 1.2rem;
         }
@@ -124,7 +144,12 @@ if ($fname === '' || $lname === '') {
         .logout-button:hover {
             background: #f5f5f5;
         }
-        /* Mobile responsive styles */
+
+        .content-area {
+            min-height: 80vh;
+            padding: 2rem;
+        }
+
         @media screen and (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -193,39 +218,50 @@ if ($fname === '' || $lname === '') {
         </div>
     </div>
 
-<?php 
-if(isset($_POST['logout'])){
-            header("Location: ../account/login.php");
-            exit();
-    }
-
-?>
-    
     <div class="nav-container">
-        <a href="dashboard.php" class="nav-button">
+        <a href="?page=dashboard" class="nav-button <?php echo $page === 'dashboard' ? 'active' : ''; ?>">
             <i class="fas fa-tachometer-alt"></i>
             Dashboard
         </a>
-        <a href="profile.php" class="nav-button">
+        <a href="?page=profile" class="nav-button <?php echo $page === 'profile' ? 'active' : ''; ?>">
             <i class="fas fa-user"></i>
             Profile
         </a>
-        <a href="schedule.php" class="nav-button">
+        <a href="?page=schedule" class="nav-button <?php echo $page === 'schedule' ? 'active' : ''; ?>">
             <i class="fas fa-calendar"></i>
             Schedule
         </a>
-        <a href="grades.php" class="nav-button">
+        <a href="?page=grades" class="nav-button <?php echo $page === 'grades' ? 'active' : ''; ?>">
             <i class="fas fa-graduation-cap"></i>
             Grades Records
         </a>
-        <a href="enrollment.php" class="nav-button">
+        <a href="?page=enrollment" class="nav-button <?php echo $page === 'enrollment' ? 'active' : ''; ?>">
             <i class="fas fa-edit"></i>
             Enrollment
         </a>
     </div>
 
-    <div class="content">
-        test<!-- Content will be loaded here based on which button is clicked -->
+    <div class="content-area">
+        <?php
+        // Load the appropriate page content
+        switch($page) {
+            case 'dashboard':
+                include 'dashboard.php';
+                break;
+            case 'profile':
+                include 'profile.php';
+                break;
+            case 'schedule':
+                include 'schedule.php';
+                break;
+            case 'grades':
+                include 'grades.php';
+                break;
+            case 'enrollment':
+                include 'enrollment.php';
+                break;
+        }
+        ?>
     </div>
 </body>
 </html>
