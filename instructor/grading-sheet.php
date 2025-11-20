@@ -1,5 +1,5 @@
 <?php
-require_once '../functions/instructor_function.php';
+include '../functions/instructor_function.php';
 session_start();
 
 // Accept either 'account_id' or 'ACCOUNTID' from session
