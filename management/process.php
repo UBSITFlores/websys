@@ -19,17 +19,16 @@ if(isset($_POST['submit'])){
         ':city'              => $_POST['current_city'] ?? '',
         ':province'          => $_POST['current_province'] ?? '',
         ':zipcode'           => $_POST['current_zip'] ?? '',
-        ':name_of_school'    => $_POST['name_of_school'] ?? '',
-        ':add_of_school'     => $_POST['address_of_school'] ?? '',
-        ':year_graduated'    => $_POST['year_graduated'] ?? '',
+        // Only the "last school attended" block
         ':sLast'             => $_POST['school_last'] ?? '',
         ':sStreet'           => $_POST['school_street'] ?? '',
         ':sBarangay'         => $_POST['school_barangay'] ?? '',
         ':sCity'             => $_POST['school_city'] ?? '',
         ':sProvince'         => $_POST['school_province'] ?? '',
         ':sZipcode'          => $_POST['school_zip'] ?? '',
-        ':pept'              => $_POST['pept_serial'] ?? '',
-        ':als_refnum'        => $_POST['als_serial'] ?? '',
+        ':year_graduated'    => $_POST['year_graduated'] ?? '',
+        // No :pept, :als_refnum, :name_of_school, :add_of_school
+        // Guardian
         ':gLname'            => $_POST['guardian_last'] ?? '',
         ':gFname'            => $_POST['guardian_first'] ?? '',
         ':gMname'            => $_POST['guardian_middle'] ?? '',
@@ -37,12 +36,14 @@ if(isset($_POST['submit'])){
         ':gOccupation'       => $_POST['guardian_occupation'] ?? '',
         ':gAddress'          => $_POST['guardian_address'] ?? '',
         ':gRelationship'     => $_POST['guardian_relationship'] ?? '',
+        // Mother
         ':mLname'            => $_POST['mother_last'] ?? '',
         ':mFname'            => $_POST['mother_first'] ?? '',
         ':mMname'            => $_POST['mother_middle'] ?? '',
         ':mContactnum'       => $_POST['mother_contact'] ?? '',
         ':mOccupation'       => $_POST['mother_occupation'] ?? '',
         ':mAddress'          => $_POST['mother_addr'] ?? '',
+        // Father
         ':fLname'            => $_POST['father_last'] ?? '',
         ':fFname'            => $_POST['father_first'] ?? '',
         ':fMname'            => $_POST['father_middle'] ?? '',
@@ -62,7 +63,6 @@ if(isset($_POST['submit'])){
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -215,9 +215,7 @@ if(isset($_POST['submit'])){
       <h2>III. EDUCATIONAL BACKGROUND</h2>
       <div class="subsection">
         <label><input type="checkbox" name="elem_check"> Elementary School</label>
-        <div class="fields">
-          <input type="text" name="name_of_school" placeholder="Name of School">
-          <input type="text" name="address_of_school" placeholder="Address of School">
+        <div class="fields">          
           <input type="text" name="year_graduated" placeholder="Year Graduated">
         </div>
       </div>

@@ -33,7 +33,6 @@
     <div class="container">
         <form method="POST" class="portal-form">
             <button type="submit" name="login" class="form-btn">Login</button>
-            <button type="submit" name="apply" class="form-btn secondary">Apply as Student</button>
         </form>
     </div>
 </body>

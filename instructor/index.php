@@ -1,57 +1,31 @@
-<?php 
-include "../functions/instructor_function.php";
-include "../functions/account.php";
+<?php
 session_start();
-$instructor = new instructor();
-$account = new account();
+if (!isset($_SESSION['ACCOUNTID']) && !isset($_SESSION['account_id'])) {
+    header("Location: ../account/login.php");
+    exit;
+}
+$instructorName = $_SESSION['FNAME'] ?? $_SESSION['fname'] ?? '';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Instructor Panel</title>
-    <link rel="stylesheet" href="index.css" /> <!-- linked external CSS file -->
+    <meta charset="UTF-8">
+    <title>Instructor Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <div class="header"> <!-- updated: header bar with left/right layout and no extra div -->
-        <div class="logo">University of Saint Louis</div> <!-- left-aligned school name -->
-        <form method="post" style="margin:0;">
-            <button type="submit" name="logout" class="logout-button">Logout</button> <!-- right-aligned logout -->
-        </form>
+    <div class="header">
+        School Portal - Instructor Panel
+        <span class="userinfo">Logged in as: <b><?php echo htmlspecialchars($instructorName); ?></b> (<a href="../account/logout.php" style="color:#fff;">Logout</a>)</span>
     </div>
-
-<?php 
-if (isset($_POST['logout'])) {
-    header("Location: ../account/login.php");
-    exit();
-}
-// moved user-info outside the header if needed
-?>
-
     <div class="container">
-        <div class="sidebar">
-            <button onclick="loadContent('grading-sheet.php')">Grading Sheet</button>
-            <button onclick="loadContent('class-list.php')">Class List</button>
+        <div id="main-content" class="content-zone">
+            <div class="placeholder">Select a function from the right sidebar.</div>
         </div>
-        <div class="main" id="center-content">
-            Please select an option from the left.
+        <div class="sidebar-right">
+            <button id="btn-grading" class="active" onclick="loadZone('grading-sheet-ajax.php', this)">Grading Sheet</button>
         </div>
     </div>
-
-    <script>
-    // AJAX loader function unchanged
-    function loadContent(page) {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("center-content").innerHTML = this.responseText;
-            }
-        };
-        xhttp.open("GET", page, true);
-        xhttp.send();
-    }
-    </script>
+    <script src="dashboard.js"></script>
 </body>
 </html>
