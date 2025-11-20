@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 
 if (!isset($_SESSION['ACCOUNTID']) || ($_SESSION['ROLE'] ?? '') !== 'student') {
     header('Location: ../account/login.php');
@@ -36,10 +36,9 @@ if ($fname === '' || $lname === '') {
 
 // Mock schedule data
 $mockSchedule = [
-    ['course' => 'Web Systems and Technologies', 'instructor' => 'Dr. Juan Santos', 'day' => 'Monday', 'time' => '9:00 AM - 11:00 AM', 'room' => 'Room 101'],
-    ['course' => 'Database Management', 'instructor' => 'Prof. Maria Cruz', 'day' => 'Tuesday', 'time' => '1:00 PM - 3:00 PM', 'room' => 'Room 205'],
-    ['course' => 'Software Engineering', 'instructor' => 'Dr. Jose Reyes', 'day' => 'Wednesday', 'time' => '10:00 AM - 12:00 PM', 'room' => 'Room 302'],
-    ['course' => 'Mobile App Development', 'instructor' => 'Prof. Anna Lopez', 'day' => 'Thursday', 'time' => '2:00 PM - 4:00 PM', 'room' => 'Lab 1'],
+    ['time' => '8:00 AM - 9:30 AM', 'course' => 'Data Structures', 'instructor' => 'Dr. Smith', 'room' => 'Room 101'],
+    ['time' => '10:00 AM - 11:30 AM', 'course' => 'Web Development', 'instructor' => 'Ms. Johnson', 'room' => 'Lab 2'],
+    ['time' => '1:00 PM - 2:30 PM', 'course' => 'Database Management', 'instructor' => 'Prof. Williams', 'room' => 'Room 205'],
 ];
 ?>
 
@@ -138,53 +137,60 @@ $mockSchedule = [
                 padding: 0.75rem;
             }
         }
+
+        .schedule-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .schedule-title {
+            color: #002D72;
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+        }
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .schedule-table th {
+            background-color: #002D72;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+        .schedule-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        .schedule-table tr:hover {
+            background-color: #f5f5f5;
+        }
     </style>
 </head>
 <body>
-    <div class="header" style="background-color:var(--royal-blue); color:var(--white); padding:1rem; display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <a class="back-button" href="index.php">← Home</a>
-            <div class="logo">University of Saint Louis</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div class="user-info">
-                <div><?php echo htmlspecialchars(trim($fname . ' ' . $lname)); ?></div>
-                <div>Student</div>
-            </div>
-            <form action="../account/logout.php" method="post" style="margin:0;">
-                <button type="submit" name="logout" class="logout-button">Logout</button>
-            </form>
-        </div>
-    </div>
-
-<?php 
-if(isset($_POST['logout'])){
-            header("Location: ../account/login.php");
-            exit();
-    }
-
-?>
     <div class="schedule-container">
         <h1 class="schedule-title">Class Schedule</h1>
         
-        <div class="schedule-table">
-            <table>
+        <div class="schedule-card">
+            <h2 class="schedule-title">Class Schedule</h2>
+            <table class="schedule-table">
                 <thead>
                     <tr>
+                        <th>Time</th>
                         <th>Course</th>
                         <th>Instructor</th>
-                        <th>Day</th>
-                        <th>Time</th>
                         <th>Room</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach($mockSchedule as $class): ?>
                     <tr>
+                        <td><?php echo $class['time']; ?></td>
                         <td><?php echo $class['course']; ?></td>
                         <td><?php echo $class['instructor']; ?></td>
-                        <td><?php echo $class['day']; ?></td>
-                        <td><?php echo $class['time']; ?></td>
                         <td><?php echo $class['room']; ?></td>
                     </tr>
                     <?php endforeach; ?>

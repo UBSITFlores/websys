@@ -59,7 +59,7 @@
                     exit;
                 } else {
                     // default (students and other roles)
-                    header("Location: ../portal/index.php");
+                    header("Location: ../portal/index.php");  // Change this line
                     exit;
                 }
             }
