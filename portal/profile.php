@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 if (!isset($_SESSION['ACCOUNTID']) || ($_SESSION['ROLE'] ?? '') !== 'student') {
     header('Location: ../account/login.php');
@@ -9,35 +8,9 @@ if (!isset($_SESSION['ACCOUNTID']) || ($_SESSION['ROLE'] ?? '') !== 'student') {
 $fname = $_SESSION['FNAME'] ?? '';
 $lname = $_SESSION['LNAME'] ?? '';
 
-if ($fname === '' || $lname === '') {
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "portal";
-
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    if (!$conn->connect_error) {
-        $query = "SELECT fname,lname FROM account WHERE account_id = ?";
-        $stmt = $conn->prepare($query);
-        if ($stmt) {
-            $stmt->bind_param('s', $_SESSION['ACCOUNTID']);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $user = $res->fetch_assoc();
-            if ($user) {
-                $fname = $user['fname'] ?? $fname;
-                $lname = $user['lname'] ?? $lname;
-            }
-            $stmt->close();
-        }
-        $conn->close();
-    }
-}
-
-// Mock data until backend is ready
 $mockProfile = [
     'studentId' => '2024-12345',
-    'email' => 'juan.delacruz@usaint.edu',
+    'email' => 'student@usaint.edu',
     'phone' => '+63 912 345 6789',
     'address' => '123 Main St, Baguio City',
     'course' => 'Bachelor of Science in Information Technology',
@@ -147,35 +120,11 @@ $mockProfile = [
     </style>
 </head>
 <body>
-    <div class="header" style="background-color:var(--royal-blue); color:var(--white); padding:1rem; display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <a class="back-button" href="index.php">← Home</a>
-            <div class="logo">University of Saint Louis</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div class="user-info">
-                <div><?php echo htmlspecialchars(trim($fname . ' ' . $lname)); ?></div>
-                <div>Student</div>
-            </div>
-            <form action="../account/logout.php" method="post" style="margin:0;">
-                <button type="submit" name="logout" class="logout-button">Logout</button>
-            </form>
-        </div>
-    </div>
-
-<?php 
-if(isset($_POST['logout'])){
-            header("Location: ../account/login.php");
-            exit();
-    }
-
-?>
     <div class="profile-container">
         <div class="profile-card">
             <div class="profile-header">
-                <h1 class="profile-name"><?php echo isset($user['fname']) ? $user['fname'] . ' ' . $user['lname'] : 'Student Name'; ?></h1>
+                <h1 class="profile-name"><?php echo htmlspecialchars(trim($fname . ' ' . $lname)); ?></h1>
             </div>
-
             <div class="profile-row">
                 <div class="profile-field">
                     <div class="field-label">Student ID</div>
@@ -186,7 +135,6 @@ if(isset($_POST['logout'])){
                     <div class="field-value"><?php echo $mockProfile['email']; ?></div>
                 </div>
             </div>
-
             <div class="profile-row">
                 <div class="profile-field">
                     <div class="field-label">Phone</div>
@@ -197,7 +145,6 @@ if(isset($_POST['logout'])){
                     <div class="field-value"><?php echo $mockProfile['address']; ?></div>
                 </div>
             </div>
-
             <div class="profile-row">
                 <div class="profile-field">
                     <div class="field-label">Course</div>
@@ -208,7 +155,6 @@ if(isset($_POST['logout'])){
                     <div class="field-value"><?php echo $mockProfile['year']; ?></div>
                 </div>
             </div>
-
             <div class="profile-row">
                 <div class="profile-field">
                     <div class="field-label">Current Semester</div>
