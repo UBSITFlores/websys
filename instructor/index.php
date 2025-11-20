@@ -1,34 +1,32 @@
 <?php 
-include "../functions/instructor_function.php";
-include "../functions/account.php";
+require_once "../functions/instructor_function.php";
+require_once "../functions/account.php";
 session_start();
-$instructor = new instructor();
-$account = new account();
-?>
 
+$instructor = new Instructor();
+$account    = new Account();
+
+if (isset($_POST['logout'])) {
+    session_destroy();
+    header("Location: ../account/login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Instructor Panel</title>
-    <link rel="stylesheet" href="index.css" /> <!-- linked external CSS file -->
+    <link rel="stylesheet" href="index.css" />
 </head>
 <body>
-    <div class="header"> <!-- updated: header bar with left/right layout and no extra div -->
-        <div class="logo">University of Saint Louis</div> <!-- left-aligned school name -->
+    <div class="header">
+        <div class="logo">University of Saint Louis</div>
         <form method="post" style="margin:0;">
-            <button type="submit" name="logout" class="logout-button">Logout</button> <!-- right-aligned logout -->
+            <button type="submit" name="logout" class="logout-button">Logout</button>
         </form>
     </div>
-
-<?php 
-if (isset($_POST['logout'])) {
-    header("Location: ../account/login.php");
-    exit();
-}
-// moved user-info outside the header if needed
-?>
 
     <div class="container">
         <div class="sidebar">
@@ -40,22 +38,27 @@ if (isset($_POST['logout'])) {
         </div>
     </div>
 
-   <script>
+    <script>
     function loadContent(page) {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            if (this.responseText.includes("__SESSION_EXPIRED__")) {
-                // Redirect the whole browser to login
-                window.location.href = "../account/login.php";
-            } else {
-                document.getElementById("center-content").innerHTML = this.responseText;
-            }
-        }
-    };
-    xhttp.open("GET", page, true);
-    xhttp.send();
-}
+        fetch(page)
+            .then(res => res.text())
+            .then(html => {
+                if (html.includes("__SESSION_EXPIRED__")) {
+                    window.location.href = "../account/login.php";
+                } else {
+                    document.getElementById("center-content").innerHTML = html;
+                }
+            })
+            .catch(() => {
+                document.getElementById("center-content").innerHTML = "Error loading content.";
+            });
+    }
+
+    function loadContentWithParams(form) {
+        const params = new URLSearchParams(new FormData(form)).toString();
+        loadContent("grading-sheet.php?" + params);
+        return false; // prevent normal form submit
+    }
     </script>
 </body>
 </html>
