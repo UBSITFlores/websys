@@ -1,13 +1,38 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "portal";
+session_start();
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+if (!isset($_SESSION['ACCOUNTID']) || ($_SESSION['ROLE'] ?? '') !== 'student') {
+    header('Location: ../account/login.php');
+    exit();
+}
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+$fname = $_SESSION['FNAME'] ?? '';
+$lname = $_SESSION['LNAME'] ?? '';
+
+// If names missing, try to fetch from DB
+if ($fname === '' || $lname === '') {
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "portal";
+
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    if (!$conn->connect_error) {
+        $query = "SELECT fname,lname FROM account WHERE account_id = ?";
+        $stmt = $conn->prepare($query);
+        if ($stmt) {
+            $stmt->bind_param('s', $_SESSION['ACCOUNTID']);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            $user = $res->fetch_assoc();
+            if ($user) {
+                $fname = $user['fname'] ?? $fname;
+                $lname = $user['lname'] ?? $lname;
+            }
+            $stmt->close();
+        }
+        $conn->close();
+    }
 }
 
 // Mock enrollment data
@@ -36,6 +61,21 @@ $mockEnrollment = [
             padding: 0;
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
+        }
+
+        .back-button {
+            color: var(--white);
+            text-decoration: none;
+            margin-right: 8px;
+            padding: 6px 10px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.03);
+            font-weight: 600;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.08);
         }
 
         .enrollment-container {
@@ -111,6 +151,29 @@ $mockEnrollment = [
     </style>
 </head>
 <body>
+    <div class="header" style="background-color:var(--royal-blue); color:var(--white); padding:1rem; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <a class="back-button" href="index.php">← Home</a>
+            <div class="logo">University of Saint Louis</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="user-info">
+                <div><?php echo htmlspecialchars(trim($fname . ' ' . $lname)); ?></div>
+                <div>Student</div>
+            </div>
+            <form action="../account/logout.php" method="post" style="margin:0;">
+                <button type="submit" name="logout" class="logout-button">Logout</button>
+            </form>
+        </div>
+    </div>
+
+<?php 
+if(isset($_POST['logout'])){
+            header("Location: ../account/login.php");
+            exit();
+    }
+
+?>
     <div class="enrollment-container">
         <h1 class="enrollment-title">Course Enrollment</h1>
         

@@ -1,0 +1,139 @@
+body {
+  background: #fafaff;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  color: #232b47;
+}
+.app-form {
+  width: 96vw;
+  max-width: 970px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 7px 30px rgba(33,11,75,0.05);
+  padding: 32px 28px 20px 28px;
+}
+.form-section {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e2e2ef;
+  padding-bottom: 18px;
+}
+.form-section:last-child {
+  border-bottom: none;
+}
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+.field-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  flex: 1;
+}
+.field-group label, .fields label {
+  font-size: 0.97rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+input[type="text"], input[type="date"], input[type="email"], select {
+  margin-bottom: 7px;
+  padding: 0.45em 0.88em;
+  border: 1.3px solid #cacadf;
+  border-radius: 6px;
+  font-size: 1.05rem;
+  background: #f6f8fe;
+}
+input[type="checkbox"] {
+  margin-right: 7px;
+}
+
+.form-section h2 {
+  color: #800000;
+  font-size: 1.10rem;
+  margin-top: 10px;
+  margin-bottom: 9px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.form-section h3 {
+  font-size: 1rem;
+  color: #d43a36;
+  margin-top: 15px;
+  margin-bottom: 8px;
+}
+.subsection label {
+  font-weight: 600;
+  color: #b8282a;
+  margin-right: 10px;
+}
+.subsection {
+  margin-bottom: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 34px;
+}
+.cancel-btn {
+  background: #e0e0ed;
+  color: #444;
+  padding: 0.6em 1.7em;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.cancel-btn:hover {
+  background: #cacadf;
+}
+.submit-btn {
+  background: #534d7c;
+  color: #fff;
+  padding: 0.67em 2em;
+  font-size: 1.12rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  transition: background 0.20s, color 0.14s;
+  cursor: pointer;
+  margin-left: 7px;
+}
+.submit-btn:hover {
+  background: #febb3f;
+  color: #232b47;
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+  .app-form { 
+    max-width: 99vw; 
+    padding: 18px 5vw 18px 5vw;
+  }
+  .fields { 
+    gap: 8px; 
+  }
+}
+@media (max-width: 600px) {
+  .app-form {
+    padding: 11px 2vw 11px 2vw;
+  }
+  .fields {
+    flex-direction: column;
+    gap: 5px;
+  }
+  .field-group {
+    min-width: 140px;
+  }
+  .form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

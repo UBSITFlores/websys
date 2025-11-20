@@ -1,37 +1,45 @@
-<?php 
-//General Design ng Portal (Same dapat sa Design 
-// ng website nila pero minimalistic)
-
-?>
-
 <?php
 session_start();
 
-// Check if user is logged in
-if (!isset($_SESSION['account_id']) || $_SESSION['role'] != 'student') {
+// Check if user is logged in and has the student role
+if (!isset($_SESSION['ACCOUNTID']) || ($_SESSION['ROLE'] ?? '') !== 'student') {
     header("Location: ../account/login.php");
     exit();
 }
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "portal";
+// Prefer session-stored name values; fall back to DB if missing
+$fname = $_SESSION['FNAME'] ?? '';
+$lname = $_SESSION['LNAME'] ?? '';
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// If names are missing in session, try to fetch from DB using account_id
+if ($fname === '' || $lname === '') {
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "portal";
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    $conn = new mysqli($servername, $username, $password, $dbname);
+
+    if ($conn->connect_error) {
+        // If DB fails, continue but the name may be blank
+        error_log('DB connection failed in portal/index.php: ' . $conn->connect_error);
+    } else {
+        $query = "SELECT * FROM account WHERE account_id = ?";
+        $stmt = $conn->prepare($query);
+        if ($stmt) {
+            $stmt->bind_param("s", $_SESSION['ACCOUNTID']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+            if ($user) {
+                $fname = $user['fname'] ?? $fname;
+                $lname = $user['lname'] ?? $lname;
+            }
+            $stmt->close();
+        }
+        $conn->close();
+    }
 }
-
-// Use session data instead of hardcoding id = 1
-$query = "SELECT * FROM account WHERE id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $_SESSION['id']);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
-$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -103,6 +111,19 @@ $stmt->close();
             text-align: right;
         }
 
+        .logout-button {
+            background: var(--white);
+            color: var(--royal-blue);
+            border: 1px solid rgba(0,0,0,0.08);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .logout-button:hover {
+            background: #f5f5f5;
+        }
         /* Mobile responsive styles */
         @media screen and (max-width: 768px) {
             .header {
@@ -161,12 +182,25 @@ $stmt->close();
 <body>
     <div class="header">
         <div class="logo">University of Saint Louis</div>
-        <div class="user-info">
-            <div><?php echo $_SESSION['fname'] . ' ' . $_SESSION['lname']; ?></div>
-            <div>Student</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="user-info">
+                <div><?php echo htmlspecialchars(trim($fname . ' ' . $lname)); ?></div>
+                <div>Student</div>
+            </div>
+            <form method="post" style="margin:0;">
+                <button type="submit" name="logout" class="logout-button">Logout</button>
+            </form>
         </div>
     </div>
 
+<?php 
+if(isset($_POST['logout'])){
+            header("Location: ../account/login.php");
+            exit();
+    }
+
+?>
+    
     <div class="nav-container">
         <a href="dashboard.php" class="nav-button">
             <i class="fas fa-tachometer-alt"></i>
@@ -191,7 +225,7 @@ $stmt->close();
     </div>
 
     <div class="content">
-        <!-- Content will be loaded here based on which button is clicked -->
+        test<!-- Content will be loaded here based on which button is clicked -->
     </div>
 </body>
 </html>
