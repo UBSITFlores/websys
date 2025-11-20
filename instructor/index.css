@@ -248,4 +248,14 @@ html, body {
     padding: 12px;
     font-style: italic;
 }
+.manual-enabled {
+  border: 2px solid #007bff;
+  background-color: #e6f2ff;
+}
+.active-quarter {
+  background-color: #004099 !important;
+  color: #fff !important;
+}
+
+
  
