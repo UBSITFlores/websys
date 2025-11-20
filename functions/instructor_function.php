@@ -20,25 +20,26 @@ class Instructor {
 
     // Sections: all or filtered by semester/year
     public function getSections($account_id, $semester = null, $schoolYear = null) {
-        $query = "SELECT s.section, s.code, s.description, s.last_transaction, s.finalized
-                  FROM sections s
-                  WHERE s.account_id = :account_id";
-        $params = [':account_id' => $account_id];
+    $query = "SELECT s.section, s.code, s.description, s.last_transaction, s.finalized
+              FROM sections s
+              WHERE s.instructor_id = :account_id";
+    $params = [':account_id' => $account_id];
 
-        if (!empty($semester)) {
-            $query .= " AND s.semester = :semester";
-            $params[':semester'] = $semester;
-        }
-        if (!empty($schoolYear)) {
-            $query .= " AND s.school_year = :schoolYear";
-            $params[':schoolYear'] = $schoolYear;
-        }
-
-        $query .= " ORDER BY s.last_transaction DESC";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if (!empty($semester)) {
+        $query .= " AND s.semester = :semester";
+        $params[':semester'] = $semester;
     }
+    if (!empty($schoolYear)) {
+        $query .= " AND s.school_year = :schoolYear";
+        $params[':schoolYear'] = $schoolYear;
+    }
+
+    $query .= " ORDER BY s.last_transaction DESC";
+    $stmt = $this->pdo->prepare($query);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
     public function getSemesters() {
         $stmt = $this->pdo->query("SELECT DISTINCT semester FROM sections ORDER BY semester ASC");

@@ -19,13 +19,27 @@ class PersonalInfoHandler {
         }
     }
 
-    public function addPersonalInfo($personalinfo) {
-        try {
-            $stmt = $this->pdo->prepare("INSERT INTO personalinfo (
-                familyname, fname, mname, suffix, birthdate, birthplace, religion, civilstatus, nationality, contactno, email, housenum_street, barangay, city, province, zipcode, name_of_school, add_of_school, year_graduated, sLast, sStreet, sBarangay, sCity, sProvince, sZipcode, pept, als_refnum, gLname, gFname, gMname, gContactnum, gOccupation, gAddress, gRelationship, mLname, mFname, mMname, mContactnum, mOccupation, mAddress, fLname, fFname, fMname, fContactnum, fOccupation, fAddress, ethnicity
+    public function enroll($personalinfo) {
+    try {
+        $stmt = $this->pdo->prepare("
+            INSERT INTO personalinfo (
+                account_id, track, date_enrolled, familyname, fname, mname, suffix, birthdate, birthplace,
+                religion, civilstatus, nationality, gender, sex, first_gen_question, ethnicity, contactno, email,
+                housenum_street, barangay, city, province, zipcode,
+                sLast, sStreet, sBarangay, sCity, sProvince, sZipcode, year_graduated,
+                gLname, gFname, gMname, gContactnum, gOccupation, gAddress, gRelationship,
+                mLname, mFname, mMname, mContactnum, mOccupation, mAddress,
+                fLname, fFname, fMname, fContactnum, fOccupation, fAddress
             ) VALUES (
-                :familyname, :fname, :mname, :suffix, :birthdate, :birthplace, :religion, :civilstatus, :nationality, :contactno, :email, :housenum_street, :barangay, :city, :province, :zipcode, :name_of_school, :add_of_school, :year_graduated, :sLast, :sStreet, :sBarangay, :sCity, :sProvince, :sZipcode, :pept, :als_refnum, :gLname, :gFname, :gMname, :gContactnum, :gOccupation, :gAddress, :gRelationship, :mLname, :mFname, :mMname, :mContactnum, :mOccupation, :mAddress, :fLname, :fFname, :fMname, :fContactnum, :fOccupation, :fAddress, :ethnicity
-            )");
+                :account_id, :track, :date_enrolled, :familyname, :fname, :mname, :suffix, :birthdate, :birthplace,
+                :religion, :civilstatus, :nationality, :gender, :sex, :first_gen_question, :ethnicity, :contactno, :email,
+                :housenum_street, :barangay, :city, :province, :zipcode,
+                :sLast, :sStreet, :sBarangay, :sCity, :sProvince, :sZipcode, :year_graduated,
+                :gLname, :gFname, :gMname, :gContactnum, :gOccupation, :gAddress, :gRelationship,
+                :mLname, :mFname, :mMname, :mContactnum, :mOccupation, :mAddress,
+                :fLname, :fFname, :fMname, :fContactnum, :fOccupation, :fAddress
+            )
+        ");
             $stmt->execute($personalinfo);
             return true;
         } catch (PDOException $e) {

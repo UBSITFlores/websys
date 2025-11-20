@@ -1,64 +1,31 @@
-<?php 
-require_once "../functions/instructor_function.php";
-require_once "../functions/account.php";
+<?php
 session_start();
-
-$instructor = new Instructor();
-$account    = new Account();
-
-if (isset($_POST['logout'])) {
-    session_destroy();
+if (!isset($_SESSION['ACCOUNTID']) && !isset($_SESSION['account_id'])) {
     header("Location: ../account/login.php");
-    exit();
+    exit;
 }
+$instructorName = $_SESSION['FNAME'] ?? $_SESSION['fname'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Instructor Panel</title>
-    <link rel="stylesheet" href="index.css" />
+    <meta charset="UTF-8">
+    <title>Instructor Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
     <div class="header">
-        <div class="logo">University of Saint Louis</div>
-        <form method="post" style="margin:0;">
-            <button type="submit" name="logout" class="logout-button">Logout</button>
-        </form>
+        School Portal - Instructor Panel
+        <span class="userinfo">Logged in as: <b><?php echo htmlspecialchars($instructorName); ?></b> (<a href="../account/logout.php" style="color:#fff;">Logout</a>)</span>
     </div>
-
     <div class="container">
-        <div class="sidebar">
-            <button onclick="loadContent('grading-sheet.php')">Grading Sheet</button>
-            <button onclick="loadContent('class-list.php')">Class List</button>
+        <div id="main-content" class="content-zone">
+            <div class="placeholder">Select a function from the right sidebar.</div>
         </div>
-        <div class="main" id="center-content">
-            Please select an option from the left.
+        <div class="sidebar-right">
+            <button id="btn-grading" class="active" onclick="loadZone('grading-sheet-ajax.php', this)">Grading Sheet</button>
         </div>
     </div>
-
-    <script>
-    function loadContent(page) {
-        fetch(page)
-            .then(res => res.text())
-            .then(html => {
-                if (html.includes("__SESSION_EXPIRED__")) {
-                    window.location.href = "../account/login.php";
-                } else {
-                    document.getElementById("center-content").innerHTML = html;
-                }
-            })
-            .catch(() => {
-                document.getElementById("center-content").innerHTML = "Error loading content.";
-            });
-    }
-
-    function loadContentWithParams(form) {
-        const params = new URLSearchParams(new FormData(form)).toString();
-        loadContent("grading-sheet.php?" + params);
-        return false; // prevent normal form submit
-    }
-    </script>
+    <script src="dashboard.js"></script>
 </body>
 </html>

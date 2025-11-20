@@ -1,5 +1,6 @@
 <?php 
     class account{
+        public $pdo;
         function __construct(){
             $host = "localhost";
             $user = "root";
@@ -51,11 +52,15 @@
                 $_SESSION['ROLE'] = $role;
                 error_log('login role: [' . $role . ']'); // temporary debug, remove when verified
 
-                if ($role === 'management') {
+                if ($role === 'admin') {
                     header("Location: ../admin/index.php");
                     exit;
                 } elseif ($role === 'instructor') {
                     header("Location: ../instructor/index.php");
+                    exit;
+                }
+                elseif($role === 'management'){
+                    header("Location: ../management/index.php");
                     exit;
                 } else {
                     // default (students and other roles)
