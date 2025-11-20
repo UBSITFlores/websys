@@ -319,7 +319,7 @@ if(isset($_POST['submit'])){
 
     <!-- BUTTONS -->
     <div class="form-actions">
-      <button type="button" class="cancel-btn" onclick="window.location.href='index.php';">Cancel</button>
+      <button type="button" class="cancel-btn" onclick="window.location.href='../account/login.php';">Cancel</button>
       <button type="submit" name="submit" class="submit-btn">Submit</button>    </div>
   </form>
 </body>

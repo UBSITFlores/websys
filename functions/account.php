@@ -1,5 +1,4 @@
 <?php 
-
     class account{
         function __construct(){
             $host = "localhost";
@@ -39,22 +38,37 @@
                     </script>
                 ";
             } else {
+                if (session_status() !== PHP_SESSION_ACTIVE) {
+                    session_start();
+                }
+
                 $_SESSION['ACCOUNTID'] = $user['account_id'];
                 $_SESSION['FNAME'] = $user['fname'];
                 $_SESSION['LNAME'] = $user['lname'];
-                $_SESSION['ROLE'] = $user['role'];
 
-                if ($user['role'] == 'management') {
+                // Normalize role value coming from the DB and store it
+                $role = strtolower(trim($user['role'] ?? ''));
+                $_SESSION['ROLE'] = $role;
+                error_log('login role: [' . $role . ']'); // temporary debug, remove when verified
+
+                if ($role === 'management') {
                     header("Location: ../admin/index.php");
-                } elseif ($user['role'] == 'instructor') {
+                    exit;
+                } elseif ($role === 'instructor') {
                     header("Location: ../instructor/index.php");
+                    exit;
+                } else {
+                    // default (students and other roles)
+                    header("Location: ../portal/index.php");
+                    exit;
                 }
-                else {
-                    header("Location: ../student/index.php");
-                }
-                exit();
             }
         }
+        public function logout(){
+            session_start();
+            session_destroy();
+            header("location:../account/index.php");
+            exit();
+        }
     }
-
 ?>
