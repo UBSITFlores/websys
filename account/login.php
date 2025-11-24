@@ -1,4 +1,4 @@
-<?php 
+<!-- <?php 
     include "../functions/account.php";
     $account = new account();
 
@@ -35,4 +35,4 @@
         </div>
     </div>
 </body>
-</html>
+</html> -->
