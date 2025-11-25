@@ -1,164 +1,165 @@
 <?php
-require_once '../functions/instructor_function.php';
 session_start();
 
-$account_id = $_SESSION['account_id'] ?? $_SESSION['ACCOUNTID'] ?? null;
-if (!$account_id) {
-    echo "__SESSION_EXPIRED__";
-    exit();
+if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
+    http_response_code(403);
+    echo "Session Expired.";
+    exit;
 }
 
-$func = new Instructor();
+$pdo = new PDO("mysql:host=localhost;dbname=portal;charset=utf8mb4", "root", "");
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$section = $_GET['section'] ?? null;
-$code    = $_GET['code'] ?? null;
-if (!$section || !$code) {
-    echo "Missing section or code.";
-    exit();
+$section_name = $_GET['section'] ?? '';
+$subject_code = $_GET['code'] ?? '';
+
+$stmt = $pdo->prepare("SELECT id, description, track, year_level FROM sections WHERE section = ? AND code = ? LIMIT 1");
+$stmt->execute([$section_name, $subject_code]);
+$section_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if(!$section_data) {
+    echo "<div style='padding:20px; color:red;'>Error: Section not found.</div>";
+    exit;
+}
+$section_id = $section_data['id'];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $grades_input = $_POST['grades'] ?? [];
+
+    $sql = "INSERT INTO grades (student_id, section_id, quarter, grade) 
+            VALUES (:sid, :sec, :q, :g)
+            ON DUPLICATE KEY UPDATE grade = :g";
+    
+    $stmt = $pdo->prepare($sql);
+
+    foreach($grades_input as $student_id => $quarters) {
+        foreach($quarters as $q => $grade_value) {
+            $val = trim($grade_value);
+            if($val !== "") {
+                $stmt->execute([
+                    ':sid' => $student_id,
+                    ':sec' => $section_id,
+                    ':q'   => $q,
+                    ':g'   => $val
+                ]);
+            }
+        }
+    }
+    echo "SAVED";
+    exit;
 }
 
-// Handle AJAX save
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['grades'])) {
-    $ok = $func->saveGrades($section, $code, $_POST['grades']);
-    echo json_encode(['ok' => $ok]);
-    exit();
-}
+$sql_students = "SELECT a.id, a.account_id, a.fname, a.lname 
+                 FROM enrollments e
+                 JOIN account a ON e.student_id = a.id
+                 WHERE e.section_id = ?
+                 ORDER BY a.lname ASC";
+$stmt = $pdo->prepare($sql_students);
+$stmt->execute([$section_id]);
+$students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$students = $func->getStudents($section, $code);
-$grades   = $func->getGrades($section, $code);
+$sql_grades = "SELECT student_id, quarter, grade FROM grades WHERE section_id = ?";
+$stmt = $pdo->prepare($sql_grades);
+$stmt->execute([$section_id]);
+$existing_grades = [];
+while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $existing_grades[$row['student_id']][$row['quarter']] = $row['grade'];
+}
 ?>
-<div class="grading-panel">
-    <h2>Grades for <?=htmlspecialchars($section)?> (<?=htmlspecialchars($code)?>)</h2>
 
-    <!-- Bulk input area -->
-    <div id="bulkInputArea" class="grading-form" style="margin-bottom:15px;">
-        <label><strong>Bulk Grades:</strong></label>
-        <input type="text" id="bulkGrades" placeholder="e.g. 85 90 78 88" disabled>
-        <button type="button" id="bulkSubmit" disabled onclick="applyBulk()">Submit</button>
-        <span id="bulkTargetLabel" style="margin-left:10px; font-weight:600; color:#002D72;"></span>
+<style>
+    .grade-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .grade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .grade-header h2 { margin: 0; color: #198754; font-size: 1.5rem; }
+    
+    .grade-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .grade-table th { background: #f8f9fa; padding: 10px; text-align: center; border-bottom: 2px solid #ddd; font-size: 0.9rem; vertical-align: middle; }
+    .grade-table td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
+    .grade-table tr:hover { background: #fafafa; }
+
+    .grade-input { width: 50px; text-align: center; padding: 5px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; }
+    .grade-input:not([readonly]) { background: #fff; border-color: #198754; font-weight: bold; }
+    .grade-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.25); }
+
+    .ctrl-btn { font-size: 0.75rem; padding: 2px 6px; margin: 0 2px; border: 1px solid #ccc; background: #fff; cursor: pointer; border-radius: 3px; }
+    .ctrl-btn:hover { background: #eee; }
+    .ctrl-active { background: #198754; color: white; border-color: #198754; }
+
+    .result-pass { color: #198754; font-weight: bold; }
+    .result-fail { color: #dc3545; font-weight: bold; }
+    
+    #bulk-container { background: #e7f1ff; border: 1px solid #b6d4fe; color: #084298; padding: 10px; margin-bottom: 15px; border-radius: 5px; display: none; align-items: center; gap: 10px; }
+    #bulk-input { flex: 1; padding: 5px; border: 1px solid #b6d4fe; border-radius: 3px; }
+</style>
+
+<div class="grade-box">
+    <div class="grade-header">
+        <div>
+            <h2>Grading Sheet: <?php echo htmlspecialchars($section_name); ?></h2>
+            <p style="color:#666; margin:5px 0;">Subject: <strong><?php echo htmlspecialchars($subject_code); ?></strong> | Track: <?php echo htmlspecialchars($section_data['track']); ?></p>
+        </div>
+        <button onclick="loadZone('grading-sheet-ajax.php', this)" style="padding:8px 15px; cursor:pointer; border:1px solid #ccc; background:#fff; border-radius:4px;">Back</button>
     </div>
 
-    <form id="gradesForm">
-        <table class="grading-table">
+    <input type="hidden" id="hidden_sec_name" value="<?php echo htmlspecialchars($section_name); ?>">
+    <input type="hidden" id="hidden_subj_code" value="<?php echo htmlspecialchars($subject_code); ?>">
+
+    <div id="bulk-container">
+        <strong>Bulk Input (Q<span id="bulk-q-label"></span>):</strong>
+        <input type="text" id="bulk-input" placeholder="Enter grades separated by space (e.g. 85 90 88 92)">
+        <button onclick="applyBulk()" style="padding:5px 10px; background:#0d6efd; color:white; border:none; border-radius:3px; cursor:pointer;">Apply</button>
+        <button onclick="closeBulk()" style="padding:5px 10px; background:#6c757d; color:white; border:none; border-radius:3px; cursor:pointer;">Cancel</button>
+    </div>
+
+    <form id="gradingForm" onsubmit="event.preventDefault(); saveGrades();">
+        <table class="grade-table">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Student ID</th>
-                    <?php for ($q=1; $q<=4; $q++): ?>
-                        <th>
-                            <?= $q ?><?php echo ($q==1?'st':($q==2?'nd':($q==3?'rd':'th'))); ?> Quarter
-                            <div>
-                                <button type="button" onclick="enableBulk(<?= $q ?>)">Bulk</button>
-                                <button type="button" onclick="enableManual(<?= $q ?>)">Manual</button>
-                            </div>
-                        </th>
+                    <th style="text-align:left;">Student Name</th>
+                    <?php for($q=1; $q<=4; $q++): ?>
+                    <th>
+                        Q<?php echo $q; ?><br>
+                        <div style="margin-top:5px;">
+                            <button type="button" class="ctrl-btn" onclick="enableManual(<?php echo $q; ?>, this)">Manual</button>
+                            <button type="button" class="ctrl-btn" onclick="enableBulk(<?php echo $q; ?>, this)">Bulk</button>
+                        </div>
+                    </th>
                     <?php endfor; ?>
+                    <th style="background:#e9ecef;">Final</th>
+                    <th style="background:#e9ecef;">Remarks</th>
                 </tr>
             </thead>
             <tbody>
-            <?php if ($students): ?>
-                <?php foreach ($students as $i => $student): ?>
-                <tr>
-                    <td><?= $i + 1 ?></td>
-                    <td><?= htmlspecialchars($student['account_id']) ?></td>
-                    <?php for ($q=1; $q<=4; $q++): ?>
-                        <td>
-                          <input type="text"
-                                 name="grades[<?= (int)$student['id'] ?>][<?= $q ?>]"
-                                 placeholder="0-100"
-                                 value="<?= isset($grades[$student['id']][$q]) ? htmlspecialchars($grades[$student['id']][$q]) : '' ?>"
-                                 disabled>
+                <?php if(empty($students)): ?>
+                    <tr><td colspan="7" style="text-align:center; padding:30px; color:#999;">No students enrolled yet.</td></tr>
+                <?php else: ?>
+                    <?php foreach($students as $stu): 
+                        $sid = $stu['id'];
+                        $g1 = $existing_grades[$sid][1] ?? '';
+                        $g2 = $existing_grades[$sid][2] ?? '';
+                        $g3 = $existing_grades[$sid][3] ?? '';
+                        $g4 = $existing_grades[$sid][4] ?? '';
+                    ?>
+                    <tr class="student-row">
+                        <td style="text-align:left;">
+                            <strong style="color:#002D72;"><?php echo htmlspecialchars($stu['lname'] . ', ' . $stu['fname']); ?></strong><br>
+                            <small style="color:#888;"><?php echo htmlspecialchars($stu['account_id']); ?></small>
                         </td>
-                    <?php endfor; ?>
-                </tr>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <tr><td colspan="6" class="no-data">No students found.</td></tr>
-            <?php endif; ?>
+                        <td><input type="text" class="grade-input q1" name="grades[<?php echo $sid; ?>][1]" value="<?php echo $g1; ?>" readonly oninput="calcRow(this)"></td>
+                        <td><input type="text" class="grade-input q2" name="grades[<?php echo $sid; ?>][2]" value="<?php echo $g2; ?>" readonly oninput="calcRow(this)"></td>
+                        <td><input type="text" class="grade-input q3" name="grades[<?php echo $sid; ?>][3]" value="<?php echo $g3; ?>" readonly oninput="calcRow(this)"></td>
+                        <td><input type="text" class="grade-input q4" name="grades[<?php echo $sid; ?>][4]" value="<?php echo $g4; ?>" readonly oninput="calcRow(this)"></td>
+                        <td style="font-weight:bold; background:#f8f9fa;" class="final-grade">-</td>
+                        <td style="font-size:0.9rem; background:#f8f9fa;" class="remarks">-</td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
 
-        <div class="grading-form" style="margin-top:15px;">
-            <button type="button" onclick="saveGrades()">Save Grades</button>
-            <a href="grading-sheet.php" class="button" onclick="loadContent('grading-sheet.php'); return false;">Back to Grading Sheets</a>
+        <div style="margin-top:20px; text-align:right;">
+            <span id="save_status" style="margin-right:15px; font-weight:bold;"></span>
+            <button type="submit" class="btn-save" style="background:#198754; color:white; padding:12px 30px; border:none; border-radius:5px; font-size:1.1rem; cursor:pointer;">Save Grades</button>
         </div>
     </form>
 </div>
-
-<script>
-let bulkQuarter = null;
-
-function enableBulk(q) {
-    bulkQuarter = q;
-    document.getElementById('bulkGrades').disabled = false;
-    document.getElementById('bulkSubmit').disabled = false;
-    document.getElementById('bulkTargetLabel').textContent = "Target: Quarter " + q;
-    document.getElementById('bulkGrades').focus();
-}
-
-function applyBulk() {
-    if (!bulkQuarter) {
-        alert("No quarter selected for bulk input.");
-        return;
-    }
-    const grades = document.getElementById('bulkGrades').value.trim().split(/\s+/);
-    if (grades.length === 0 || grades[0] === "") {
-        alert("Please enter grades in the bulk box first.");
-        return;
-    }
-    const inputs = document.querySelectorAll(`input[name^="grades"][name$="[${bulkQuarter}]"]`);
-    inputs.forEach((input, i) => {
-        if (grades[i]) {
-            input.value = grades[i];
-            input.disabled = false; // unlock so you can edit further
-        }
-    });
-    alert("Bulk grades applied to Quarter " + bulkQuarter);
-    // reset
-    document.getElementById('bulkGrades').value = "";
-    document.getElementById('bulkGrades').disabled = true;
-    document.getElementById('bulkSubmit').disabled = true;
-    document.getElementById('bulkTargetLabel').textContent = "";
-    bulkQuarter = null;
-}
-
-function enableManual(q) {
-    const inputs = document.querySelectorAll(`input[name^="grades"][name$="[${q}]"]`);
-    if (inputs.length === 0) {
-        alert("No inputs found for quarter " + q);
-        return;
-    }
-    inputs.forEach(input => {
-        input.disabled = false;   // unlock
-        input.classList.add('manual-enabled');
-    });
-    const th = document.querySelector(`th:nth-child(${q+2})`);
-    if (th) th.classList.add('active-quarter');
-    alert("Manual mode enabled for Quarter " + q + ". You can now type grades.");
-}
-
-function saveGrades() {
-    const form = document.getElementById('gradesForm');
-    const formData = new FormData(form);
-
-    fetch('section-grades.php?section=<?=urlencode($section)?>&code=<?=urlencode($code)?>', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-    })
-    .then(json => {
-        if (json.ok) {
-            alert('Grades saved successfully.');
-        } else {
-            alert('Failed to save grades.');
-        }
-    })
-    .catch(err => {
-        console.error("AJAX error:", err);
-        alert('Error saving grades. Check console for details.');
-    });
-}
-</script>

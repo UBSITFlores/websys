@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once 'pdo_functions.php'; // creates $portalDB instance
+require_once 'pdo_functions.php';
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'management') {
-    header('Location: index.php');
+if (!isset($_SESSION['ROLE']) || !in_array($_SESSION['ROLE'], ['management', 'admin'])) {
+    header('Location: ../account/login.php');
     exit;
 }
 

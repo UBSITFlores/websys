@@ -10,7 +10,6 @@ function loadZone(url, btn) {
             document.getElementById('main-content').innerHTML = "<div style='color:red;'>Error loading content.</div>";
         });
 }
-// Auto-load grading sheet on start
 window.onload = function() {
     loadZone('grading-sheet-ajax.php', document.getElementById('btn-grading'));
 };

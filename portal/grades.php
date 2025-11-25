@@ -1,44 +1,48 @@
 <?php
+require_once '../functions/student_function.php';
 
 if (!isset($_SESSION['ACCOUNTID']) || ($_SESSION['ROLE'] ?? '') !== 'student') {
     header('Location: ../account/login.php');
     exit();
 }
 
-$fname = $_SESSION['FNAME'] ?? '';
-$lname = $_SESSION['LNAME'] ?? '';
+$studentFunc = new Student();
+$student_pk = $studentFunc->getStudentId($_SESSION['ACCOUNTID']);
 
-if ($fname === '' || $lname === '') {
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "portal";
-
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    if (!$conn->connect_error) {
-        $query = "SELECT fname,lname FROM account WHERE account_id = ?";
-        $stmt = $conn->prepare($query);
-        if ($stmt) {
-            $stmt->bind_param('s', $_SESSION['ACCOUNTID']);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $user = $res->fetch_assoc();
-            if ($user) {
-                $fname = $user['fname'] ?? $fname;
-                $lname = $user['lname'] ?? $lname;
-            }
-            $stmt->close();
-        }
-        $conn->close();
-    }
+if (!$student_pk) {
+    echo "<div style='padding:20px; color:red;'>Error: Student account record not found.</div>";
+    exit();
 }
 
-// Mock grades data
-$mockGrades = [
-    ['course' => 'Data Structures', 'midterm' => '88', 'final' => '92', 'grade' => '90'],
-    ['course' => 'Web Development', 'midterm' => '85', 'final' => '87', 'grade' => '86'],
-    ['course' => 'Database Management', 'midterm' => '90', 'final' => '94', 'grade' => '92'],
-];
+$rows = $studentFunc->getGrades($student_pk);
+$my_grades = [];
+
+foreach($rows as $r){
+    $code = $r['code'];
+    if(!isset($my_grades[$code])){
+        $my_grades[$code] = [
+            'name'   => $r['description'],
+            'q1'     => '-', 'q2' => '-', 'q3' => '-', 'q4' => '-',
+            'avg'    => '-', 'status' => '-'
+        ];
+    }
+    if($r['quarter'] == 1) $my_grades[$code]['q1'] = $r['grade'];
+    if($r['quarter'] == 2) $my_grades[$code]['q2'] = $r['grade'];
+    if($r['quarter'] == 3) $my_grades[$code]['q3'] = $r['grade'];
+    if($r['quarter'] == 4) $my_grades[$code]['q4'] = $r['grade'];
+}
+
+foreach($my_grades as $code => $data) {
+    if(is_numeric($data['q1']) && is_numeric($data['q2']) && is_numeric($data['q3']) && is_numeric($data['q4'])) {
+        $average = ($data['q1'] + $data['q2'] + $data['q3'] + $data['q4']) / 4;
+        $my_grades[$code]['avg'] = round($average, 2);
+        if($average >= 75) {
+            $my_grades[$code]['status'] = 'PASSED';
+        } else {
+            $my_grades[$code]['status'] = 'FAILED';
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -46,125 +50,55 @@ $mockGrades = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grades Records - Academic Management System</title>
-    <style>
-        :root {
-            --royal-blue: #002D72;
-            --white: #ffffff;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
-
-        .back-button {
-            color: var(--white);
-            text-decoration: none;
-            margin-right: 8px;
-            padding: 6px 10px;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 4px;
-            background: rgba(255,255,255,0.03);
-            font-weight: 600;
-        }
-
-        .back-button:hover {
-            background: rgba(255,255,255,0.08);
-        }
-
-        .grades-card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .grades-title {
-            color: #002D72;
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-        }
-
-        .grades-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .grades-table th {
-            background-color: #002D72;
-            color: white;
-            padding: 1rem;
-            text-align: left;
-        }
-
-        .grades-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .grades-table tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .grade-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        .grade-excellent {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        @media screen and (max-width: 768px) {
-            .grades-card {
-                padding: 1rem;
-            }
-
-            .grades-title {
-                font-size: 1.5rem;
-            }
-
-            .grades-table {
-                font-size: 0.9rem;
-            }
-
-            .grades-table th, .grades-table td {
-                padding: 0.75rem;
-            }
-        }
-    </style>
+    <title>Grades Records</title>
+    <link rel="stylesheet" href="grades.css">
 </head>
 <body>
 
     <div class="grades-card">
-        <h2 class="grades-title">Grades Records</h2>
+        <h2 class="grades-title">My Grades</h2>
+        
         <table class="grades-table">
-            <thead>
+            <tr>
+                <th>Subject / Code</th>
+                <th>1st</th>
+                <th>2nd</th>
+                <th>3rd</th>
+                <th>4th</th>
+                <th style="background:#001f52;">Final</th>
+                <th style="background:#001f52;">Status</th>
+            </tr>
+
+            <?php if(empty($my_grades)): ?>
                 <tr>
-                    <th>Course</th>
-                    <th>Midterm</th>
-                    <th>Final</th>
-                    <th>Overall Grade</th>
+                    <td colspan="7" style="text-align:center; padding:20px; color:#888;">
+                        No grades records found.
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                <?php foreach($mockGrades as $grade): ?>
+            <?php else: ?>
+                <?php foreach($my_grades as $code => $data): ?>
                 <tr>
-                    <td><?php echo $grade['course']; ?></td>
-                    <td><?php echo $grade['midterm']; ?></td>
-                    <td><?php echo $grade['final']; ?></td>
-                    <td><span class="grade-badge grade-excellent"><?php echo $grade['grade']; ?></span></td>
+                    <td>
+                        <?php echo htmlspecialchars($data['name']); ?><br>
+                        <small style="color:#888;"><?php echo htmlspecialchars($code); ?></small>
+                    </td>
+                    <td><?php echo $data['q1']; ?></td>
+                    <td><?php echo $data['q2']; ?></td>
+                    <td><?php echo $data['q3']; ?></td>
+                    <td><?php echo $data['q4']; ?></td>
+                    <td style="font-weight:bold;"><?php echo $data['avg']; ?></td>
+                    <td>
+                        <?php if($data['status'] == 'PASSED'): ?>
+                            <span class="badge-pass">PASSED</span>
+                        <?php elseif($data['status'] == 'FAILED'): ?>
+                            <span class="badge-fail">FAILED</span>
+                        <?php else: ?>
+                            <span style="color:#ccc;">-</span>
+                        <?php endif; ?>
+                    </td>
                 </tr>
                 <?php endforeach; ?>
-            </tbody>
+            <?php endif; ?>
         </table>
     </div>
 </body>

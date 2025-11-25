@@ -1,0 +1,50 @@
+/* --- BASE RESET --- */
+body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; color: #232b47; }
+
+/* --- HEADER --- */
+.header { padding: 20px 24px; background: #002D72; color: #fff; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
+.header a { color: #fff; font-size: 14px; text-decoration: none; opacity: 0.8; }
+.header a:hover { opacity: 1; }
+
+/* --- LAYOUT --- */
+.container { display: flex; min-height: calc(100vh - 69px); }
+
+/* --- SIDEBAR --- */
+.sidebar-right { width: 240px; background: #001f52; color: #fff; padding: 20px 10px; flex-shrink: 0; }
+.sidebar-right button {
+    width: 100%; margin-bottom: 8px; padding: 12px 15px; 
+    background: transparent; border: 1px solid rgba(255,255,255,0.1); 
+    border-radius: 6px; color: #cfd8dc; font-size: 14px; 
+    text-align: left; cursor: pointer; transition: 0.2s;
+}
+.sidebar-right button:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.sidebar-right button.active { background: #febb3f; color: #001f52; font-weight: bold; border-color: #febb3f; }
+
+/* --- CONTENT AREA --- */
+.content-zone { flex: 1; padding: 40px; overflow-y: auto; }
+
+/* --- WELCOME SCREEN --- */
+.welcome-box { text-align: center; margin-top: 60px; }
+.welcome-box h1 { color: #002D72; font-size: 2.5rem; margin-bottom: 10px; }
+.welcome-box p { font-size: 1.1rem; color: #666; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+.welcome-icon { font-size: 4rem; margin-top: 30px; opacity: 0.5; }
+
+/* --- FORMS (Shared) --- */
+.form-card { max-width: 600px; margin: 0 auto; background: #fff; padding: 35px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.form-card h2 { color: #002D72; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-top: 0; font-size: 1.5rem; }
+
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; font-size: 0.95rem; }
+.form-group input, .form-group select {
+    width: 100%; padding: 10px 12px; 
+    border: 1.5px solid #dfe1e5; border-radius: 6px; 
+    font-size: 1rem; color: #333; box-sizing: border-box;
+}
+.form-group input:focus, .form-group select:focus { border-color: #002D72; outline: none; background: #fafaff; }
+
+.btn-save {
+    width: 100%; background: #002D72; color: white; 
+    padding: 12px; border: none; border-radius: 6px; 
+    font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+}
+.btn-save:hover { background: #004099; }
