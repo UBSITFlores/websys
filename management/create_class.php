@@ -7,9 +7,11 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
     exit;
 }
 
+// DB CONNECTION
 $pdo = new PDO("mysql:host=localhost;dbname=portal;charset=utf8mb4", "root", "");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+// HANDLE SAVE
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $track = $_POST['track'];
     $year  = $_POST['year_level'];
@@ -20,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $room  = trim($_POST['room']);
     $sem   = $_POST['semester'];
     $sy    = $_POST['school_year'];
-    $iid   = $_POST['instructor_id'] ?: null; 
+    $iid   = $_POST['instructor_id'] ?: null;
 
     $sql = "INSERT INTO sections 
             (track, year_level, code, description, section, schedule_time, room, semester, school_year, instructor_id) 
@@ -44,12 +46,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $instructors = $pdo->query("SELECT * FROM account WHERE role = 'instructor' ORDER BY lname ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<div class="form-card" style="max-width: 900px;">
+<link rel="stylesheet" href="create_class.css">
+
+<div class="form-card class-form-container">
     <h2>Create New Class Offering</h2>
     
     <form method="POST" onsubmit="event.preventDefault(); submitForm(this, 'create_class.php');">
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="grid-row-2">
             <div class="form-group">
                 <label>Track</label>
                 <select name="track" id="filter_track" onchange="assign_updateYear()" required>
@@ -74,11 +78,11 @@ $instructors = $pdo->query("SELECT * FROM account WHERE role = 'instructor' ORDE
             </div>
         </div>
 
-        <h3 style="color:#002D72; font-size:1rem; border-bottom:1px solid #eee; margin-top:10px;">Subject Details</h3>
-        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+        <div class="section-title">Subject Details</div>
+        <div class="grid-row-2-bias">
             <div class="form-group">
                 <label>Subject Code</label>
-                <input type="text" name="code" placeholder="e.g. MATH 101" required>
+                <input type="text" name="code" class="input-code" placeholder="e.g. MATH 101" required>
             </div>
             <div class="form-group">
                 <label>Description</label>
@@ -86,8 +90,8 @@ $instructors = $pdo->query("SELECT * FROM account WHERE role = 'instructor' ORDE
             </div>
         </div>
 
-        <h3 style="color:#002D72; font-size:1rem; border-bottom:1px solid #eee; margin-top:10px;">Section & Schedule</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+        <div class="section-title">Section & Schedule</div>
+        <div class="grid-row-3">
             <div class="form-group">
                 <label>Section Name</label>
                 <input type="text" name="section" placeholder="e.g. Block A" required>
@@ -102,7 +106,7 @@ $instructors = $pdo->query("SELECT * FROM account WHERE role = 'instructor' ORDE
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+        <div class="grid-row-3">
             <div class="form-group">
                 <label>Semester</label>
                 <select name="semester" required>

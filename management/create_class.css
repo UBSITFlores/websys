@@ -1,0 +1,55 @@
+/* management/create_class.css */
+
+.class-form-container {
+    max-width: 900px;
+    /* Inherits .form-card styles from dashboard.css automatically */
+}
+
+/* Section Headers */
+.section-title {
+    color: #002D72;
+    font-size: 1rem;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Grid Layouts */
+.grid-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.grid-row-2-bias {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Second column is wider */
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.grid-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* Specific Input Tweaks */
+.input-code {
+    text-transform: uppercase; /* Force uppercase for Subject Codes */
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+/* Responsive: Stack grids on small screens */
+@media (max-width: 768px) {
+    .grid-row-2, .grid-row-2-bias, .grid-row-3 {
+        grid-template-columns: 1fr; /* Stack everything */
+    }
+}
