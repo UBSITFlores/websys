@@ -48,3 +48,70 @@ body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6f
     font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s;
 }
 .btn-save:hover { background: #004099; }
+
+/* --- FAMILY SECTION STYLES --- */
+.family-box {
+    background: #f8f9fa;        /* Light Gray Card */
+    border: 1px solid #e9ecef;  /* Subtle Border */
+    padding: 25px;              /* More breathing room */
+    border-radius: 10px;        /* Softer corners */
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02); /* Very subtle depth */
+}
+
+.family-label {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    color: #002D72;             /* Royal Blue Text */
+    margin-bottom: 15px;
+    font-size: 1.05rem;
+    border-bottom: 2px solid #e9ecef; /* underline separator */
+    padding-bottom: 8px;
+}
+
+/* Icon hint (Optional, pure CSS decoration for the label) */
+.family-label::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background: #febb3f; /* Gold accent */
+    margin-right: 10px;
+    border-radius: 2px;
+}
+
+/* Grid Layouts */
+.grid-3-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Cleaner Inputs specifically for this section */
+.family-box input {
+    background: #ffffff; /* White input on Gray background */
+    border: 1px solid #ced4da;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.family-box input:focus {
+    border-color: #002D72;
+    box-shadow: 0 0 0 3px rgba(0, 45, 114, 0.1); /* Soft blue glow */
+    outline: none;
+}
+
+/* Responsive: Stack on mobile */
+@media (max-width: 768px) {
+    .grid-3-col, .grid-2-col { grid-template-columns: 1fr; }
+}

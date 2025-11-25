@@ -16,9 +16,9 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $sql = "INSERT INTO account 
-                (account_id, fname, mname, lname, password, role, track, date_enrolled) 
+                (account_id, fname, mname, lname, password, role, track, date_enrolled, degree, status) 
                 VALUES 
-                (:aid, :fname, :mname, :lname, :pass, :role, :track, CURDATE())";
+                (:aid, :fname, :mname, :lname, :pass, :role, :track, CURDATE(), 'Bachelor', 'Active')";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':fname' => $_POST['fname'],
             ':mname' => $_POST['mname'],
             ':lname' => $_POST['lname'],
-            ':pass'  => $_POST['password'], // In a real app, use password_hash()!
+            ':pass'  => $_POST['password'], 
             ':role'  => $_POST['role'],
             ':track' => $_POST['track'] ?? ''
         ]);
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <form method="POST" onsubmit="event.preventDefault(); submitForm(this, 'add_user.php');">
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
             <div class="form-group">
                 <label>User ID (Username)</label>
                 <input type="text" name="account_id" placeholder="e.g. prof_smith" required>
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
             <div class="form-group">
                 <label>Password</label>
                 <input type="text" name="password" required>
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option value="junior high school">Junior High School</option>
                     <option value="senior high school">Senior High School</option>
                 </select>
-                <small style="color:#666;">Required if role is Instructor</small>
+                <small style="color:#666; font-size: 0.8rem;">Required if role is Instructor</small>
             </div>
         </div>
 

@@ -102,44 +102,120 @@ $tracks = ['kinder', 'junior high school', 'senior high school'];
             </div>
         </div>
 
-        <h3 style="color:#002D72; font-size:1.1rem; border-bottom:1px solid #eee; margin-top:20px;">III. Family Background</h3>
+        <h3 style="color:#002D72; font-size:1.1rem; border-bottom:1px solid #eee; margin-top:20px; margin-bottom:15px;">III. Family Background</h3>
 
-        <div style="background:#fafaff; padding:10px; border-radius:5px; margin-bottom:10px;">
-            <label style="font-weight:bold; color:#666;">Father's Information</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                <input type="text" name="fLname" placeholder="Last Name">
-                <input type="text" name="fFname" placeholder="First Name">
-                <input type="text" name="fMName" placeholder="Middle">
+        <div class="family-box">
+            <label class="family-label">Father's Information</label>
+            <div class="grid-3-col">
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="fLname" placeholder="Last Name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="fFname" placeholder="First Name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="fMName" placeholder="Middle Name">
+                </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:5px;">
-                <input type="text" name="fContactnum" placeholder="Contact No.">
-                <input type="text" name="fOccupation" placeholder="Occupation">
+            <div class="grid-2-col">
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="fContactnum" placeholder="Contact No.">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="fOccupation" placeholder="Occupation">
+                </div>
             </div>
         </div>
 
-        <div style="background:#fafaff; padding:10px; border-radius:5px; margin-bottom:10px;">
-            <label style="font-weight:bold; color:#666;">Mother's Information</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                <input type="text" name="mLname" placeholder="Maiden Last Name">
-                <input type="text" name="mFname" placeholder="First Name">
-                <input type="text" name="mMName" placeholder="Middle">
+        <div class="family-box">
+            <label class="family-label">Mother's Information</label>
+            <div class="grid-3-col">
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="mLname" placeholder="Maiden Last Name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="mFname" placeholder="First Name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="mMName" placeholder="Middle Name">
+                </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:5px;">
-                <input type="text" name="mContactnum" placeholder="Contact No.">
-                <input type="text" name="mOccupation" placeholder="Occupation">
+            <div class="grid-2-col">
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="mContactnum" placeholder="Contact No.">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="mOccupation" placeholder="Occupation">
+                </div>
             </div>
         </div>
 
-        <div style="background:#fafaff; padding:10px; border-radius:5px; margin-bottom:10px;">
-            <label style="font-weight:bold; color:#666;">Guardian's Information</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                <input type="text" name="gLname" placeholder="Last Name">
-                <input type="text" name="gFname" placeholder="First Name">
-                <input type="text" name="gMName" placeholder="Middle">
+        <div class="family-box">
+            <label class="family-label">Guardian's Information</label>
+            <div class="grid-3-col">
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="gLname" placeholder="Last Name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="gFname" placeholder="First Name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="gMName" placeholder="Middle Name">
+                </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:5px;">
-                <input type="text" name="gContactnum" placeholder="Contact No.">
-                <input type="text" name="gRelationship" placeholder="Relationship">
+            <div class="grid-2-col">
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="gContactnum" placeholder="Contact No.">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="gRelationship" placeholder="Relationship">
+                </div>
+            </div>
+        </div>
+
+        <div class="family-box">
+            <label class="family-label">Mother's Information</label>
+            <div class="grid-3-col">
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="mLname" placeholder="Maiden Last Name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="mFname" placeholder="First Name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="mMName" placeholder="Middle Name">
+                </div>
+            </div>
+            <div class="grid-2-col">
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="mContactnum" placeholder="Contact No.">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="mOccupation" placeholder="Occupation">
+                </div>
+            </div>
+        </div>
+
+        <div class="family-box">
+            <label class="family-label">Guardian's Information</label>
+            <div class="grid-3-col">
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="gLname" placeholder="Last Name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="gFname" placeholder="First Name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="gMName" placeholder="Middle Name">
+                </div>
+            </div>
+            <div class="grid-2-col">
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="gContactnum" placeholder="Contact No.">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <input type="text" name="gRelationship" placeholder="Relationship">
+                </div>
             </div>
         </div>
 
