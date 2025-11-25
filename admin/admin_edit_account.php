@@ -1,12 +1,10 @@
 <?php
 session_start();
 require_once 'pdo_functions.php';
-
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'management') {
-    header('Location: index.php');
+if (!isset($_SESSION['ROLE']) || !in_array($_SESSION['ROLE'], ['management', 'admin'])) {
+    header('Location: ../account/login.php');
     exit;
 }
-
 $accountId = $_GET['id'] ?? 0;
 $stmt = $portalDB->getAccountById($accountId);
 $accountData = $stmt->fetch();

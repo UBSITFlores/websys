@@ -1,0 +1,77 @@
+body {
+    background: #fafaff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #232b47;
+}
+
+.enroll-container {
+    width: 96vw;
+    max-width: 600px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 7px 30px rgba(33,11,75,0.05);
+    padding: 30px;
+}
+
+h2 {
+    color: #002D72;
+    margin-top: 0;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #444;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid #dfe1e5;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box; /* Keeps padding inside width */
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: #002D72;
+    outline: none;
+}
+
+.btn-enroll {
+    margin-top: 30px;
+    width: 100%;
+    background: #002D72;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-enroll:hover {
+    background: #004099;
+}
+
+.btn-back {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    color: #666;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.hint {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 5px;
+}
