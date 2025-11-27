@@ -14,7 +14,7 @@ if (isset($_SESSION['account_id']) && isset($_SESSION['role'])){
         exit();
     }
 } else {
-    header("Location: ./account/index.php");
+    header("Location: ./account/login.php");
     exit();
 }
 ?>

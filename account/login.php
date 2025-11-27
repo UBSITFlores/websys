@@ -38,7 +38,7 @@
             </form>
 
             <div class="footer-links">
-                <a href="index.php">Back to Home</a>
+                <a href="#">Forgot Password?</a>
             </div>
         </div>
     </div>

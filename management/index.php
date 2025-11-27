@@ -10,49 +10,9 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
 <head>
     <meta charset="UTF-8">
     <title>Management Dashboard</title>
-    <style>
-
-        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; color: #232b47; }
-        
-
-        .header { padding: 20px 24px; background: #002D72; color: #fff; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .header a { color: #fff; font-size: 14px; text-decoration: none; opacity: 0.8; }
-        .header a:hover { opacity: 1; }
-
-
-        .container { display: flex; min-height: calc(100vh - 69px); }
-        
-
-        .sidebar-right { width: 240px; background: #001f52; color: #fff; padding: 20px 10px; flex-shrink: 0; }
-        .sidebar-right button {
-            width: 100%; margin-bottom: 8px; padding: 12px 15px; 
-            background: transparent; border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 6px; color: #cfd8dc; font-size: 14px; 
-            text-align: left; cursor: pointer; transition: 0.2s;
-        }
-        .sidebar-right button:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .sidebar-right button.active { background: #febb3f; color: #001f52; font-weight: bold; border-color: #febb3f; }
-
-
-        .content-zone { flex: 1; padding: 40px; overflow-y: auto; }
-
-
-        .form-card { max-width: 600px; margin: 0 auto; background: #fff; padding: 35px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .form-card h2 { color: #002D72; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-top: 0; font-size: 1.5rem; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; font-size: 0.95rem; }
-        .form-group input, .form-group select {
-            width: 100%; padding: 10px 12px; border: 1.5px solid #dfe1e5; border-radius: 6px; font-size: 1rem; color: #333; box-sizing: border-box;
-        }
-        .btn-save {
-            width: 100%; background: #002D72; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s;
-        }
-        .btn-save:hover { background: #004099; }
-
-        .welcome-box { text-align: center; margin-top: 60px; }
-        .welcome-box h1 { color: #002D72; font-size: 2.5rem; margin-bottom: 10px; }
-        .welcome-icon { font-size: 4rem; margin-top: 30px; opacity: 0.5; }
-    </style>
+    
+    <link rel="stylesheet" href="dashboard.css?v=6">
+    
 </head>
 <body>
 
@@ -68,11 +28,10 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
     <div class="container">
         <div class="sidebar-right">
             <button onclick="loadZone('welcome.php', null)">Dashboard Home</button>
-            <button onclick="loadZone('create_class.php', this)">Create New Class</button>
-            <button onclick="loadZone('view_classes.php', this)">Master Class List</button> 
-            <button onclick="loadZone('enroll-student-ajax.php', this)">Register New Student</button>
-            <button onclick="loadZone('enroll_subject.php', this)">Enroll Student to Subject</button>
-            <button onclick="loadZone('assign_instructor.php', this)">Assign Instructor</button>
+            
+            <button onclick="loadZone('enroll-student-ajax.php', this)">Register Student</button>
+            
+            <button onclick="loadZone('billing.php', this)">Student Accounts</button>
         </div>
 
         <div class="content-zone" id="main-content">
@@ -80,6 +39,9 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
     </div>
 
     <script>
+    // ==========================================
+    // 1. CORE DASHBOARD FUNCTIONS
+    // ==========================================
     function loadZone(url, btn) {
         if(btn) {
             document.querySelectorAll('.sidebar-right button').forEach(b => b.classList.remove('active'));
@@ -118,210 +80,143 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
             scripts.forEach(script => { try { eval(script.innerHTML); } catch(e) {} });
         });
     }
-//checker if id is valid
-    function verifyStudent() {
-        var id = document.getElementById("stu_id_input").value;
-        var resultDiv = document.getElementById("check_result");
-        var btn = document.getElementById("btn_enroll");
-        var sectionList = document.getElementById("final_section");
-        var trackDisplay = document.getElementById("display_track");
-        var trackHidden = document.getElementById("filter_track");
-        
-        var strandBox = document.getElementById("strand_container");
-        var strandFilter = document.getElementById("filter_strand");
-        var yearFilter = document.getElementById("filter_year");
 
-        if(id.trim() == ""){
-            if(resultDiv) resultDiv.style.display = "none";
+    // ==========================================
+    // 2. REGISTRATION LOGIC
+    // ==========================================
+    
+    // A. Update Grade Levels based on Track
+    function updateRegisterGrade() {
+        var track = document.getElementById('reg_track').value;
+        var levelSelect = document.getElementById('reg_level');
+        
+        levelSelect.value = "";
+        
+        var opts = levelSelect.getElementsByClassName("opt-lvl");
+        for(var i=0; i<opts.length; i++) {
+            opts[i].style.display = "none";
+        }
+
+        if(track == 'kinder') {
+            var show = levelSelect.getElementsByClassName("opt-kinder");
+            for(var i=0; i<show.length; i++) show[i].style.display = "block";
+        } 
+        else if(track == 'junior high school') {
+            var show = levelSelect.getElementsByClassName("opt-jhs");
+            for(var i=0; i<show.length; i++) show[i].style.display = "block";
+            if(document.getElementById('esc_box')) document.getElementById('esc_box').style.display = 'block';
+        }
+        else if(track == 'senior high school') {
+            var show = levelSelect.getElementsByClassName("opt-shs");
+            for(var i=0; i<show.length; i++) show[i].style.display = "block";
+            if(document.getElementById('esc_box')) document.getElementById('esc_box').style.display = 'none';
+        }
+    }
+
+    // B. Fetch Sections based on Track/Year
+    function fetchSections() {
+        var track = document.getElementById('reg_track').value;
+        var year = document.getElementById('reg_level').value;
+        var secSelect = document.getElementById('reg_section');
+
+        if(track == "" || year == "") return;
+
+        secSelect.innerHTML = "<option>Loading...</option>";
+        
+        var fd = new FormData();
+        fd.append('track', track);
+        fd.append('year_level', year);
+
+        fetch('get_sections.php', { method: 'POST', body: fd })
+        .then(res => res.text())
+        .then(data => {
+            secSelect.innerHTML = data;
+        });
+    }
+
+    // ==========================================
+    // 3. BILLING LOGIC
+    // ==========================================
+    
+    // A. Check Student ID Real-time
+    function checkBillingID() {
+        var id = document.getElementById('bill_search').value;
+        var statusDiv = document.getElementById('bill_check_status');
+        var btn = document.getElementById('btn_bill_search');
+
+        if(id.trim() == "") {
+            statusDiv.innerHTML = "";
             return;
         }
 
-        var formData = new FormData();
-        formData.append("student_id", id);
+        var fd = new FormData();
+        fd.append('student_id', id);
 
-        fetch("get_student_info.php", { method: "POST", body: formData })
-        .then(function(response){ return response.text(); })
-        .then(function(data){
+        fetch('get_student_info.php', { method: 'POST', body: fd })
+        .then(res => res.text())
+        .then(data => {
             if(data.includes("|")) {
                 var parts = data.split("|");
-            
-                resultDiv.style.display = "block";
-                resultDiv.style.background = "#d4edda";
-                resultDiv.style.color = "#155724";
-                resultDiv.innerHTML = "✅ Found: " + parts[1];
-
-                var track = parts[2].toLowerCase().trim();
-                trackDisplay.value = track;
-                trackHidden.value = track;
-
-                yearFilter.value = "";
-                var opts = document.getElementsByClassName("opt-level");
-                for(var i=0; i<opts.length; i++) { opts[i].style.display = "none"; } 
-
-                if(track == "kinder") {
-                    var show = document.getElementsByClassName("opt-kinder");
-                    for(var i=0; i<show.length; i++) show[i].style.display = "block";
-                    if(strandBox) strandBox.style.display = "none";
-                } 
-                else if(track == "junior high school") {
-                    var show = document.getElementsByClassName("opt-jhs");
-                    for(var i=0; i<show.length; i++) show[i].style.display = "block";
-                    if(strandBox) strandBox.style.display = "none";
-                }
-                else if(track == "senior high school") {
-                    var show = document.getElementsByClassName("opt-shs");
-                    for(var i=0; i<show.length; i++) show[i].style.display = "block";
-                    if(strandBox) strandBox.style.display = "block"; 
-                }
-
+                statusDiv.style.color = "#198754";
+                statusDiv.innerHTML = "✅ Found: " + parts[1];
                 btn.disabled = false;
                 btn.style.opacity = "1";
-                btn.style.cursor = "pointer";
-                sectionList.disabled = false;
-                
-                filterClasses();
             } else {
-
-                resultDiv.style.display = "block";
-                resultDiv.style.background = "#f8d7da";
-                resultDiv.style.color = "#721c24";
-                resultDiv.innerHTML = "❌ ID Not Found";
+                statusDiv.style.color = "#dc3545";
+                statusDiv.innerHTML = "❌ Student not found";
                 btn.disabled = true;
-                sectionList.disabled = true;
+                btn.style.opacity = "0.5";
             }
         });
     }
 
-    function filterClasses(){
-        var trackVal = document.getElementById("filter_track").value; 
-        var yearVal = document.getElementById("filter_year").value;
-        var subjVal = document.getElementById("filter_subject").value;
-        var strandVal = document.getElementById("filter_strand") ? document.getElementById("filter_strand").value : "";
-        
-        var options = document.getElementsByClassName("sec-opt");
-        var selectBox = document.getElementById("final_section");
-        var visibleCount = 0;
+    // B. Load Billing Dashboard
+    function loadBilling() {
+        var id = document.getElementById('bill_search').value;
+        if(!id) { alert("Please enter a Student ID"); return; }
 
-        for(var i=0; i < options.length; i++){
-            var opt = options[i];
-            var matchTrack = (trackVal == "") || (opt.getAttribute("data-track") == trackVal);
-            var matchYear  = (yearVal == "")  || (opt.getAttribute("data-year") == yearVal);
-            var matchSubj  = (subjVal == "")  || (opt.getAttribute("data-code") == subjVal);
-            var matchStrand = (strandVal == "") || (opt.getAttribute("data-strand") == strandVal);
+        var fd = new FormData();
+        fd.append('student_id', id);
 
-            if(trackVal == "senior high school") {
-                 if(matchTrack && matchYear && matchSubj && matchStrand){
-                    opt.style.display = "block";
-                    visibleCount++;
-                } else {
-                    opt.style.display = "none";
-                }
-            } else {
-                if(matchTrack && matchYear && matchSubj){
-                    opt.style.display = "block";
-                    visibleCount++;
-                } else {
-                    opt.style.display = "none";
-                }
-            }
-        }
+        var btn = document.querySelector('#bill_search + button');
+        var originalText = btn.innerText;
+        btn.innerText = "Searching...";
 
-        if(visibleCount > 0){
-            selectBox.options[0].text = "-- Choose Class (" + visibleCount + " available) --";
-        } else {
-            selectBox.options[0].text = "-- No classes match filters --";
-            selectBox.value = "";
-        }
-    }
-
-//Instructor
-    function assign_updateYear() {
-        var trackVal = document.getElementById("filter_track").value;
-        var yearSelect = document.getElementById("filter_year");
-        
-        yearSelect.value = ""; 
-        
-        var opts = yearSelect.getElementsByClassName("opt-level");
-        for(var i=0; i<opts.length; i++) {
-            opts[i].hidden = true; 
-            opts[i].style.display = "none"; 
-        }
-
-        if(trackVal == "kinder") {
-            var show = yearSelect.getElementsByClassName("opt-kinder");
-            for(var i=0; i<show.length; i++) { show[i].hidden = false; show[i].style.display = "block"; }
-        } 
-        else if(trackVal == "junior high school") {
-            var show = yearSelect.getElementsByClassName("opt-jhs");
-            for(var i=0; i<show.length; i++) { show[i].hidden = false; show[i].style.display = "block"; }
-        }
-        else if(trackVal == "senior high school") {
-            var show = yearSelect.getElementsByClassName("opt-shs");
-            for(var i=0; i<show.length; i++) { show[i].hidden = false; show[i].style.display = "block"; }
-        }
-        assign_filterAll();
-    }
-
-    function assign_filterAll() {
-        var trackVal = document.getElementById("filter_track").value; 
-        var yearVal = document.getElementById("filter_year").value;
-        var subjVal = document.getElementById("filter_subject").value;
-        
-        var subjOpts = document.getElementsByClassName("subj-opt");
-        for(var i=0; i<subjOpts.length; i++){
-            var sOpt = subjOpts[i];
-            var sTrack = sOpt.getAttribute("data-track");
+        fetch('get_billing_info.php', { method: 'POST', body: fd })
+        .then(res => res.text())
+        .then(data => {
+            btn.innerText = originalText;
             
-            if(trackVal == "" || sTrack == trackVal) {
-                sOpt.hidden = false; sOpt.style.display = "block";
+            if(data.trim() == "NOT_FOUND") {
+                alert("Student ID not found.");
+                document.getElementById('billing_dashboard').style.display = 'none';
+            } 
+            else if(data.includes("||")) {
+                var parts = data.split("||");
+                
+                document.getElementById('lbl_name').innerText = parts[0];
+                document.getElementById('lbl_track').innerText = parts[1];
+                document.getElementById('val_total').innerText = parts[2];
+                document.getElementById('val_paid').innerText  = parts[3];
+                document.getElementById('val_balance').innerText = parts[4];
+                document.getElementById('history_table').innerHTML = parts[5];
+                document.getElementById('lbl_status').innerHTML = parts[6];
+                
+                document.querySelectorAll('.target_sid').forEach(el => el.value = parts[7]);
+
+                document.getElementById('billing_dashboard').style.display = 'block';
             } else {
-                sOpt.hidden = true; sOpt.style.display = "none";
+                alert("Error fetching data.");
+                console.log(data);
             }
-        }
-
-        var options = document.getElementsByClassName("sec-opt");
-        var selectBox = document.getElementById("final_section");
-        var visibleCount = 0;
-
-        for(var i=0; i < options.length; i++){
-            var opt = options[i];
-            var matchTrack = (trackVal == "") || (opt.getAttribute("data-track") == trackVal);
-            var matchYear  = (yearVal == "")  || (opt.getAttribute("data-year") == yearVal);
-            var matchSubj  = (subjVal == "")  || (opt.getAttribute("data-code") == subjVal);
-
-            if(matchTrack && matchYear && matchSubj){
-                opt.hidden = false; opt.style.display = "block";
-                visibleCount++;
-            } else {
-                opt.hidden = true; opt.style.display = "none";
-            }
-        }
-        
-        if(visibleCount > 0){
-            selectBox.options[0].text = "-- Choose Class (" + visibleCount + " available) --";
-        } else {
-            selectBox.options[0].text = "-- No classes match filters --";
-            selectBox.value = "";
-        }
-
-        var instList = document.getElementById("instructor_list");
-        if(instList) {
-            var instructors = instList.getElementsByTagName("option");
-            for(var j=0; j < instructors.length; j++){
-                var inst = instructors[j];
-                if(inst.value == "") continue; 
-                var iTrack = inst.getAttribute("data-track");
-                if(trackVal == "" || iTrack == trackVal){
-                    inst.hidden = false; inst.style.display = "block";
-                } else {
-                    inst.hidden = true; inst.style.display = "none";
-                }
-            }
-            if(instList.selectedOptions.length > 0 && instList.selectedOptions[0].hidden){
-                instList.value = "";
-            }
-        }
+        })
+        .catch(err => {
+            btn.innerText = originalText;
+            console.error(err);
+        });
     }
+
+    // Default Load
     window.onload = function() {
         loadZone('welcome.php', null);
     };

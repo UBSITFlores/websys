@@ -140,6 +140,16 @@ $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     onclick="loadZone('section-grades.php?section=<?php echo urlencode($row['section']); ?>&code=<?php echo urlencode($row['code']); ?>', null)">
                     Open Gradebook
                 </button>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-open" 
+                        onclick="loadZone('section-grades.php?section=<?php echo urlencode($row['section']); ?>&code=<?php echo urlencode($row['code']); ?>', null)">
+                        Grades
+                    </button>
+                    <button class="btn-open" style="background:#ffc107; color:#333;"
+                        onclick="loadZone('attendance.php?section=<?php echo urlencode($row['section']); ?>&code=<?php echo urlencode($row['code']); ?>', null)">
+                        Attendance
+                    </button>
+                </div>
             </div>
         <?php endforeach; ?>
     </div>

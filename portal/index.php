@@ -28,7 +28,6 @@ if ($fname === '' || $lname === '') {
     $conn = new mysqli($servername, $username, $password, $dbname);
 
     if ($conn->connect_error) {
-        // If DB fails, continue but the name may be blank
         error_log('DB connection failed in portal/index.php: ' . $conn->connect_error);
     } else {
         $query = "SELECT * FROM account WHERE account_id = ?";
@@ -50,7 +49,9 @@ if ($fname === '' || $lname === '') {
 
 // Get the page to display (default is dashboard)
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
-$allowed_pages = ['dashboard', 'profile', 'schedule', 'grades', 'enrollment'];
+
+// UPDATED: Added 'payment' to the allowed list
+$allowed_pages = ['dashboard', 'profile', 'schedule', 'grades', 'enrollment', 'payment'];
 
 if (!in_array($page, $allowed_pages)) {
     $page = 'dashboard';
@@ -101,6 +102,10 @@ if (!in_array($page, $allowed_pages)) {
             <i class="fas fa-edit"></i>
             Enrollment
         </a>
+        <a href="?page=payment" class="nav-button <?php echo ($page == 'payment') ? 'active' : ''; ?>">
+            <i class="fas fa-wallet"></i>
+            Accounts
+        </a>
     </div>
 
     <div class="content-area">
@@ -121,6 +126,10 @@ if (!in_array($page, $allowed_pages)) {
                 break;
             case 'enrollment':
                 include 'enrollment.php';
+                break;
+            // UPDATED: Added case for payment
+            case 'payment':
+                include 'payment.php';
                 break;
         }
         ?>
