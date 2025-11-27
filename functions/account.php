@@ -10,10 +10,8 @@
 
             try{
                 $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
-                
                 $connection = new PDO($dsn,$user,$pass);
                 $this->pdo = $connection;
-                
             }catch(PDOException $e){
                 die("Connection Failed!" . $e->getMessage());
             }
@@ -31,14 +29,26 @@
                 PDO::ATTR_EMULATE_PREPARES => false
             ];
             $user = $fetch->fetch(PDO::FETCH_ASSOC);
+            
             if (!$user) {
                 echo "
                     <script>
-                        alert('Provide Correct Credentials...');
+                        alert('Invalid Credentials.');
                         window.location.href = 'index.php';
                     </script>
                 ";
             } else {
+                // --- SECURITY CHECK: BLOCK INACTIVE USERS ---
+                if (isset($user['status']) && $user['status'] === 'Inactive') {
+                    echo "
+                        <script>
+                            alert('Access Denied: Your account is currently Inactive. Please contact the administrator.');
+                            window.location.href = 'index.php';
+                        </script>
+                    ";
+                    exit;
+                }
+
                 if (session_status() !== PHP_SESSION_ACTIVE) {
                     session_start();
                 }
@@ -47,10 +57,8 @@
                 $_SESSION['FNAME'] = $user['fname'];
                 $_SESSION['LNAME'] = $user['lname'];
 
-                // Normalize role value coming from the DB and store it
                 $role = strtolower(trim($user['role'] ?? ''));
                 $_SESSION['ROLE'] = $role;
-                error_log('login role: [' . $role . ']'); // temporary debug, remove when verified
 
                 if ($role === 'admin') {
                     header("Location: ../admin/index.php");
@@ -63,16 +71,17 @@
                     header("Location: ../management/index.php");
                     exit;
                 } else {
-                    // default (students and other roles)
-                    header("Location: ../portal/index.php");  // Change this line
+                    // default (students)
+                    header("Location: ../portal/index.php");
                     exit;
                 }
             }
         }
+
         public function logout(){
             session_start();
             session_destroy();
-            header("location:../account/index.php");
+            header("location:../account/login.php");
             exit();
         }
     }
