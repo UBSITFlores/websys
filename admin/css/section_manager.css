@@ -1,0 +1,12 @@
+@import url("/assets/core.css");
+
+.page-wrap{padding:2rem;}
+
+.page-title{
+    font-size:1.9rem;font-weight:700;color:var(--primary);
+    margin-bottom:1.3rem;
+}
+
+.table{margin-top:10px;}
+.assign-btn{ @extend .btn-primary; }
+.remove-btn{ @extend .btn-danger; }

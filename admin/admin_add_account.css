@@ -1,0 +1,77 @@
+@import url("/assets/core.css");
+
+body{
+    font-family:Arial, sans-serif;
+    background:#f9f9f9;
+    padding:40px;
+    text-align:center;
+}
+
+/* Page header */
+.page-title{
+    font-size:1.9rem;
+    font-weight:700;
+    margin-bottom:20px;
+    color:var(--primary);
+}
+
+/* Error message */
+.alert-error{
+    background:#f8d7da;
+    color:#721c24;
+    padding:12px 15px;
+    border-radius:6px;
+    font-weight:700;
+    max-width:400px;
+    margin:auto;
+    margin-bottom:18px;
+}
+
+/* Form Box */
+.form-box{
+    background:white;
+    padding:25px;
+    border-radius:8px;
+    display:inline-block;
+    text-align:left;
+    max-width:400px;
+    width:100%;
+    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* Inputs / Selects */
+.form-box input,
+.form-box select{
+    width:100%;
+    padding:8px;
+    margin-bottom:12px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+/* Button */
+.btn-submit{
+    background:#27ae60;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:4px;
+    font-size:1rem;
+    cursor:pointer;
+}
+.btn-submit:hover{
+    background:#1e8d4d;
+}
+
+/* Back link */
+.back-link{
+    margin-top:20px;
+}
+.back-link a{
+    text-decoration:none;
+    color:var(--primary);
+    font-weight:600;
+}
+back-link a:hover{
+    text-decoration:underline;
+}

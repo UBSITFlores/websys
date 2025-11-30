@@ -1,0 +1,64 @@
+/* ========= GLOBAL NAVY BLUE THEME ========= */
+:root{
+    --primary:#002D72;
+    --primary-light:#0056b3;
+    --text:#1b1f2f;
+    --white:#fff;
+    --bg:#f6f7fb;
+
+    --success:#198754;
+    --warning:#ffc107;
+    --danger:#dc3545;
+}
+
+/* Base Reset */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:"Segoe UI",sans-serif;color:var(--text);}
+
+/* Cards */
+.card{
+    background:var(--white);
+    padding:1.7rem;
+    border-radius:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.05);
+    margin-bottom:20px;
+}
+
+/* Tables */
+.table{
+    width:100%;
+    border-collapse:collapse;
+    overflow:hidden;
+}
+.table th{
+    background:var(--primary);
+    color:white;
+    padding:12px;
+    text-align:left;
+}
+.table td{
+    padding:12px;
+    border-bottom:1px solid #e4e4e4;
+}
+.table tr:hover{background:#f2f3ff;}
+
+/* Buttons */
+.btn{padding:10px 16px;border-radius:6px;font-weight:600;border:none;cursor:pointer;transition:0.2s;}
+.btn-primary{background:var(--primary);color:white;}
+.btn-primary:hover{background:var(--primary-light);}
+.btn-light{background:white;color:var(--primary);border:2px solid var(--primary);}
+.btn-light:hover{background:var(--primary);color:white;}
+.btn-danger{background:var(--danger);color:white;}
+.btn-danger:hover{filter:brightness(.9);}
+.btn-success{background:var(--success);color:white;}
+.btn-success:hover{filter:brightness(.9);}
+
+/* Inputs */
+input,select,textarea{
+    width:100%;padding:10px;border:1px solid #d1d1d1;border-radius:6px;font-size:1rem;margin-bottom:14px;
+}
+input:focus,select:focus,textarea:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 2px rgba(0,45,114,.2);
+    outline:none;
+}

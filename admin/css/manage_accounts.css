@@ -1,0 +1,10 @@
+@import url("/assets/core.css");
+
+.page-wrap{padding:2rem;}
+.page-title{font-size:1.8rem;font-weight:700;color:var(--primary);margin-bottom:1.2rem;}
+
+.table{margin-top:15px;}
+
+.action-btn{display:flex;gap:8px;}
+.edit-btn{ @extend .btn-light; }
+.del-btn{ @extend .btn-danger; }

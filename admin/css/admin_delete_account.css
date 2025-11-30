@@ -1,0 +1,12 @@
+@import url("/assets/core.css");
+
+.warning-box{
+    @extend .card;
+    border-left:6px solid var(--danger);
+    padding:2rem;
+}
+
+.warning-box h2{color:var(--danger);font-size:1.5rem;font-weight:800;}
+
+.confirm-btn{ @extend .btn-danger;width:49%; }
+.cancel-btn{ @extend .btn-light;width:49%; }

@@ -1,0 +1,17 @@
+@import url("/assets/core.css");
+
+.page-wrap{
+    max-width:600px;margin:auto;padding:2rem;
+}
+
+.page-title{
+    font-size:1.8rem;font-weight:700;color:var(--primary);
+    margin-bottom:15px;
+}
+
+.card-setting{
+    @extend .card;
+    padding:1.6rem;
+}
+
+.save-changes-btn{ @extend .btn-primary;width:100%; }

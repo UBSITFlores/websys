@@ -1,0 +1,46 @@
+@import url("/assets/core.css");
+
+/* Header */
+.main-header{
+    background:#002D72;
+    color:white;
+    padding-bottom:14px;
+    box-shadow:0 2px 12px rgba(0,0,0,.12);
+}
+
+/* Header branding */
+.brand-bar{
+    display:flex;
+    align-items:center;
+    padding:18px 30px;
+}
+.school-logo{height:55px;margin-right:18px;}
+
+.site-info{display:flex;flex-direction:column;}
+.school-name{font-size:1.7rem;font-weight:700;letter-spacing:1px;color:white;}
+.school-tagline{font-size:.95rem;color:#c7d4f2;margin-top:3px;}
+
+/* Main Layout */
+.container{
+    height:80vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* Form card */
+.portal-form{
+    background:white;
+    padding:32px;
+    border-radius:14px;
+    box-shadow:0 4px 14px rgba(0,0,0,.08);
+    min-width:320px;
+    display:flex;
+}
+
+/* Login button */
+.form-btn{
+    @extend .btn-primary;
+    width:100%;
+    font-size:1.1rem;
+}

@@ -1,0 +1,55 @@
+.enrollment-container {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.enrollment-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.enrollment-title {
+    color: #002D72;
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+}
+
+.enrollment-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.enrollment-table th {
+    background-color: #002D72;
+    color: white;
+    padding: 1rem;
+    text-align: left;
+}
+
+.enrollment-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.enrollment-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Status Badge */
+.status-enrolled {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.85em;
+    text-transform: uppercase;
+}
+
+@media screen and (max-width: 768px) {
+    .enrollment-container { padding: 1rem; }
+    .enrollment-table th, .enrollment-table td { padding: 0.75rem; font-size: 0.9rem; }
+}

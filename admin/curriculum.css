@@ -1,0 +1,58 @@
+@import url("/assets/core.css");
+
+.form-card{ max-width:1100px; margin:auto; background:white; padding:25px; border-radius:8px; }
+
+.title{
+    color:#002D72;
+    padding-bottom:10px;
+    border-bottom:2px solid #eee;
+    margin-bottom:18px;
+}
+
+/* FORM PANEL */
+.form-panel{
+    background:#f8f9fa;
+    padding:20px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    margin-bottom:30px;
+}
+.form-panel.edit-mode{ background:#fff3cd; }
+
+/* GRID LAYOUTS */
+.grid-3{ display:grid; grid-template-columns:1fr 2fr 1fr; gap:15px; margin-bottom:15px;}
+.grid-4{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:15px;}
+
+.align-bottom{ display:flex; align-items:flex-end; }
+
+/* TABLE */
+.table-wrap{ overflow-x:auto; }
+.curr-table{ width:100%; border-collapse:collapse; font-size:14px; }
+.curr-table td, .curr-table th{ padding:10px; border-bottom:1px solid #eee; }
+
+.thead-row{
+    background:#002D72;
+    color:white;
+    text-align:left;
+}
+
+.price{ color:#198754; font-weight:bold; }
+
+/* ACTION BUTTONS */
+.edit-btn, .del-btn{
+    cursor:pointer;
+    border:none;
+    background:none;
+    font-size:16px;
+}
+.del-btn{ color:red; font-weight:bold; }
+
+.btn-save{
+    background:#002D72;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:5px;
+    cursor:pointer;
+}
+.btn-save:hover{ background:#003c9e; }

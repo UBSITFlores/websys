@@ -1,0 +1,257 @@
+/* --- Reset and base styles --- */
+html, body {
+    margin: 0;                
+    padding: 0;                
+    width: 100vw;              
+    height: 100vh;             
+    box-sizing: border-box;   
+    overflow-x: hidden;        
+}
+
+.header {
+    background-color: #002D72;  
+    color: #ffffff;
+    padding: 0;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;    
+    width: 100vw;                      
+    box-sizing: border-box;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding-left: 2rem;                
+}
+
+.logout-button {
+    background: #ffffff;
+    color: #002D72;
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 8px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 2rem;                
+    transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+    background: #f5f5f5;
+}
+
+.container {
+    display: flex;
+    height: calc(100vh - 60px);       
+    width: 100vw;                      
+    border: 1.5px solid #d5d5d5;
+    border-radius: 7px;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    min-width: 0; 
+}
+
+.sidebar {
+    width: 180px;
+    background: #ffffff;
+    box-shadow: none;
+    border-right: 1.5px solid #e0e0e0; 
+    border-top-left-radius: 7px;
+    border-bottom-left-radius: 7px;
+    padding: 20px 0;
+}
+
+.sidebar button {
+    display: block;
+    margin: 10px auto;
+    width: 80%;
+    padding: 10px;
+    border: 1px solid #bbb;
+    background: #ffffff;
+    cursor: pointer;
+    font-weight: 600;
+    color: #002D72;
+    transition: background-color 0.3s;
+}
+
+.sidebar button:hover {
+    background-color: #f0f0f0;
+    border-color: #002D72;
+}
+
+.main {
+    flex: 1;
+    padding: 30px;
+    background: #ffffff;
+    overflow-y: auto;
+    border-top-right-radius: 7px;
+    border-bottom-right-radius: 7px;
+    min-width: 0;
+}
+
+
+@media screen and (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        text-align: center;
+        height: auto;
+    }
+    .container {
+        flex-direction: column;
+        height: auto;
+        width: 100vw; 
+    }
+    .sidebar {
+        width: 100%;
+        box-shadow: none;
+        padding: 10px 0;
+        display: flex;
+        justify-content: center;
+        border-right: none;
+        border-top-right-radius: 7px;
+        border-bottom-left-radius: 0;
+    }
+    .sidebar button {
+        width: 120px;
+        margin: 0 10px;
+    }
+    .main {
+        padding: 15px;
+        border-radius: 0 0 7px 7px;
+    }
+}
+
+.grading-panel {
+    padding: 20px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.grading-panel h2 {
+    color: #002D72;   /* SLU royal blue */
+    margin-bottom: 16px;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+/* --- Filter Form --- */
+.grading-form {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.grading-form label {
+    font-weight: 500;
+    color: #333;
+}
+
+.grading-form select,
+.grading-form button,
+.grading-form a.button {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.grading-form button {
+    background-color: #002D72;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.grading-form button:hover {
+    background-color: #004099;
+}
+
+.grading-form a.button {
+    background-color: #ccc;
+    color: #002D72;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.grading-form a.button:hover {
+    background-color: #bbb;
+}
+
+/* --- Meta Info --- */
+.grading-meta {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* --- Table Styles --- */
+.grading-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.grading-table th {
+    background-color: #002D72;
+    color: #fff;
+    padding: 8px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.grading-table td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+.grading-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* --- Section & Labels --- */
+.section-code {
+    color: #002D72;
+    font-weight: bold;
+}
+
+.school-label {
+    color: #7f8c8d;
+    font-size: 12px;
+}
+
+/* --- Finalized Status --- */
+.finalized-yes {
+    color: green;
+    font-weight: bold;
+}
+
+.finalized-no {
+    color: red;
+    font-weight: bold;
+}
+
+/* --- No Data --- */
+.no-data {
+    text-align: center;
+    color: #7f8c8d;
+    padding: 12px;
+    font-style: italic;
+}
+.manual-enabled {
+  border: 2px solid #007bff;
+  background-color: #e6f2ff;
+}
+.active-quarter {
+  background-color: #004099 !important;
+  color: #fff !important;
+}
+
+
+ 

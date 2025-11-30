@@ -1,0 +1,53 @@
+@import url("/assets/core.css");
+
+/* PAGE */
+body { background:#f5f6fa; margin:0; font-family:Arial, sans-serif; }
+
+/* HEADER */
+.header{
+    background:#2c3e50; color:#fff;
+    padding:15px 30px;
+    display:flex; justify-content:space-between; align-items:center;
+}
+.header h2{ margin:0; }
+.header p{ margin:0; font-size:13px; }
+
+/* RIGHT USER AREA */
+.user-panel{ text-align:right; }
+.logout-link{ color:white; font-size:13px; text-decoration:none; }
+.logout-link:hover{ text-decoration:underline; }
+
+/* MAIN PAGE */
+.page-wrapper{ padding:22px 30px; }
+
+/* BUTTON SET */
+.btn{ padding:6px 12px; border-radius:3px; font-size:13px; text-decoration:none; }
+.btn-add{ background:#27ae60; color:white; padding:8px 14px; font-size:14px; }
+.btn-student{ background:#2980b9; color:white; }
+.btn-instructor{ background:#8e44ad; color:white; }
+.btn-management{ background:#d35400; color:white; }
+.btn-reset{ background:#7f8c8d; color:white; }
+.action-btns a{ margin-right:6px; }
+
+/* FILTER CARD */
+.filter-container{
+    background:white; padding:12px 15px;
+    border:1px solid #ddd; border-radius:4px;
+    margin-bottom:15px;
+    display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;
+}
+label{ font-size:13px; margin-bottom:4px; display:block; }
+select,input[type="text"]{ padding:5px 6px; font-size:13px; }
+
+/* TABLE SECTION */
+.table-wrapper{
+    background:white; border:1px solid #ddd;
+    padding:12px 15px; border-radius:4px;
+}
+.table-wrapper h3{ margin-top:0; font-size:18px; }
+
+.table-scroll{ overflow-x:auto; }
+
+table{ width:100%; border-collapse:collapse; font-size:13px; }
+th,td{ padding:6px; border:1px solid #ecf0f1; }
+thead tr{ background:#ecf0f1; }

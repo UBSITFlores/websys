@@ -1,0 +1,31 @@
+@import url("/assets/core.css");
+
+.admin-container{
+    display:flex;
+    gap:20px;
+    padding:2rem;
+}
+
+/* Side menu */
+.admin-sidebar{
+    width:230px;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,.06);
+    padding:1rem;
+}
+.admin-sidebar a{
+    display:block;padding:12px 15px;margin-bottom:6px;
+    border-radius:6px;font-weight:600;color:var(--primary);
+    text-decoration:none;transition:.22s;
+}
+.admin-sidebar a:hover{
+    background:var(--primary);color:white;
+}
+
+/* Main area */
+.admin-main{
+    flex:1;
+    padding:2rem;
+}
+.page-title{font-size:1.9rem;color:var(--primary);font-weight:700;}

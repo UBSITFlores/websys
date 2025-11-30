@@ -1,0 +1,12 @@
+@import url("/assets/core.css");
+
+.page-wrap{max-width:750px;margin:auto;padding:2rem;}
+.page-title{color:var(--primary);font-size:1.7rem;font-weight:700;margin-bottom:1.5rem;}
+
+.form-card{
+    @extend .card;
+    padding:2rem;
+}
+
+input,select{margin-bottom:14px;}
+.save-btn{ @extend .btn-primary;width:100%; }

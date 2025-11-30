@@ -1,0 +1,9 @@
+@import url("/assets/core.css");
+
+.page-wrap{padding:2rem;}
+.page-title{color:var(--primary);font-size:1.85rem;margin-bottom:1rem;}
+
+.filter-row{display:flex;gap:15px;margin-bottom:15px;}
+.filter-row select{width:200px;}
+
+.table{margin-top:15px;}

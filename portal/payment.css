@@ -1,0 +1,75 @@
+/* portal/payment.css */
+
+/* CARDS */
+.billing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.bill-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    text-align: center;
+    border-top: 5px solid #eee;
+}
+
+.bc-blue { border-color: #002D72; }
+.bc-green { border-color: #198754; }
+.bc-red { border-color: #dc3545; }
+
+.bc-label { font-size: 0.9rem; color: #666; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bc-amount { font-size: 1.8rem; font-weight: 800; color: #333; }
+
+/* PAYMENT FORM (GCash Style) */
+.pay-box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    max-width: 500px;
+    margin: 0 auto 40px auto;
+    border: 1px solid #e0e0e0;
+}
+
+.pay-header {
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.gcash-logo {
+    color: #007bff; /* GCash Blue */
+    font-weight: 900;
+    font-size: 1.5rem;
+}
+
+.pay-input-group { margin-bottom: 15px; }
+.pay-input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
+.pay-input-group input, .pay-input-group select {
+    width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 1rem; box-sizing: border-box;
+}
+.pay-input-group input:focus { border-color: #007bff; outline: none; }
+
+.btn-pay {
+    width: 100%; background: #007bff; color: white;
+    padding: 15px; border: none; border-radius: 30px;
+    font-size: 1.1rem; font-weight: bold; cursor: pointer;
+    transition: transform 0.1s;
+}
+.btn-pay:hover { background: #0056b3; transform: scale(1.02); }
+
+/* HISTORY TABLE */
+.history-container { background: #fff; padding: 20px; border-radius: 10px; }
+.hist-table { width: 100%; border-collapse: collapse; }
+.hist-table th { text-align: left; padding: 15px; color: #002D72; border-bottom: 2px solid #eee; }
+.hist-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; color: #555; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .billing-grid { grid-template-columns: 1fr; }
+}
