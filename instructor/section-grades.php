@@ -19,21 +19,28 @@ $section_data = $stmt->fetch(PDO::FETCH_ASSOC);
 if(!$section_data) { echo "<div style='padding:20px; color:red;'>Error: Section not found.</div>"; exit; }
 $section_id = $section_data['id'];
 
-// --- DETERMINE GRADING COLUMNS ---
+// --- DETERMINE COLUMNS (CAVEMAN STYLE) ---
 $track = strtolower($section_data['track']);
-$grading_periods = [];
+$columns = [];
+$col_keys = []; // This maps the name to the database ID (1, 2, 3...)
 
-if ($track == 'kinder' || $track == 'junior high school') {
-    $grading_periods = [1 => 'Q1', 2 => 'Q2', 3 => 'Q3', 4 => 'Q4'];
+if ($track == 'senior high school') {
+    // SHS = 3 Terms
+    $columns = ['Prelim', 'Midterm', 'Finals'];
+    $col_keys = [1, 2, 3]; 
 } else {
-    $grading_periods = [1 => 'Prelim', 2 => 'Midterm', 3 => 'Finals'];
+    // Kinder & JHS = 4 Quarters
+    $columns = ['Q1', 'Q2', 'Q3', 'Q4'];
+    $col_keys = [1, 2, 3, 4];
 }
 
 // 2. HANDLE SAVE
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // SAVE GRADES
     if(isset($_POST['grades'])) {
         $sql = "INSERT INTO grades (student_id, section_id, quarter, grade) VALUES (:sid, :sec, :q, :g) ON DUPLICATE KEY UPDATE grade = :g";
         $stmt = $pdo->prepare($sql);
+        
         foreach($_POST['grades'] as $sid => $periods) {
             foreach($periods as $q => $val) {
                 if(trim($val) !== "") {
@@ -43,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
+    // SAVE BEHAVIOR
     if(isset($_POST['behavior'])) {
         $acc_stmt = $pdo->prepare("SELECT id FROM account WHERE account_id = ?");
         $acc_stmt->execute([$_SESSION['ACCOUNTID']]);
@@ -57,8 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach($periods as $q => $data) {
                 $att = $data['att'] ?? null;
                 $con = $data['con'] ?? null;
-                if($att !== "" || $con !== "") {
-                    $stmt->execute([':sid'=>$sid, ':sec'=>$section_id, ':iid'=>$real_inst_id, ':q'=>$q, ':att'=>($att===""?null:$att), ':con'=>($con===""?null:$con)]);
+                // Save if not empty
+                if($att != "" || $con != "") {
+                    // Handle empty strings as null
+                    if($att == "") $att = null;
+                    if($con == "") $con = null;
+                    
+                    $stmt->execute([':sid'=>$sid, ':sec'=>$section_id, ':iid'=>$real_inst_id, ':q'=>$q, ':att'=>$att, ':con'=>$con]);
                 }
             }
         }
@@ -100,45 +113,30 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id'
     .mode-btn.active { background:#002D72; color:white; border-color:#002D72; }
     .col-behav { display: none; }
     #bulk-container { background: #e7f1ff; border: 1px solid #b6d4fe; color: #084298; padding: 10px; margin-bottom: 15px; border-radius: 5px; display: none; align-items: center; gap: 10px; }
-
-    /* --- PRINT-ONLY HEADER STYLE --- */
+    
+    /* PRINT STYLES */
     .print-header { display: none; }
-
     @media print {
-        /* Hide Web Interface */
-        .grade-header, .ctrl-div, .save-bar, #bulk-container, .sidebar-right, .header, .mode-tabs { 
-            display: none !important; 
-        }
-        
-        /* Show Custom Print Header */
-        .print-header {
-            display: block !important;
-            text-align: center;
-            margin-bottom: 20px;
-            color: black;
-        }
+        .grade-header, .ctrl-div, .save-bar, #bulk-container, .sidebar-right, .header, .mode-tabs { display: none !important; }
+        .print-header { display: block !important; text-align: center; margin-bottom: 20px; color: black; }
         .print-header h1 { font-size: 18pt; margin: 0 0 5px 0; }
         .print-header h3 { font-size: 14pt; margin: 0; font-weight: normal; }
-
-        /* Reset Layout */
         body, .content-zone, .grade-box { background: white; margin: 0; padding: 0; box-shadow: none; width: 100%; }
         .grade-table { border: 1px solid black; }
         .grade-table th, .grade-table td { border: 1px solid black !important; color: black !important; }
         .grade-input { border: none; background: transparent; text-align: center; color: black !important; }
-        
-        /* Optional: Force landscape if needed */
         @page { size: landscape; margin: 1cm; }
     }
 </style>
 
 <div class="grade-box">
-    
     <div class="grade-header">
         <div>
             <h2><?php echo htmlspecialchars($section_name); ?></h2>
             <p style="color:#666; margin:5px 0;">
                 <strong><?php echo htmlspecialchars($subject_code); ?></strong> | 
-                <?php echo htmlspecialchars($section_data['track']); ?>
+                <?php echo htmlspecialchars($section_data['track']); ?> | 
+                <?php echo htmlspecialchars($section_data['semester']); ?>
             </p>
         </div>
         <div>
@@ -148,11 +146,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id'
     </div>
 
     <div class="print-header">
-        <h1>
-            <?php echo htmlspecialchars($section_data['year_level']); ?> - 
-            <?php echo htmlspecialchars($section_data['track']); ?> | 
-            <?php echo htmlspecialchars($section_name); ?> Grading Sheet
-        </h1>
+        <h1><?php echo htmlspecialchars($section_data['year_level'] . " - " . $section_data['track']); ?> | <?php echo htmlspecialchars($section_name); ?> Grading Sheet</h1>
         <h3><?php echo htmlspecialchars($subject_code . ' - ' . $section_data['description']); ?></h3>
         <p>Instructor: <?php echo htmlspecialchars($_SESSION['FNAME'] . ' ' . $_SESSION['LNAME']); ?></p>
     </div>
@@ -167,7 +161,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id'
 
     <div id="bulk-container">
         <strong>Bulk Input (<span id="bulk-q-label"></span>):</strong>
-        <input type="text" id="bulk-input" placeholder="e.g. 85 90 88 92" style="flex:1; padding:5px;">
+        <input type="text" id="bulk-input" placeholder="e.g. 85 90 88" style="flex:1; padding:5px;">
         <button onclick="applyBulk()" style="padding:5px 10px; background:#0d6efd; color:white; border:none; cursor:pointer;">Apply</button>
         <button onclick="closeBulk()" style="padding:5px 10px; background:#6c757d; color:white; border:none; cursor:pointer;">Cancel</button>
     </div>
@@ -177,25 +171,32 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id'
             <thead>
                 <tr>
                     <th style="text-align:left; width:200px;">Student Name</th>
-                    <?php foreach($grading_periods as $key => $label): ?>
+                    
+                    <?php 
+                    $col_count = count($columns);
+                    for($i = 0; $i < $col_count; $i++): 
+                        $label = $columns[$i];
+                        $db_key = $col_keys[$i];
+                    ?>
                     <th>
                         <?php echo $label; ?><br>
                         <div class="col-acad ctrl-div" style="margin-top:5px;">
-                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableManual('acad', <?php echo $key; ?>)">Edit</button>
-                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableBulk(<?php echo $key; ?>)">Bulk</button>
+                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableManual('acad', <?php echo $db_key; ?>)">Edit</button>
+                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableBulk(<?php echo $db_key; ?>)">Bulk</button>
                         </div>
                         <div class="col-behav ctrl-div" style="margin-top:5px;">
-                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableManual('behav', <?php echo $key; ?>)">Edit</button>
+                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableManual('behav', <?php echo $db_key; ?>)">Edit</button>
                         </div>
                     </th>
-                    <?php endforeach; ?>
+                    <?php endfor; ?>
+                    
                     <th style="background:#e9ecef;">Final</th>
                     <th style="background:#e9ecef;">Remarks</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if(empty($students)): ?>
-                    <tr><td colspan="<?php echo count($grading_periods)+3; ?>" style="text-align:center; padding:30px; color:#999;">No students enrolled.</td></tr>
+                    <tr><td colspan="<?php echo $col_count + 3; ?>" style="text-align:center; padding:30px; color:#999;">No students enrolled.</td></tr>
                 <?php else: ?>
                     <?php foreach($students as $stu): 
                         $sid = $stu['id'];
@@ -205,19 +206,30 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id'
                             <strong style="color:#002D72;"><?php echo htmlspecialchars($stu['lname'] . ', ' . $stu['fname']); ?></strong><br>
                             <small><?php echo htmlspecialchars($stu['account_id']); ?></small>
                         </td>
-                        <?php foreach($grading_periods as $key => $label): 
-                            $g = $existing_grades[$sid][$key] ?? '';
-                            $att = $existing_behav[$sid][$key]['att'] ?? '';
-                            $con = $existing_behav[$sid][$key]['con'] ?? '';
+                        
+                        <?php 
+                        for($i = 0; $i < $col_count; $i++): 
+                            $db_key = $col_keys[$i];
+                            $g = $existing_grades[$sid][$db_key] ?? '';
+                            $att = $existing_behav[$sid][$db_key]['att'] ?? '';
+                            $con = $existing_behav[$sid][$db_key]['con'] ?? '';
                         ?>
                         <td style="white-space:nowrap;">
-                            <input type="text" class="grade-input col-acad score-val q<?php echo $key; ?>" name="grades[<?php echo $sid; ?>][<?php echo $key; ?>]" value="<?php echo $g; ?>" readonly oninput="calcRow(this)">
+                            <input type="text" class="grade-input col-acad score-val q<?php echo $db_key; ?>" 
+                                   name="grades[<?php echo $sid; ?>][<?php echo $db_key; ?>]" 
+                                   value="<?php echo $g; ?>" readonly oninput="calcRow(this)">
+                            
                             <div class="col-behav">
-                                <input type="text" class="grade-input b-att q<?php echo $key; ?>" name="behavior[<?php echo $sid; ?>][<?php echo $key; ?>][att]" value="<?php echo $att; ?>" placeholder="Att" readonly style="width:35px;">
-                                <input type="text" class="grade-input b-con q<?php echo $key; ?>" name="behavior[<?php echo $sid; ?>][<?php echo $key; ?>][con]" value="<?php echo $con; ?>" placeholder="Con" readonly style="width:35px;">
+                                <input type="text" class="grade-input b-att q<?php echo $db_key; ?>" 
+                                       name="behavior[<?php echo $sid; ?>][<?php echo $db_key; ?>][att]" 
+                                       value="<?php echo $att; ?>" placeholder="Att" readonly style="width:35px;">
+                                <input type="text" class="grade-input b-con q<?php echo $db_key; ?>" 
+                                       name="behavior[<?php echo $sid; ?>][<?php echo $db_key; ?>][con]" 
+                                       value="<?php echo $con; ?>" placeholder="Con" readonly style="width:35px;">
                             </div>
                         </td>
-                        <?php endforeach; ?>
+                        <?php endfor; ?>
+                        
                         <td style="font-weight:bold; background:#f8f9fa;" class="final-grade">-</td>
                         <td style="font-size:0.9rem; background:#f8f9fa;" class="remarks">-</td>
                     </tr>
@@ -225,6 +237,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id'
                 <?php endif; ?>
             </tbody>
         </table>
+
         <div class="save-bar" style="margin-top:20px; text-align:right;">
             <span id="save_status" style="margin-right:15px; font-weight:bold;"></span>
             <button type="submit" class="btn-save" style="padding:12px 30px;">Save All Changes</button>

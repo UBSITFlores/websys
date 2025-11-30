@@ -3,6 +3,7 @@ session_start();
 if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
     http_response_code(403); echo "Session Expired."; exit;
 }
+
 $tracks = ['kinder', 'junior high school', 'senior high school'];
 ?>
 
@@ -12,6 +13,7 @@ $tracks = ['kinder', 'junior high school', 'senior high school'];
     <form id="enrollForm" method="POST" autocomplete="off" onsubmit="event.preventDefault(); submitForm(this, 'register_student.php');">
         
         <h3 style="color:#002D72; font-size:1.1rem; border-bottom:1px solid #eee; margin-top:0;">I. Personal Information</h3>
+        
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 0.5fr; gap: 15px;">
             <div class="form-group"><label>First Name</label><input type="text" name="fname" required></div>
             <div class="form-group"><label>Middle Name</label><input type="text" name="mname" required></div>
@@ -26,11 +28,19 @@ $tracks = ['kinder', 'junior high school', 'senior high school'];
             <div class="form-group"><label>Nationality</label><input type="text" name="nationality" value="Filipino"></div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-            <div class="form-group"><label>Civil Status</label><select name="civilstatus"><option>Single</option><option>Married</option></select></div>
-            <div class="form-group"><label>Gender</label><select name="gender"><option>Cisgender</option><option>Transgender</option></select></div>
-            <div class="form-group"><label>Sex</label><select name="sex"><option>Male</option><option>Female</option></select></div>
-        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group"><label>Civil Status</label>
+                <select name="civilstatus">
+                    <option>Single</option><option>Married</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Gender</label>
+                <select name="gender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            </div>
 
         <h3 style="color:#002D72; font-size:1.1rem; border-bottom:1px solid #eee; margin-top:20px;">II. Academic History</h3>
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-bottom: 15px;">
@@ -68,37 +78,37 @@ $tracks = ['kinder', 'junior high school', 'senior high school'];
         <div class="family-box">
             <label class="family-label">Father's Information</label>
             <div class="grid-3-col">
-                <input type="text" name="fLname" placeholder="Last Name">
-                <input type="text" name="fFname" placeholder="First Name">
-                <input type="text" name="fMName" placeholder="Middle Name">
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="fLname" placeholder="Last Name"></div>
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="fFname" placeholder="First Name"></div>
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="fMName" placeholder="Middle Name"></div>
             </div>
             <div class="grid-2-col">
-                <input type="text" name="fContactnum" placeholder="Contact No.">
-                <input type="text" name="fOccupation" placeholder="Occupation">
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="fContactnum" placeholder="Contact No."></div>
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="fOccupation" placeholder="Occupation"></div>
             </div>
         </div>
         <div class="family-box">
             <label class="family-label">Mother's Information</label>
             <div class="grid-3-col">
-                <input type="text" name="mLname" placeholder="Last Name">
-                <input type="text" name="mFname" placeholder="First Name">
-                <input type="text" name="mMName" placeholder="Middle Name">
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="mLname" placeholder="Maiden Last Name"></div>
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="mFname" placeholder="First Name"></div>
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="mMName" placeholder="Middle Name"></div>
             </div>
             <div class="grid-2-col">
-                <input type="text" name="mContactnum" placeholder="Contact No.">
-                <input type="text" name="mOccupation" placeholder="Occupation">
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="mContactnum" placeholder="Contact No."></div>
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="mOccupation" placeholder="Occupation"></div>
             </div>
         </div>
         <div class="family-box">
             <label class="family-label">Guardian's Information</label>
             <div class="grid-3-col">
-                <input type="text" name="gLname" placeholder="Last Name">
-                <input type="text" name="gFname" placeholder="First Name">
-                <input type="text" name="gMName" placeholder="Middle Name">
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="gLname" placeholder="Last Name"></div>
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="gFname" placeholder="First Name"></div>
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="gMName" placeholder="Middle Name"></div>
             </div>
             <div class="grid-2-col">
-                <input type="text" name="gContactnum" placeholder="Contact No.">
-                <input type="text" name="gRelationship" placeholder="Relationship">
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="gContactnum" placeholder="Contact No."></div>
+                <div class="form-group" style="margin-bottom:0;"><input type="text" name="gRelationship" placeholder="Relationship"></div>
             </div>
         </div>
 
@@ -114,7 +124,6 @@ $tracks = ['kinder', 'junior high school', 'senior high school'];
                     <?php endforeach; ?>
                 </select>
             </div>
-
             <div class="form-group">
                 <label>Grade Level</label>
                 <select name="grade_level" id="reg_level" onchange="fetchSections()" required>
@@ -134,7 +143,7 @@ $tracks = ['kinder', 'junior high school', 'senior high school'];
             <label style="color:#002D72;">Assigned Section</label>
             <select name="section" id="reg_section" required>
                 <option value="">-- Select Grade Level First --</option>
-                </select>
+            </select>
             <small style="color:#666;">This will auto-enroll the student in all subjects for this section.</small>
         </div>
 
@@ -152,25 +161,3 @@ $tracks = ['kinder', 'junior high school', 'senior high school'];
         <button type="submit" class="btn-save" style="margin-top: 25px; padding: 15px;">Register & Enroll Student</button>
     </form>
 </div>
-
-<script>
-    function fetchSections() {
-        var track = document.getElementById('reg_track').value;
-        var year = document.getElementById('reg_level').value;
-        var secSelect = document.getElementById('reg_section');
-
-        if(track == "" || year == "") return;
-
-        secSelect.innerHTML = "<option>Loading...</option>";
-        
-        var fd = new FormData();
-        fd.append('track', track);
-        fd.append('year_level', year);
-
-        fetch('get_sections.php', { method: 'POST', body: fd })
-        .then(res => res.text())
-        .then(data => {
-            secSelect.innerHTML = data;
-        });
-    }
-</script>

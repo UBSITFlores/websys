@@ -31,7 +31,15 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
             
             <button onclick="loadZone('enroll-student-ajax.php', this)">Register Student</button>
             
+            <button onclick="loadZone('edit_student.php', this)">Update Student Info</button>
+            
             <button onclick="loadZone('billing.php', this)">Student Accounts</button>
+
+            <button onclick="loadZone('honor_list.php', this)">Honor List / Ranking</button>
+        
+            <button onclick="loadZone('section_report.php', this)">Section Master List</button>
+        
+            <button onclick="loadZone('student_records.php', this)">Student Records (Report Card)</button>
         </div>
 
         <div class="content-zone" id="main-content">
