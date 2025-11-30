@@ -26,13 +26,22 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'admin') {
     <div class="container">
         <div class="sidebar-right">
             <button onclick="loadZone('welcome.php', null)">Dashboard Home</button>
-            <button onclick="loadZone('settings.php', this)">System Settings</button>
+            
             <button onclick="loadZone('curriculum.php', this)">Curriculum Setup</button>
+
             <button onclick="loadZone('class_offering.php', this)">Class Assignment</button>
-            <button onclick="loadZone('instructors.php', this)">Faculty List</button>
-            <button onclick="loadZone('manage_accounts.php', this)">Manage Accounts</button>
-            <button onclick="loadZone('add_user.php', this)">Create New User</button>
+
             <button onclick="loadZone('section_manager.php', this)">Section Manager</button>
+
+            <button onclick="loadZone('instructors.php', this)">Faculty List</button>
+
+            <button onclick="loadZone('manage_accounts.php', this)">Manage Accounts</button>
+
+            <button onclick="loadZone('promotion.php', this)">Promotion & Graduation</button>
+
+            <button onclick="loadZone('add_user.php', this)">Create New User</button>
+
+            <button onclick="loadZone('settings.php', this)">System Settings</button>
         </div>
 
         <div class="content-zone" id="main-content">
@@ -289,6 +298,51 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'admin') {
             secSelect.options[0].text = "-- Choose Section --";
         }
     }
+    // ==========================================
+    // 6. PROMOTION LOGIC
+    // ==========================================
+    function updateActionUI() {
+        var level = document.getElementById('batch_level').value;
+        var preview = document.getElementById('action_preview');
+        var text = document.getElementById('action_text');
+        var input = document.getElementById('real_action');
+        var btn = document.getElementById('btn_process');
+
+        if(level == "") {
+            preview.style.display = "none";
+            btn.disabled = true;
+            return;
+        }
+
+        preview.style.display = "block";
+        btn.disabled = false;
+
+        // LOGIC: Who Graduates?
+        // Kinder AND Grade 12 now Graduate.
+        if(level == "Grade 12" || level == "Kinder") {
+            text.innerText = "Mark batch as GRADUATED. Accounts will close in 3 months.";
+            input.value = "graduate";
+            btn.innerText = "Graduate Batch";
+            btn.style.backgroundColor = "#dc3545"; // Red
+        } else {
+            // Everyone else promotes
+            var next = "";
+            var num = 0;
+            
+            // Simple string replacement
+            if(level.includes("Grade")) {
+                var parts = level.split(" "); // Split "Grade 7" into ["Grade", "7"]
+                var currentNum = parseInt(parts[1]);
+                var nextNum = currentNum + 1;
+                next = "Grade " + nextNum;
+            }
+
+            text.innerText = "Promote all active students to " + next + ".";
+            input.value = "promote";
+            btn.innerText = "Promote Batch";
+            btn.style.backgroundColor = "#002D72"; // Blue
+        }
+    }
     // 7. SECTION MANAGER LOGIC
     function deleteSection(id) {
         if(confirm("Are you sure you want to delete this section?")) {
@@ -305,6 +359,37 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'admin') {
                 }
             });
         }
+    }
+    // FACULTY UPDATE (New Function)
+    function updateInstructor(btn, id) {
+        // 1. Find the row (TR)
+        let row = btn.closest('tr');
+        
+        // 2. Find inputs inside that row
+        let degree = row.querySelector('.val-degree').value;
+        let years = row.querySelector('.val-years').value;
+        let status = row.querySelector('.val-status').value;
+
+        // 3. Prepare Data
+        let fd = new FormData();
+        fd.append('update_id', id);
+        fd.append('degree', degree);
+        fd.append('years_active', years);
+        fd.append('status', status);
+
+        // 4. Send
+        btn.innerText = "Saving...";
+        fetch('instructors.php', { method: 'POST', body: fd })
+        .then(res => res.text())
+        .then(data => {
+            if(data.trim() === "UPDATED") {
+                alert("Instructor Updated Successfully!");
+                filterFaculty(); // Refresh table
+            } else {
+                alert("Error updating.");
+                btn.innerText = "Update";
+            }
+        });
     }
 
     // Default Load

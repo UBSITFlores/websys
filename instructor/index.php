@@ -28,7 +28,7 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
             <button onclick="loadZone('welcome.php', null)">Dashboard Home</button>
             <button onclick="loadZone('schedule.php', this)">My Schedule</button>
             <button onclick="loadZone('grading-sheet-ajax.php', this)">My Class Loads</button>
-        </div>
+            <button onclick="loadZone('advisory.php', this)">My Advisory Class</button> </div>
 
         <div class="content-zone" id="main-content">
             </div>
@@ -111,19 +111,46 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
     }
 
     function calcRow(input) {
-        let row = input.closest('tr');
-        let inputs = row.querySelectorAll('.score-val');
-        let total = 0; let count = 0;
+        var row = input.closest('tr');
+        // This works for both 3 columns and 4 columns automatically
+        var inputs = row.querySelectorAll('.score-val');
         
-        inputs.forEach(inp => {
-            let val = parseFloat(inp.value);
-            if(!isNaN(val)) { total += val; count++; }
-        });
+        var total = 0;
+        var count = 0;
+        var filled = 0;
 
-        let finalCell = row.querySelector('.final-grade');
-        if(count > 0) {
-            let avg = total / count;
-            finalCell.innerText = avg.toFixed(2);
+        // Basic Loop
+        for(var i = 0; i < inputs.length; i++) {
+            var val = inputs[i].value;
+            if(val != "" && !isNaN(val)) {
+                total = total + parseFloat(val);
+                filled++;
+            }
+            count++;
+        }
+
+        var finalCell = row.querySelector('.final-grade');
+        var remarkCell = row.querySelector('.remarks');
+
+        // Show average if at least one grade is entered (or wait for all? let's show current avg)
+        if(filled > 0) {
+            // In real school systems, blank usually means 0, but for display we average what is there
+            // OR strict mode: total / count (dividing by 3 or 4 even if some are empty)
+            // Let's use strict mode:
+            
+            var avg = total / count;
+            var final = avg.toFixed(2);
+            
+            finalCell.innerText = final;
+            
+            if(avg >= 75) {
+                remarkCell.innerHTML = "<span style='color:green; font-weight:bold;'>PASSED</span>";
+            } else {
+                remarkCell.innerHTML = "<span style='color:red; font-weight:bold;'>FAILED</span>";
+            }
+        } else {
+            finalCell.innerText = "-";
+            remarkCell.innerText = "-";
         }
     }
 
@@ -232,6 +259,11 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
         // 3. Update Cells
         row.querySelector('.count-p').innerText = p;
         row.querySelector('.count-a').innerText = a;
+    }
+    // 5. ADVISORY LOGIC
+    function loadAdvisory() {
+        let p = document.getElementById('adv_period').value;
+        loadZone('advisory.php?period=' + p);
     }
 
     window.onload = function() {
