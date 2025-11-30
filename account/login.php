@@ -5,7 +5,7 @@
     if(isset($_POST['submit'])){
         $accountid = $_POST['accountid'];
         $password = $_POST['password'];
-        $account->login($accountid,$password);
+        $account->login($accountid, $password);
     }
 ?>
 <!DOCTYPE html>
@@ -13,25 +13,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pacdal Portal</title>
+    <title>University Portal - Login</title>
     <link rel="stylesheet" href="login.css">
 </head>
 <body>
     <div class="container">
         <div class="login-card">
             <div class="login-header">
-                <a href="index.php" class="back-btn" title="Back to portal">
-                    <img src="back-arrow.png" alt="Back" class="back-img">
-                </a>
-                <span class="login-title">Login</span>
+                <span class="logo-text">University Portal</span>
             </div>
+            
             <form method="POST" class="login-form">
-                <label for="accountid">Account ID</label>
-                <input type="text" name="accountid" id="accountid" required>
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" required>
-                <input type="submit" name="submit" value="Login" class="form-btn main-btn">
+                <div>
+                    <label for="accountid">Account ID</label>
+                    <input type="text" name="accountid" id="accountid" placeholder="Enter your ID" required>
+                </div>
+                
+                <div>
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                </div>
+
+                <input type="submit" name="submit" value="Sign In" class="form-btn">
             </form>
+
+            <div class="footer-links">
+                <a href="#">Forgot Password?</a>
+            </div>
         </div>
     </div>
 </body>

@@ -1,221 +1,87 @@
 <?php
-session_start();
+require_once '../functions/student_function.php';
 
 if (!isset($_SESSION['ACCOUNTID']) || ($_SESSION['ROLE'] ?? '') !== 'student') {
     header('Location: ../account/login.php');
     exit();
 }
 
-$fname = $_SESSION['FNAME'] ?? '';
-$lname = $_SESSION['LNAME'] ?? '';
+$studentFunc = new Student();
+$student_pk = $studentFunc->getStudentId($_SESSION['ACCOUNTID']);
+$p = $studentFunc->getProfile($student_pk);
 
-if ($fname === '' || $lname === '') {
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "portal";
-
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    if (!$conn->connect_error) {
-        $query = "SELECT fname,lname FROM account WHERE account_id = ?";
-        $stmt = $conn->prepare($query);
-        if ($stmt) {
-            $stmt->bind_param('s', $_SESSION['ACCOUNTID']);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $user = $res->fetch_assoc();
-            if ($user) {
-                $fname = $user['fname'] ?? $fname;
-                $lname = $user['lname'] ?? $lname;
-            }
-            $stmt->close();
-        }
-        $conn->close();
-    }
+if (!$p) {
+    echo "<div style='padding:20px; text-align:center;'>Profile not found.</div>";
+    exit();
 }
 
-// Mock data until backend is ready
-$mockProfile = [
-    'studentId' => '2024-12345',
-    'email' => 'juan.delacruz@usaint.edu',
-    'phone' => '+63 912 345 6789',
-    'address' => '123 Main St, Baguio City',
-    'course' => 'Bachelor of Science in Information Technology',
-    'year' => '3rd Year',
-    'semester' => '1st Semester'
-];
+// Helper to combine address
+$current_addr = trim($p['housenum_street'] . ', ' . $p['barangay'] . ', ' . $p['city'] . ', ' . $p['province'] . ' ' . $p['zipcode']);
+$prev_addr = trim($p['prev_street'] . ', ' . $p['prev_barangay'] . ', ' . $p['prev_city'] . ', ' . $p['prev_province']);
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - Academic Management System</title>
-    <style>
-        :root {
-            --royal-blue: #002D72;
-            --white: #ffffff;
-        }
+<style>
+    .profile-card { background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto; }
+    .prof-header { display: flex; align-items: center; gap: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px; }
+    .prof-avatar { width: 80px; height: 80px; background: #002D72; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; }
+    .prof-title h1 { margin: 0; color: #002D72; font-size: 1.8rem; }
+    .prof-title p { margin: 5px 0 0; color: #666; }
+    
+    .section-title { color: #002D72; font-size: 1.1rem; font-weight: bold; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #febb3f; padding-left: 10px; }
+    
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .info-item label { display: block; font-size: 0.85rem; color: #888; font-weight: 600; text-transform: uppercase; margin-bottom: 3px; }
+    .info-item div { font-size: 1rem; color: #333; font-weight: 500; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
+    
+    @media (max-width: 768px) { .info-grid { grid-template-columns: 1fr; } }
+</style>
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
-
-        .back-button {
-            color: var(--white);
-            text-decoration: none;
-            margin-right: 8px;
-            padding: 6px 10px;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 4px;
-            background: rgba(255,255,255,0.03);
-            font-weight: 600;
-        }
-
-        .back-button:hover {
-            background: rgba(255,255,255,0.08);
-        }
-
-        .profile-container {
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .profile-card {
-            background-color: var(--white);
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
-        .profile-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--royal-blue);
-            padding-bottom: 1rem;
-        }
-
-        .profile-name {
-            color: var(--royal-blue);
-            font-size: 1.8rem;
-            margin: 0;
-        }
-
-        .profile-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .profile-field {
-            padding: 1rem;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-        }
-
-        .field-label {
-            color: var(--royal-blue);
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .field-value {
-            color: #333;
-        }
-
-        @media screen and (max-width: 768px) {
-            .profile-container {
-                padding: 1rem;
-            }
-
-            .profile-row {
-                grid-template-columns: 1fr;
-            }
-
-            .profile-name {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="header" style="background-color:var(--royal-blue); color:var(--white); padding:1rem; display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <a class="back-button" href="index.php">← Home</a>
-            <div class="logo">University of Saint Louis</div>
+<div class="profile-card">
+    <div class="prof-header">
+        <div class="prof-avatar">
+            <?php echo strtoupper(substr($p['fname'], 0, 1)); ?>
         </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div class="user-info">
-                <div><?php echo htmlspecialchars(trim($fname . ' ' . $lname)); ?></div>
-                <div>Student</div>
-            </div>
-            <form action="../account/logout.php" method="post" style="margin:0;">
-                <button type="submit" name="logout" class="logout-button">Logout</button>
-            </form>
+        <div class="prof-title">
+            <h1><?php echo htmlspecialchars($p['lname'] . ', ' . $p['fname'] . ' ' . $p['mname']); ?></h1>
+            <p>Student ID: <strong><?php echo htmlspecialchars($p['account_id']); ?></strong> | <?php echo htmlspecialchars(ucfirst($p['track'])); ?></p>
         </div>
     </div>
 
-<?php 
-if(isset($_POST['logout'])){
-            header("Location: ../account/login.php");
-            exit();
-    }
-
-?>
-    <div class="profile-container">
-        <div class="profile-card">
-            <div class="profile-header">
-                <h1 class="profile-name"><?php echo isset($user['fname']) ? $user['fname'] . ' ' . $user['lname'] : 'Student Name'; ?></h1>
-            </div>
-
-            <div class="profile-row">
-                <div class="profile-field">
-                    <div class="field-label">Student ID</div>
-                    <div class="field-value"><?php echo $mockProfile['studentId']; ?></div>
-                </div>
-                <div class="profile-field">
-                    <div class="field-label">Email</div>
-                    <div class="field-value"><?php echo $mockProfile['email']; ?></div>
-                </div>
-            </div>
-
-            <div class="profile-row">
-                <div class="profile-field">
-                    <div class="field-label">Phone</div>
-                    <div class="field-value"><?php echo $mockProfile['phone']; ?></div>
-                </div>
-                <div class="profile-field">
-                    <div class="field-label">Address</div>
-                    <div class="field-value"><?php echo $mockProfile['address']; ?></div>
-                </div>
-            </div>
-
-            <div class="profile-row">
-                <div class="profile-field">
-                    <div class="field-label">Course</div>
-                    <div class="field-value"><?php echo $mockProfile['course']; ?></div>
-                </div>
-                <div class="profile-field">
-                    <div class="field-label">Year</div>
-                    <div class="field-value"><?php echo $mockProfile['year']; ?></div>
-                </div>
-            </div>
-
-            <div class="profile-row">
-                <div class="profile-field">
-                    <div class="field-label">Current Semester</div>
-                    <div class="field-value"><?php echo $mockProfile['semester']; ?></div>
-                </div>
-            </div>
-        </div>
+    <div class="section-title">Academic Information</div>
+    <div class="info-grid">
+        <div class="info-item"><label>LRN</label><div><?php echo htmlspecialchars($p['lrn']); ?></div></div>
+        <div class="info-item"><label>Grade Level</label><div><?php echo htmlspecialchars($p['grade_level']); ?></div></div>
+        <div class="info-item"><label>Date Enrolled</label><div><?php echo htmlspecialchars($p['date_enrolled']); ?></div></div>
+        <div class="info-item"><label>ESC Grantee</label><div><?php echo htmlspecialchars($p['esc_grantee']); ?></div></div>
     </div>
-</body>
-</html>
+
+    <div class="section-title">Personal Information</div>
+    <div class="info-grid">
+        <div class="info-item"><label>Birthdate</label><div><?php echo htmlspecialchars($p['birthdate']); ?></div></div>
+        <div class="info-item"><label>Gender</label><div><?php echo htmlspecialchars($p['gender']); ?></div></div>
+        <div class="info-item"><label>Nationality</label><div><?php echo htmlspecialchars($p['nationality']); ?></div></div>
+        <div class="info-item"><label>Religion</label><div><?php echo htmlspecialchars($p['religion']); ?></div></div>
+        <div class="info-item"><label>Civil Status</label><div><?php echo htmlspecialchars($p['civilstatus']); ?></div></div>
+        <div class="info-item"><label>Contact No.</label><div><?php echo htmlspecialchars($p['contactno']); ?></div></div>
+        <div class="info-item" style="grid-column: span 2;"><label>Email</label><div><?php echo htmlspecialchars($p['email']); ?></div></div>
+        <div class="info-item" style="grid-column: span 2;"><label>Current Address</label><div><?php echo htmlspecialchars($current_addr); ?></div></div>
+    </div>
+
+    <div class="section-title">Educational Background</div>
+    <div class="info-grid">
+        <div class="info-item"><label>Last School Attended</label><div><?php echo htmlspecialchars($p['previous_school']); ?></div></div>
+        <div class="info-item"><label>School Address</label><div><?php echo htmlspecialchars($prev_addr); ?></div></div>
+    </div>
+
+    <div class="section-title">Family Information</div>
+    <div class="info-grid">
+        <div class="info-item"><label>Father's Name</label><div><?php echo htmlspecialchars($p['fLname'] . ', ' . $p['fFname']); ?></div></div>
+        <div class="info-item"><label>Father's Contact</label><div><?php echo htmlspecialchars($p['fContactnum']); ?></div></div>
+        
+        <div class="info-item"><label>Mother's Name</label><div><?php echo htmlspecialchars($p['mLname'] . ', ' . $p['mFname']); ?></div></div>
+        <div class="info-item"><label>Mother's Contact</label><div><?php echo htmlspecialchars($p['mContactnum']); ?></div></div>
+        
+        <div class="info-item"><label>Guardian's Name</label><div><?php echo htmlspecialchars($p['gLname'] . ', ' . $p['gFname']); ?></div></div>
+        <div class="info-item"><label>Guardian's Contact</label><div><?php echo htmlspecialchars($p['gContactnum']); ?></div></div>
+    </div>
+</div>

@@ -1,3 +1,4 @@
+/* account/login.css */
 body {
     background: #f5f6fa;
     font-family: 'Segoe UI', Arial, sans-serif;
@@ -16,11 +17,11 @@ body {
 .login-card {
     background: #fff;
     border-radius: 20px;
-    box-shadow: 0 2px 20px rgba(33,12,81,0.13);
+    box-shadow: 0 2px 20px rgba(0,45,114,0.1); /* Blue shadow */
     width: 100%;
-    max-width: 440px;
-    padding: 38px 32px 38px 32px;
-    border-top: 8px solid #534d7c;
+    max-width: 400px;
+    padding: 40px 35px;
+    border-top: 8px solid #002D72; /* Royal Blue Top */
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -29,84 +30,83 @@ body {
 .login-header {
     display: flex;
     align-items: center;
-    color: #232b47;
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin-bottom: 30px;
-    margin-left: 2px;
-    gap: 12px;
+    justify-content: center;
+    color: #002D72; /* Royal Blue */
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 35px;
+    gap: 10px;
 }
 
-.back-btn {
-    display: flex;
-    align-items: center;
-    margin-right: 8px;
-    text-decoration: none;
-}
-
-.back-img {
-    width: 26px;
-    height: 26px;
-    margin-right: 3px;
-}
-
-.login-title {
-    font-size: 1.28rem;
+/* If you have a logo image, you can add it here */
+.logo-text {
+    text-align: center;
 }
 
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 26px;
+    gap: 20px;
 }
 
 .login-form label {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #232b47;
-    margin-bottom: 8px;
-    margin-left: 1px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #444;
+    margin-left: 2px;
+    margin-bottom: 5px;
 }
 
 .login-form input[type="text"], 
 .login-form input[type="password"] {
-    padding: 1em;
-    border-radius: 9px;
-    border: 1.5px solid #e9eaf1;
-    background: #f5f6fa;
-    font-size: 1.13rem;
-    margin-bottom: 6px;
-    transition: border 0.16s;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1.5px solid #dfe1e5;
+    background: #fcfcfc;
+    font-size: 1rem;
+    transition: border 0.2s, box-shadow 0.2s;
     width: 100%;
     box-sizing: border-box;
 }
 
-.login-form input[type="text"]:focus, 
-.login-form input[type="password"]:focus {
-    border-color: #210c51;
+.login-form input:focus {
+    border-color: #002D72;
     outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 45, 114, 0.1);
 }
 
 .form-btn {
     border: none;
     border-radius: 8px;
-    padding: 0.85em 1.1em;
-    font-size: 1.09rem;
-    font-weight: 600;
+    padding: 14px;
+    font-size: 1.1rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.16s, color 0.16s;
-    background: #534d7c;
+    transition: background 0.2s, transform 0.1s;
+    background: #002D72; /* Royal Blue */
     color: #fff;
-}
-
-.main-btn {
-    background: #534d7c;
-    color: #fff;
+    margin-top: 10px;
     width: 100%;
-    margin-top: 2px;
 }
 
-.main-btn:hover {
-    background: #febb3f;
-    color: #210c51;
+.form-btn:hover {
+    background: #001f52; /* Darker Blue */
+    transform: translateY(-1px);
+}
+
+.footer-links {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.footer-links a {
+    color: #666;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.footer-links a:hover {
+    color: #002D72;
+    text-decoration: underline;
 }

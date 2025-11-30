@@ -1,6 +1,12 @@
-
 <?php
 session_start();
+
+// Check logout FIRST before anything else
+if(isset($_POST['logout'])){
+    session_destroy();
+    header("Location: ../account/logout.php");
+    exit();
+}
 
 // Check if user is logged in and has the student role
 if (!isset($_SESSION['ACCOUNTID']) || ($_SESSION['ROLE'] ?? '') !== 'student') {
@@ -22,7 +28,6 @@ if ($fname === '' || $lname === '') {
     $conn = new mysqli($servername, $username, $password, $dbname);
 
     if ($conn->connect_error) {
-        // If DB fails, continue but the name may be blank
         error_log('DB connection failed in portal/index.php: ' . $conn->connect_error);
     } else {
         $query = "SELECT * FROM account WHERE account_id = ?";
@@ -41,6 +46,16 @@ if ($fname === '' || $lname === '') {
         $conn->close();
     }
 }
+
+// Get the page to display (default is dashboard)
+$page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+
+// UPDATED: Added 'payment' to the allowed list
+$allowed_pages = ['dashboard', 'profile', 'schedule', 'grades', 'enrollment', 'payment'];
+
+if (!in_array($page, $allowed_pages)) {
+    $page = 'dashboard';
+}
 ?>
 
 <!DOCTYPE html>
@@ -49,135 +64,7 @@ if ($fname === '' || $lname === '') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academic Management System</title>
-    <style>
-        :root {
-            --royal-blue: #002D72;
-            --white: #ffffff;
-        }
-        
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
-
-        .header {
-            background-color: var(--royal-blue);
-            color: var(--white);
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .nav-container {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-            background-color: var(--white);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .nav-button {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 20px;
-            background: none;
-            border: none;
-            color: var(--royal-blue);
-            cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.3s;
-        }
-
-        .nav-button:hover {
-            background-color: #f0f0f0;
-            border-radius: 5px;
-        }
-
-        .nav-button i {
-            font-size: 1.2rem;
-        }
-
-        .user-info {
-            color: var(--white);
-            text-align: right;
-        }
-
-        .logout-button {
-            background: var(--white);
-            color: var(--royal-blue);
-            border: 1px solid rgba(0,0,0,0.08);
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .logout-button:hover {
-            background: #f5f5f5;
-        }
-        /* Mobile responsive styles */
-        @media screen and (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                text-align: center;
-                padding: 0.5rem;
-            }
-
-            .logo {
-                margin-bottom: 0.5rem;
-                font-size: 1.2rem;
-            }
-
-            .user-info {
-                text-align: center;
-                width: 100%;
-                margin-top: 0.5rem;
-            }
-
-            .nav-container {
-                flex-direction: column;
-                gap: 10px;
-                padding: 10px;
-            }
-
-            .nav-button {
-                width: 100%;
-                justify-content: flex-start;
-                padding: 15px;
-                border-bottom: 1px solid #eee;
-            }
-
-            .nav-button:last-child {
-                border-bottom: none;
-            }
-
-            .nav-button i {
-                width: 25px;
-            }
-        }
-
-        /* Small screen adjustments */
-        @media screen and (max-width: 480px) {
-            .logo {
-                font-size: 1rem;
-            }
-
-            .nav-button {
-                padding: 12px;
-                font-size: 0.9rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -194,39 +81,58 @@ if ($fname === '' || $lname === '') {
         </div>
     </div>
 
-<?php 
-if(isset($_POST['logout'])){
-            header("Location: ../account/login.php");
-            exit();
-    }
-
-?>
-    
     <div class="nav-container">
-        <a href="dashboard.php" class="nav-button">
+        <a href="?page=dashboard" class="nav-button <?php echo $page === 'dashboard' ? 'active' : ''; ?>">
             <i class="fas fa-tachometer-alt"></i>
             Dashboard
         </a>
-        <a href="profile.php" class="nav-button">
+        <a href="?page=profile" class="nav-button <?php echo $page === 'profile' ? 'active' : ''; ?>">
             <i class="fas fa-user"></i>
             Profile
         </a>
-        <a href="schedule.php" class="nav-button">
+        <a href="?page=schedule" class="nav-button <?php echo $page === 'schedule' ? 'active' : ''; ?>">
             <i class="fas fa-calendar"></i>
             Schedule
         </a>
-        <a href="grades.php" class="nav-button">
+        <a href="?page=grades" class="nav-button <?php echo $page === 'grades' ? 'active' : ''; ?>">
             <i class="fas fa-graduation-cap"></i>
             Grades Records
         </a>
-        <a href="enrollment.php" class="nav-button">
+        <a href="?page=enrollment" class="nav-button <?php echo $page === 'enrollment' ? 'active' : ''; ?>">
             <i class="fas fa-edit"></i>
             Enrollment
         </a>
+        <a href="?page=payment" class="nav-button <?php echo ($page == 'payment') ? 'active' : ''; ?>">
+            <i class="fas fa-wallet"></i>
+            Accounts
+        </a>
     </div>
 
-    <div class="content">
-        test<!-- Content will be loaded here based on which button is clicked -->
+    <div class="content-area">
+        <?php
+        // Load the appropriate page content
+        switch($page) {
+            case 'dashboard':
+                include 'dashboard.php';
+                break;
+            case 'profile':
+                include 'profile.php';
+                break;
+            case 'schedule':
+                include 'schedule.php';
+                break;
+            case 'grades':
+                include 'grades.php';
+                break;
+            case 'enrollment':
+                include 'enrollment.php';
+                break;
+            // UPDATED: Added case for payment
+            case 'payment':
+                include 'payment.php';
+                break;
+        }
+        ?>
     </div>
 </body>
 </html>

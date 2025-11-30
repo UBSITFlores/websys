@@ -18,47 +18,28 @@ class Instructor {
         }
     }
 
-    public function login($username, $password) {
-        $stmt = $this->pdo->prepare("SELECT * FROM instructors WHERE username = :username");
-        $stmt->execute(['username' => $username]);
-        $instructor = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Sections: all or filtered by semester/year
+    public function getSections($account_id, $semester = null, $schoolYear = null) {
+    $query = "SELECT s.section, s.code, s.description, s.last_transaction, s.finalized
+              FROM sections s
+              WHERE s.instructor_id = :account_id";
+    $params = [':account_id' => $account_id];
 
-        // Replace plain text check below with password_verify() in production
-        if ($instructor && $password === $instructor['password_hash']) {
-            return $instructor;
-        }
-        return false;
+    if (!empty($semester)) {
+        $query .= " AND s.semester = :semester";
+        $params[':semester'] = $semester;
+    }
+    if (!empty($schoolYear)) {
+        $query .= " AND s.school_year = :schoolYear";
+        $params[':schoolYear'] = $schoolYear;
     }
 
-// Get classes filtered optionally by semester and school year for an instructor
-public function getClassesFiltered($instructor_id, $semester = null, $school_year = null) {
-    $query = "SELECT cs.class_id, cs.semester, cs.school_year, s.subject_name, s.description,
-                     sec.section_name, s.grade_level
-              FROM class_schedule cs
-              JOIN subjects s ON cs.subject_id = s.subject_id
-              JOIN sections sec ON cs.section_id = sec.section_id
-              LEFT JOIN enrollments e ON e.class_id = cs.class_id
-              LEFT JOIN grades g ON g.enrollment_id = e.enrollment_id
-              WHERE cs.instructor_id = :instructor_id";
-    $a = [':instructor_id' => $instructor_id];
-
-    if (!empty($semester) && $semester !== 'All') {
-        $query .= " AND cs.semester = :semester";
-        $a[':semester'] = $semester;
-    }
-    if (!empty($school_year) && $school_year !== 'All') {
-        $query .= " AND cs.school_year = :school_year";
-        $a[':school_year'] = $school_year;
-    }
-
-    $query .= "
-              GROUP BY cs.class_id, cs.semester, cs.school_year, s.subject_name, s.description, sec.section_name, s.grade_level
-              ORDER BY cs.school_year DESC, FIELD(cs.semester, '1st Semester', '2nd Semester'), sec.section_name, s.subject_name";
-
+    $query .= " ORDER BY s.last_transaction DESC";
     $stmt = $this->pdo->prepare($query);
-    $stmt->execute($a);
+    $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 
 // Get distinct semesters available for this instructor's classes
 public function getSemestersByInstructor($instructor_id) {

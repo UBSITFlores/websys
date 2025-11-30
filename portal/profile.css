@@ -1,0 +1,66 @@
+.profile-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.profile-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #002D72;
+    padding-bottom: 1rem;
+}
+
+.profile-name {
+    color: #002D72;
+    font-size: 1.8rem;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.section-title {
+    color: #002D72;
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 10px;
+    border-left: 4px solid #febb3f; /* Gold accent */
+    padding-left: 10px;
+}
+
+.profile-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.profile-field {
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.field-label {
+    color: #002D72;
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+}
+
+.field-value {
+    color: #333;
+    font-size: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+    .profile-row { grid-template-columns: 1fr; }
+    .profile-container { padding: 1rem; }
+}

@@ -1,264 +1,246 @@
 <?php
-require_once '../functions/instructor_function.php';
-
 session_start();
 
-// Demo instructor ID - replace with session in production
-$instructor_id = 1;
-
-$class_id = $_GET['class_id'] ?? null;
-if (!$class_id) {
-    die('Class ID is required.');
+if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
+    http_response_code(403); echo "Session Expired."; exit;
 }
 
-$instructor = new Instructor();
-$classInfo = $instructor->getClassInfo($class_id);
-if (!$classInfo) {
-    die('Class not found.');
-}
+$pdo = new PDO("mysql:host=localhost;dbname=portal;charset=utf8mb4", "root", "");
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$isSeniorHigh = ($classInfo['grade_level'] >= 11 && $classInfo['grade_level'] <= 12);
+$section_name = $_GET['section'] ?? '';
+$subject_code = $_GET['code'] ?? '';
 
-// Fetch students enrolled (student_number and full_name from students table)
-$students = $instructor->getStudentsByClass($class_id);
+// 1. GET SECTION DETAILS
+$stmt = $pdo->prepare("SELECT id, description, track, year_level, semester FROM sections WHERE section = ? AND code = ? LIMIT 1");
+$stmt->execute([$section_name, $subject_code]);
+$section_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Grading periods
-$quarters = ['Quarter 1', 'Quarter 2', 'Quarter 3', 'Quarter 4'];
-$seniorPeriods = ['Prelim', 'Midterm', 'Finals'];
+if(!$section_data) { echo "<div style='padding:20px; color:red;'>Error: Section not found.</div>"; exit; }
+$section_id = $section_data['id'];
 
-// Default grading period if not selected (both for HS and SHS now)
-if ($isSeniorHigh) {
-    $grading_period = $_POST['grading_period'] ?? $_GET['grading_period'] ?? 'Prelim';
+// --- DETERMINE COLUMNS (CAVEMAN STYLE) ---
+$track = strtolower($section_data['track']);
+$columns = [];
+$col_keys = []; // This maps the name to the database ID (1, 2, 3...)
+
+if ($track == 'senior high school') {
+    // SHS = 3 Terms
+    $columns = ['Prelim', 'Midterm', 'Finals'];
+    $col_keys = [1, 2, 3]; 
 } else {
-    $grading_period = $_POST['grading_period'] ?? $_GET['grading_period'] ?? 'Quarter 1';
+    // Kinder & JHS = 4 Quarters
+    $columns = ['Q1', 'Q2', 'Q3', 'Q4'];
+    $col_keys = [1, 2, 3, 4];
 }
 
-// Helper for display in rows
-function getGradeValue($allGrades, $period, $enroll_id) {
-    return isset($allGrades[$period][$enroll_id]) ? $allGrades[$period][$enroll_id] : '';
-}
-
-// Handle form submission for manual grades (single period at a time)
-$message = '';
+// 2. HANDLE SAVE
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $gradesToSave = $_POST['grades'][$grading_period] ?? [];
-    if ($instructor->saveGrades($gradesToSave, $grading_period)) {
-        $message = "Grades saved successfully for $grading_period.";
-    } else {
-        $message = "Failed to save grades for $grading_period.";
+    // SAVE GRADES
+    if(isset($_POST['grades'])) {
+        $sql = "INSERT INTO grades (student_id, section_id, quarter, grade) VALUES (:sid, :sec, :q, :g) ON DUPLICATE KEY UPDATE grade = :g";
+        $stmt = $pdo->prepare($sql);
+        
+        foreach($_POST['grades'] as $sid => $periods) {
+            foreach($periods as $q => $val) {
+                if(trim($val) !== "") {
+                    $stmt->execute([':sid'=>$sid, ':sec'=>$section_id, ':q'=>$q, ':g'=>trim($val)]);
+                }
+            }
+        }
     }
+    
+    // SAVE BEHAVIOR
+    if(isset($_POST['behavior'])) {
+        $acc_stmt = $pdo->prepare("SELECT id FROM account WHERE account_id = ?");
+        $acc_stmt->execute([$_SESSION['ACCOUNTID']]);
+        $real_inst_id = $acc_stmt->fetchColumn();
+
+        $sql = "INSERT INTO behavior_records (student_id, section_id, instructor_id, grading_period, attendance_score, conduct_grade) 
+                VALUES (:sid, :sec, :iid, :q, :att, :con)
+                ON DUPLICATE KEY UPDATE attendance_score = :att, conduct_grade = :con";
+        $stmt = $pdo->prepare($sql);
+        
+        foreach($_POST['behavior'] as $sid => $periods) {
+            foreach($periods as $q => $data) {
+                $att = $data['att'] ?? null;
+                $con = $data['con'] ?? null;
+                // Save if not empty
+                if($att != "" || $con != "") {
+                    // Handle empty strings as null
+                    if($att == "") $att = null;
+                    if($con == "") $con = null;
+                    
+                    $stmt->execute([':sid'=>$sid, ':sec'=>$section_id, ':iid'=>$real_inst_id, ':q'=>$q, ':att'=>$att, ':con'=>$con]);
+                }
+            }
+        }
+    }
+    echo "SAVED"; exit;
 }
 
-// Fetch all grades for all periods
-$allGrades = [];
-if ($isSeniorHigh) {
-    foreach ($seniorPeriods as $period) {
-        $grades = $instructor->getGradesByClassAndPeriod($class_id, $period);
-        foreach ($grades as $g) {
-            $allGrades[$period][$g['enrollment_id']] = $g['grade'];
-        }
-    }
-} else {
-    foreach ($quarters as $period) {
-        $grades = $instructor->getGradesByClassAndPeriod($class_id, $period);
-        foreach ($grades as $g) {
-            $allGrades[$period][$g['enrollment_id']] = $g['grade'];
-        }
-    }
-}
+// 3. FETCH DATA
+$sql_students = "SELECT a.id, a.account_id, a.fname, a.lname FROM enrollments e JOIN account a ON e.student_id = a.id WHERE e.section_id = ? ORDER BY a.lname ASC";
+$stmt = $pdo->prepare($sql_students);
+$stmt->execute([$section_id]);
+$students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$sql_grades = "SELECT student_id, quarter, grade FROM grades WHERE section_id = ?";
+$stmt = $pdo->prepare($sql_grades);
+$stmt->execute([$section_id]);
+$existing_grades = [];
+while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_grades[$row['student_id']][$row['quarter']] = $row['grade']; }
+
+$sql_behav = "SELECT student_id, grading_period, attendance_score, conduct_grade FROM behavior_records WHERE section_id = ?";
+$stmt = $pdo->prepare($sql_behav);
+$stmt->execute([$section_id]);
+$existing_behav = [];
+while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id']][$row['grading_period']] = ['att' => $row['attendance_score'], 'con' => $row['conduct_grade']]; }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Section Grades - AMS Instructor Portal</title>
-<link rel="stylesheet" href="index.css" />
+
 <style>
-    .message { padding: 10px; background-color: #e0ffe0; margin-bottom: 15px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    input[type=number] { width: 60px; }
+    .grade-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .grade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .grade-header h2 { margin: 0; color: #002D72; font-size: 1.5rem; }
+    .grade-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .grade-table th { background: #f8f9fa; padding: 10px; text-align: center; border-bottom: 2px solid #ddd; font-size: 0.85rem; }
+    .grade-table td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
+    .grade-input { width: 45px; text-align: center; padding: 5px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; }
+    .grade-input:not([readonly]) { background: #fff; border-color: #002D72; font-weight: bold; }
+    
+    .mode-tabs { display:flex; gap:5px; margin-bottom:10px; }
+    .mode-btn { padding:8px 15px; border:1px solid #ccc; background:#fff; cursor:pointer; border-radius:4px 4px 0 0; border-bottom:none; font-weight:bold; color:#666; }
+    .mode-btn.active { background:#002D72; color:white; border-color:#002D72; }
+    .col-behav { display: none; }
+    #bulk-container { background: #e7f1ff; border: 1px solid #b6d4fe; color: #084298; padding: 10px; margin-bottom: 15px; border-radius: 5px; display: none; align-items: center; gap: 10px; }
+    
+    /* PRINT STYLES */
+    .print-header { display: none; }
+    @media print {
+        .grade-header, .ctrl-div, .save-bar, #bulk-container, .sidebar-right, .header, .mode-tabs { display: none !important; }
+        .print-header { display: block !important; text-align: center; margin-bottom: 20px; color: black; }
+        .print-header h1 { font-size: 18pt; margin: 0 0 5px 0; }
+        .print-header h3 { font-size: 14pt; margin: 0; font-weight: normal; }
+        body, .content-zone, .grade-box { background: white; margin: 0; padding: 0; box-shadow: none; width: 100%; }
+        .grade-table { border: 1px solid black; }
+        .grade-table th, .grade-table td { border: 1px solid black !important; color: black !important; }
+        .grade-input { border: none; background: transparent; text-align: center; color: black !important; }
+        @page { size: landscape; margin: 1cm; }
+    }
 </style>
-</head>
-<body>
-<div class="header">
-    <div class="logo">AMS Instructor Portal</div>
-    <form action="../logout.php" method="post" style="margin:0;">
-        <button class="logout-button" type="submit">Logout</button>
+
+<div class="grade-box">
+    <div class="grade-header">
+        <div>
+            <h2><?php echo htmlspecialchars($section_name); ?></h2>
+            <p style="color:#666; margin:5px 0;">
+                <strong><?php echo htmlspecialchars($subject_code); ?></strong> | 
+                <?php echo htmlspecialchars($section_data['track']); ?> | 
+                <?php echo htmlspecialchars($section_data['semester']); ?>
+            </p>
+        </div>
+        <div>
+            <button onclick="window.print()" style="padding:8px 15px; cursor:pointer; background:#6c757d; color:white; border:none; border-radius:4px; margin-right:5px;">Print / PDF</button>
+            <button onclick="loadZone('grading-sheet-ajax.php', this)" style="padding:8px 15px; cursor:pointer; border:1px solid #ccc; background:#fff; border-radius:4px;">Back</button>
+        </div>
+    </div>
+
+    <div class="print-header">
+        <h1><?php echo htmlspecialchars($section_data['year_level'] . " - " . $section_data['track']); ?> | <?php echo htmlspecialchars($section_name); ?> Grading Sheet</h1>
+        <h3><?php echo htmlspecialchars($subject_code . ' - ' . $section_data['description']); ?></h3>
+        <p>Instructor: <?php echo htmlspecialchars($_SESSION['FNAME'] . ' ' . $_SESSION['LNAME']); ?></p>
+    </div>
+
+    <input type="hidden" id="hidden_sec_name" value="<?php echo htmlspecialchars($section_name); ?>">
+    <input type="hidden" id="hidden_subj_code" value="<?php echo htmlspecialchars($subject_code); ?>">
+
+    <div class="mode-tabs">
+        <button class="mode-btn active" onclick="switchMode('academic', this)">Academic Grades</button>
+        <button class="mode-btn" onclick="switchMode('behavior', this)">Attendance & Conduct</button>
+    </div>
+
+    <div id="bulk-container">
+        <strong>Bulk Input (<span id="bulk-q-label"></span>):</strong>
+        <input type="text" id="bulk-input" placeholder="e.g. 85 90 88" style="flex:1; padding:5px;">
+        <button onclick="applyBulk()" style="padding:5px 10px; background:#0d6efd; color:white; border:none; cursor:pointer;">Apply</button>
+        <button onclick="closeBulk()" style="padding:5px 10px; background:#6c757d; color:white; border:none; cursor:pointer;">Cancel</button>
+    </div>
+
+    <form id="gradingForm" onsubmit="event.preventDefault(); saveGrades();">
+        <table class="grade-table">
+            <thead>
+                <tr>
+                    <th style="text-align:left; width:200px;">Student Name</th>
+                    
+                    <?php 
+                    $col_count = count($columns);
+                    for($i = 0; $i < $col_count; $i++): 
+                        $label = $columns[$i];
+                        $db_key = $col_keys[$i];
+                    ?>
+                    <th>
+                        <?php echo $label; ?><br>
+                        <div class="col-acad ctrl-div" style="margin-top:5px;">
+                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableManual('acad', <?php echo $db_key; ?>)">Edit</button>
+                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableBulk(<?php echo $db_key; ?>)">Bulk</button>
+                        </div>
+                        <div class="col-behav ctrl-div" style="margin-top:5px;">
+                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableManual('behav', <?php echo $db_key; ?>)">Edit</button>
+                        </div>
+                    </th>
+                    <?php endfor; ?>
+                    
+                    <th style="background:#e9ecef;">Final</th>
+                    <th style="background:#e9ecef;">Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if(empty($students)): ?>
+                    <tr><td colspan="<?php echo $col_count + 3; ?>" style="text-align:center; padding:30px; color:#999;">No students enrolled.</td></tr>
+                <?php else: ?>
+                    <?php foreach($students as $stu): 
+                        $sid = $stu['id'];
+                    ?>
+                    <tr class="student-row">
+                        <td style="text-align:left;">
+                            <strong style="color:#002D72;"><?php echo htmlspecialchars($stu['lname'] . ', ' . $stu['fname']); ?></strong><br>
+                            <small><?php echo htmlspecialchars($stu['account_id']); ?></small>
+                        </td>
+                        
+                        <?php 
+                        for($i = 0; $i < $col_count; $i++): 
+                            $db_key = $col_keys[$i];
+                            $g = $existing_grades[$sid][$db_key] ?? '';
+                            $att = $existing_behav[$sid][$db_key]['att'] ?? '';
+                            $con = $existing_behav[$sid][$db_key]['con'] ?? '';
+                        ?>
+                        <td style="white-space:nowrap;">
+                            <input type="text" class="grade-input col-acad score-val q<?php echo $db_key; ?>" 
+                                   name="grades[<?php echo $sid; ?>][<?php echo $db_key; ?>]" 
+                                   value="<?php echo $g; ?>" readonly oninput="calcRow(this)">
+                            
+                            <div class="col-behav">
+                                <input type="text" class="grade-input b-att q<?php echo $db_key; ?>" 
+                                       name="behavior[<?php echo $sid; ?>][<?php echo $db_key; ?>][att]" 
+                                       value="<?php echo $att; ?>" placeholder="Att" readonly style="width:35px;">
+                                <input type="text" class="grade-input b-con q<?php echo $db_key; ?>" 
+                                       name="behavior[<?php echo $sid; ?>][<?php echo $db_key; ?>][con]" 
+                                       value="<?php echo $con; ?>" placeholder="Con" readonly style="width:35px;">
+                            </div>
+                        </td>
+                        <?php endfor; ?>
+                        
+                        <td style="font-weight:bold; background:#f8f9fa;" class="final-grade">-</td>
+                        <td style="font-size:0.9rem; background:#f8f9fa;" class="remarks">-</td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+        <div class="save-bar" style="margin-top:20px; text-align:right;">
+            <span id="save_status" style="margin-right:15px; font-weight:bold;"></span>
+            <button type="submit" class="btn-save" style="padding:12px 30px;">Save All Changes</button>
+        </div>
     </form>
 </div>
-<div class="container">
-    <div class="sidebar">
-        <button onclick="location.href='grading-sheet.php'">Back to Grading Sheets</button>
-    </div>
-    <div class="main">
-        <h2>Grades for <?=htmlspecialchars($classInfo['subject_name'])?> — <?=htmlspecialchars($classInfo['section_name'])?> (<?= $isSeniorHigh ? "Senior High" : "High School" ?>)</h2>
-        <?php if ($message): ?>
-            <div class="message"><?=htmlspecialchars($message)?></div>
-        <?php endif; ?>
-
-        <form method="post">
-        <label for="grading_period">Grading Period:</label>
-        <select name="grading_period" id="grading_period" onchange="this.form.submit()">
-            <?php
-            $periods = $isSeniorHigh ? $seniorPeriods : $quarters;
-            foreach ($periods as $period):
-                $sel = ($grading_period === $period) ? 'selected' : '';
-                echo "<option value=\"$period\" $sel>$period</option>";
-            endforeach; ?>
-        </select>
-
-        <?php if ($isSeniorHigh): ?>
-            <h3>Manual Grade Entry (Senior High)</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Student Number</th>
-                        <th>Full Name</th>
-                        <th>Prelim</th>
-                        <th>Midterm</th>
-                        <th>Finals</th>
-                        <th>Average</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php $i=1; foreach ($students as $student): 
-                    $enroll_id = $student['enrollment_id'];
-                    $prelim = getGradeValue($allGrades, 'Prelim', $enroll_id);
-                    $midterm = getGradeValue($allGrades, 'Midterm', $enroll_id);
-                    $finals = getGradeValue($allGrades, 'Finals', $enroll_id);
-                    $vals = array_filter([$prelim, $midterm, $finals], function($v){return $v !== '' && $v !== null;});
-                    $avg = count($vals) ? array_sum($vals)/count($vals) : 0;
-                ?>
-                <tr>
-                    <td><?= $i ?></td>
-                    <td><?=htmlspecialchars($student['student_number'])?></td>
-                    <td>
-                        <?php 
-                            if (!empty($student['full_name'])) {
-                                echo htmlspecialchars($student['full_name']);
-                            } else {
-                                echo htmlspecialchars(trim("{$student['fname']} {$student['mname']} {$student['lname']}"));
-                            }
-                        ?>
-                    </td>
-                    <td>
-                        <input type="number" step="0.01" min="0" max="100"
-                               name="grades[Prelim][<?= $enroll_id ?>]"
-                               id="Prelim_<?= $i ?>"
-                               value="<?= htmlspecialchars($prelim) ?>"
-                               <?= $grading_period === 'Prelim' ? '' : 'disabled' ?>
-                               oninput="updateSHAverage(<?= $i ?>)">
-                    </td>
-                    <td>
-                        <input type="number" step="0.01" min="0" max="100"
-                               name="grades[Midterm][<?= $enroll_id ?>]"
-                               id="Midterm_<?= $i ?>"
-                               value="<?= htmlspecialchars($midterm) ?>"
-                               <?= $grading_period === 'Midterm' ? '' : 'disabled' ?>
-                               oninput="updateSHAverage(<?= $i ?>)">
-                    </td>
-                    <td>
-                        <input type="number" step="0.01" min="0" max="100"
-                               name="grades[Finals][<?= $enroll_id ?>]"
-                               id="Finals_<?= $i ?>"
-                               value="<?= htmlspecialchars($finals) ?>"
-                               <?= $grading_period === 'Finals' ? '' : 'disabled' ?>
-                               oninput="updateSHAverage(<?= $i ?>)">
-                    </td>
-                    <td id="sh_avg_<?= $i ?>"><?= number_format($avg, 2) ?></td>
-                </tr>
-                <?php $i++; endforeach; ?>
-                </tbody>
-            </table>
-            <button type="submit" name="manual_grades">Save Manual Grades</button>
-            <script>
-                function updateSHAverage(rowId) {
-                    let p1 = parseFloat(document.getElementById(`Prelim_${rowId}`).value) || 0;
-                    let p2 = parseFloat(document.getElementById(`Midterm_${rowId}`).value) || 0;
-                    let p3 = parseFloat(document.getElementById(`Finals_${rowId}`).value) || 0;
-                    let avg = (p1 + p2 + p3) / 3;
-                    document.getElementById(`sh_avg_${rowId}`).textContent = avg.toFixed(2);
-                }
-                window.onload = function() {
-                    <?php foreach ($students as $idx => $student):
-                        $rowNum = $idx + 1; ?>
-                        updateSHAverage(<?= $rowNum ?>);
-                    <?php endforeach; ?>
-                };
-            </script>
-        <?php else: ?>
-            <h3>Manual Grade Entry (High School)</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Student Number</th>
-                        <th>Full Name</th>
-                        <th>Quarter 1</th>
-                        <th>Quarter 2</th>
-                        <th>Quarter 3</th>
-                        <th>Quarter 4</th>
-                        <th>Average</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php $i=1; foreach ($students as $student):
-                    $enroll_id = $student['enrollment_id'];
-                    $grades = [];
-                    foreach ($quarters as $q) $grades[] = getGradeValue($allGrades, $q, $enroll_id);
-                    $vals = array_filter($grades, function($v){return $v !== '' && $v !== null;});
-                    $avg = count($vals) ? array_sum($vals)/count($vals) : 0;
-                ?>
-                <tr>
-                    <td><?= $i ?></td>
-                    <td><?=htmlspecialchars($student['student_number'])?></td>
-                    <td>
-                        <?php 
-                            if (!empty($student['full_name'])) {
-                                echo htmlspecialchars($student['full_name']);
-                            } else {
-                                echo htmlspecialchars(trim("{$student['fname']} {$student['mname']} {$student['lname']}"));
-                            }
-                        ?>
-                    </td>
-                    <?php foreach ($quarters as $idx => $q): ?>
-                    <td>
-                        <input type="number" step="0.01" min="0" max="100"
-                               id="Q<?=($idx+1)?>_<?= $i ?>"
-                               name="grades[<?= $q ?>][<?= $enroll_id ?>]"
-                               value="<?= htmlspecialchars(getGradeValue($allGrades, $q, $enroll_id)) ?>"
-                               <?= $grading_period === $q ? '' : 'disabled' ?>
-                               oninput="updateAverage(<?= $i ?>)">
-                    </td>
-                    <?php endforeach; ?>
-                    <td id="avg_<?= $i ?>"><?= number_format($avg, 2) ?></td>
-                </tr>
-                <?php $i++; endforeach; ?>
-                </tbody>
-            </table>
-            <button type="submit" name="manual_grades">Save Manual Grades</button>
-            <script>
-                function updateAverage(rowId) {
-                    let q1 = parseFloat(document.getElementById(`Q1_${rowId}`).value) || 0;
-                    let q2 = parseFloat(document.getElementById(`Q2_${rowId}`).value) || 0;
-                    let q3 = parseFloat(document.getElementById(`Q3_${rowId}`).value) || 0;
-                    let q4 = parseFloat(document.getElementById(`Q4_${rowId}`).value) || 0;
-                    let avg = (q1 + q2 + q3 + q4) / 4;
-                    document.getElementById(`avg_${rowId}`).textContent = avg.toFixed(2);
-                }
-                window.onload = function() {
-                    <?php foreach ($students as $idx => $student):
-                        $rowNum = $idx + 1; ?>
-                        updateAverage(<?= $rowNum ?>);
-                    <?php endforeach; ?>
-                };
-            </script>
-        <?php endif; ?>
-        </form>
-    </div>
-</div>
-</body>
-</html>
