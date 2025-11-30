@@ -1,0 +1,132 @@
+.form-card {
+    max-width: 1000px;
+}
+
+.form-card h2 {
+    margin: 0 !important;
+    background: #002D72 !important;
+    color: white !important;
+    padding: 15px 20px !important;
+    border-radius: 5px 5px 0 0 !important;
+    font-size: 1.2rem !important;
+    border-bottom: 2px solid #febb3f !important;
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.honor-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: #f0f8ff;
+    padding: 20px;
+    border-radius: 0 0 5px 5px;
+}
+
+.honor-filters select,
+.honor-filters input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.95rem;
+}
+
+.honor-filters button {
+    padding: 10px 20px;
+    background: #002d72;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.honor-filters button:hover {
+    background: #004099;
+}
+
+.honor-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.honor-table th {
+    background: #002d72;
+    color: white;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #001f52;
+}
+
+.honor-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.honor-table th:first-child,
+.honor-table td:first-child {
+    text-align: left;
+}
+
+.honor-table tr:hover {
+    background: #f5f5f5;
+}
+
+.rank-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.rank-1st {
+    background: #ffd700;
+    color: #001f52;
+}
+
+.rank-2nd {
+    background: #c0c0c0;
+    color: #001f52;
+}
+
+.rank-3rd {
+    background: #cd7f32;
+    color: white;
+}
+
+.rank-1 {
+    background-color: #fff3cd;
+    font-weight: bold;
+}
+
+.rank-2 {
+    background-color: #e0e0e0;
+}
+
+.rank-3 {
+    background-color: #cd7f32;
+    color: white;
+}
+
+@media print {
+    .honor-filters {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .honor-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .honor-table {
+        font-size: 0.85rem;
+    }
+}

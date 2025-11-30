@@ -10,7 +10,6 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 // --- HANDLE UPDATE ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_student'])) {
     try {
-        // Removed 'sex' from update query
         $sql = "UPDATE students SET 
                 lrn=?, civilstatus=?, nationality=?, gender=?, contactno=?, email=?,
                 housenum_street=?, barangay=?, city=?, province=?, zipcode=?,
@@ -47,12 +46,12 @@ if ($search_id) {
 }
 ?>
 
-<div class="form-card" style="max-width: 900px;">
-    <h2 style="color:#002D72; border-bottom:2px solid #febb3f; padding-bottom:10px;">Update Student Records</h2>
+<div class="form-card">
+    <h2>Update Student Records</h2>
 
-    <div style="background:#f0f8ff; padding:20px; border-radius:8px; margin-bottom:20px; border:1px solid #cce5ff; display:flex; gap:10px;">
-        <input type="text" id="edit_search" value="<?php echo htmlspecialchars($search_id); ?>" placeholder="Enter Student ID (e.g. 20260001)" style="flex:1; padding:10px; border:1px solid #aaa; border-radius:4px;">
-        <button type="button" onclick="loadZone('edit_student.php?sid=' + document.getElementById('edit_search').value)" class="btn-save" style="width:auto; padding:10px 30px;">Load Profile</button>
+    <div class="edit-search">
+        <input type="text" id="edit_search" value="<?php echo htmlspecialchars($search_id); ?>" placeholder="Enter Student ID (e.g. 20260001)">
+        <button type="button" onclick="loadZone('edit_student.php?sid=' + document.getElementById('edit_search').value)" class="btn-save">Load Profile</button>
     </div>
 
     <?php if ($student): ?>
@@ -60,13 +59,13 @@ if ($search_id) {
         <input type="hidden" name="update_student" value="1">
         <input type="hidden" name="student_id_display" value="<?php echo $search_id; ?>">
 
-        <h3 style="color:#002D72; margin-top:0;">I. Personal Details</h3>
+        <h3>I. Personal Details</h3>
         
-        <div style="background:#eee; padding:10px; border-radius:4px; margin-bottom:15px; font-weight:bold; color:#333;">
+        <div class="student-display-box">
             Name: <?php echo htmlspecialchars($student['last'] . ', ' . $student['first'] . ' ' . $student['middle']); ?>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+        <div class="form-grid-3col">
             <div class="form-group"><label>LRN</label><input type="text" name="lrn" value="<?php echo $student['lrn']; ?>"></div>
             <div class="form-group"><label>Civil Status</label>
                 <select name="civilstatus">
@@ -83,13 +82,13 @@ if ($search_id) {
         </div>
 
         <h3>II. Contact & Address</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-grid-2col">
             <div class="form-group"><label>Mobile</label><input type="text" name="contactno" value="<?php echo $student['contactno']; ?>"></div>
             <div class="form-group"><label>Email</label><input type="text" name="email" value="<?php echo $student['email']; ?>"></div>
         </div>
         <div class="form-group">
             <label>Address</label>
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; gap: 10px;">
+            <div class="address-grid">
                 <input type="text" name="street" value="<?php echo $student['housenum_street']; ?>" placeholder="Street">
                 <input type="text" name="barangay" value="<?php echo $student['barangay']; ?>" placeholder="Brgy">
                 <input type="text" name="city" value="<?php echo $student['city']; ?>" placeholder="City">
@@ -124,9 +123,9 @@ if ($search_id) {
             </div>
         </div>
 
-        <button type="submit" class="btn-save" style="margin-top:20px;">Update Student Record</button>
+        <button type="submit" class="btn-save">Update Student Record</button>
     </form>
     <?php elseif($search_id): ?>
-        <div style="padding:30px; text-align:center; color:red;">Student ID not found.</div>
+        <div class="not-found-message">Student ID not found.</div>
     <?php endif; ?>
 </div>
