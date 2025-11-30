@@ -83,46 +83,26 @@ if (isset($_GET['student_id'])) {
 }
 ?>
 
-<div class="form-card" style="max-width: 1000px;">
+<div class="form-card">
     <div class="no-print">
-        <h2 style="color:#002D72; border-bottom:2px solid #febb3f; padding-bottom:10px;">Student Records (Report Card)</h2>
+        <h2>Student Records (Report Card)</h2>
         
-        <form method="GET" style="display:flex; gap:10px; margin-bottom:20px; background:#f0f8ff; padding:15px; border-radius:8px;">
-            <input type="text" name="student_id" value="<?php echo $_GET['student_id'] ?? ''; ?>" placeholder="Enter Student ID (e.g. 20260001)" style="padding:10px; flex:1; border:1px solid #aaa; border-radius:4px;">
-            <button type="button" onclick="loadZone('student_records.php?' + new URLSearchParams(new FormData(this.form)).toString())" class="btn-save" style="width:auto; padding:10px 30px;">Search Record</button>
+        <form method="GET">
+            <input type="text" name="student_id" value="<?php echo $_GET['student_id'] ?? ''; ?>" placeholder="Enter Student ID (e.g. 20260001)">
+            <button type="button" onclick="loadZone('student_records.php?' + new URLSearchParams(new FormData(this.form)).toString())" class="btn-save">Search Record</button>
         </form>
     </div>
 
     <?php if($student): ?>
         
-        <style>
-            .report-header { text-align: center; margin-bottom: 30px; display: none; }
-            .student-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
-            .info-group label { font-weight: bold; color: #666; font-size: 0.9rem; display: block; }
-            .info-group span { font-weight: bold; color: #002D72; font-size: 1.1rem; }
-            
-            .grades-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-bottom: 30px; }
-            .grades-table th { background: #002D72; color: white; padding: 10px; text-align: center; border: 1px solid #001f52; }
-            .grades-table td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-            .grades-table th:first-child, .grades-table td:first-child { text-align: left; }
-            
-            @media print {
-                .no-print, .sidebar-right, .header { display: none !important; }
-                body, .content-zone, .form-card { background: white; margin: 0; padding: 0; width: 100%; box-shadow: none; }
-                .report-header { display: block; }
-                .grades-table th { background: #eee !important; color: black !important; border: 1px solid black; }
-                .grades-table td { border: 1px solid black; }
-            }
-        </style>
-
         <div class="print-area">
             <div class="report-header">
                 <h1>University of Saint Louis</h1>
                 <p>OFFICIAL REPORT CARD / STUDENT RECORD</p>
             </div>
 
-            <div style="text-align:right; margin-bottom:10px;" class="no-print">
-                <button onclick="window.print()" class="btn-save" style="background:#6c757d;">🖨️ Print Report Card</button>
+            <div class="print-button-container no-print">
+                <button onclick="window.print()" class="btn-save secondary">🖨️ Print Report Card</button>
             </div>
 
             <div class="student-info">
@@ -141,7 +121,7 @@ if (isset($_GET['student_id'])) {
             </div>
 
             <?php foreach($grades as $sy => $subs): ?>
-                <h3 style="color:#002D72; border-bottom:1px solid #ccc;">School Year: <?php echo $sy; ?></h3>
+                <h3>School Year: <?php echo $sy; ?></h3>
                 <table class="grades-table">
                     <thead>
                         <tr>
@@ -161,17 +141,15 @@ if (isset($_GET['student_id'])) {
                             <td><?php echo $d['q2']; ?></td>
                             <td><?php echo $d['q3']; ?></td>
                             <td><?php echo $d['q4']; ?></td>
-                            <td style="font-weight:bold;"><?php echo $d['final']; ?></td>
-                            <td style="font-size:0.85rem; font-weight:bold; color:<?php echo ($d['remarks']=='PASSED'?'green':'red'); ?>">
-                                <?php echo $d['remarks']; ?>
-                            </td>
+                            <td><strong><?php echo $d['final']; ?></strong></td>
+                            <td><span style="font-size:0.85rem; font-weight:bold; color:<?php echo ($d['remarks']=='PASSED'?'green':'red'); ?>"><?php echo $d['remarks']; ?></span></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php endforeach; ?>
             
-            <h3 style="color:#002D72; margin-top:30px;">Observed Values</h3>
+            <h3>Observed Values</h3>
             <table class="grades-table" style="width:50%;">
                 <thead>
                     <tr>
@@ -203,7 +181,7 @@ if (isset($_GET['student_id'])) {
         </div>
 
     <?php elseif(isset($_GET['student_id'])): ?>
-        <div style="padding:30px; text-align:center; color:#dc3545; background:#fff0f0; border-radius:8px;">
+        <div class="not-found-message">
             <strong>Student not found.</strong> Please check the ID number.
         </div>
     <?php endif; ?>

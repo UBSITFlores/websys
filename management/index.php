@@ -12,6 +12,12 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
     <title>Management Dashboard</title>
     
     <link rel="stylesheet" href="dashboard.css?v=6">
+    <link rel="stylesheet" href="enroll-student-ajax.css?v=1">
+    <link rel="stylesheet" href="billing.css?v=1">
+    <link rel="stylesheet" href="student_records.css?v=1">
+    <link rel="stylesheet" href="section_report.css?v=1">
+    <link rel="stylesheet" href="honor_list.css?v=1">
+    <link rel="stylesheet" href="edit_student.css?v=1">
     
 </head>
 <body>
