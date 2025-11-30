@@ -11,6 +11,11 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
     <meta charset="UTF-8">
     <title>Instructor Dashboard</title>
     <link rel="stylesheet" href="dashboard.css?v=4">
+    <link rel="stylesheet" href="grading-sheet.css">
+    <link rel="stylesheet" href="schedule.css">
+    <link rel="stylesheet" href="section-grades.css">
+    <link rel="stylesheet" href="attendance.css">
+    <link rel="stylesheet" href="advisory.css">
 </head>
 <body>
 

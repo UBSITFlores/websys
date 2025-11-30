@@ -1,0 +1,240 @@
+.alert-error {
+  padding: 20px;
+  color: red;
+}
+
+/* Container */
+.att-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Top bar */
+.att-topbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.att-topbar-left-title {
+  margin: 0;
+  color: #002D72;
+}
+
+.att-topbar-left-sub {
+  margin: 0;
+  color: #666;
+}
+
+.att-topbar-right {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-top-print {
+  padding: 8px 15px;
+  background: #6c757d;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-top-back {
+  padding: 8px 15px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.month-sel {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Table */
+.att-table {
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  width: 100%;
+  min-width: max-content;
+}
+
+.att-table th,
+.att-table td {
+  border: 1px solid #ddd;
+  text-align: center;
+  padding: 4px 2px;
+}
+
+.att-table th {
+  background: #002D72;
+  color: white;
+  height: 30px;
+  min-width: 25px;
+}
+
+.att-name {
+  text-align: left;
+  padding: 5px 10px !important;
+  min-width: 150px;
+  font-weight: bold;
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 2;
+}
+
+.att-total-header {
+  background: #444;
+}
+
+/* Inputs and counts */
+.att-input {
+  width: 25px;
+  height: 25px;
+  border: none;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.att-input:focus {
+  background: #eef2ff;
+  outline: none;
+}
+
+.att-input[value="A"] {
+  color: red;
+  background: #ffe6e6;
+}
+
+.att-input[value="P"] {
+  color: green;
+}
+
+.att-input[value="L"] {
+  color: orange;
+}
+
+.count-p {
+  background: #f9f9f9;
+  font-weight: bold;
+}
+
+.count-a {
+  background: #f9f9f9;
+  font-weight: bold;
+  color: red;
+}
+
+/* Save bar and empty state */
+.att-no-students {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+}
+
+.att-savebar {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.att-savemsg {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.btn-save {
+  background: #198754;
+  color: white;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* PRINT STYLES */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0.5cm;
+  }
+
+  .no-print,
+  .sidebar-right,
+  .header,
+  .btn-save,
+  .month-sel,
+  #save_msg {
+    display: none !important;
+  }
+
+  body,
+  .content-zone,
+  .att-container,
+  .container {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    box-shadow: none !important;
+    display: block !important;
+    zoom: 85%;
+  }
+
+  .att-table {
+    width: 100% !important;
+    border: 2px solid black;
+    font-size: 9pt;
+    page-break-inside: avoid;
+  }
+
+  .att-table th {
+    background-color: #eee !important;
+    color: black !important;
+    border: 1px solid black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .att-table td {
+    border: 1px solid black !important;
+  }
+
+  .att-name {
+    position: static !important;
+    white-space: nowrap;
+    border-right: 2px solid black !important;
+  }
+
+  .att-input {
+    color: black !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    height: auto !important;
+  }
+
+  .att-input[value="A"] {
+    color: red !important;
+    font-weight: bold;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .att-input[value="P"] {
+    color: green !important;
+    font-weight: bold;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

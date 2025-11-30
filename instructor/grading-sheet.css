@@ -1,0 +1,130 @@
+/* Error / info messages */
+.alert-error {
+  color: red;
+  padding: 20px;
+}
+
+/* Title */
+.class-load-title {
+  color: #198754;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+/* Class load cards */
+.class-card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.class-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.class-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.cc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.cc-code {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #198754; /* green */
+}
+
+.cc-section {
+  background: #e8f5e9;
+  color: #146c43;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.cc-title {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.cc-meta {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-right: 5px;
+}
+
+.bg-track {
+  background-color: #cfe2ff;
+  color: #084298;
+}
+
+.bg-year {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+/* Buttons */
+.btn-open {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: #198754;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-open:hover {
+  background: #146c43;
+}
+
+.btn-open-warning {
+  background: #ffc107;
+  color: #333;
+}
+
+/* Button row */
+.class-card-actions {
+  display: flex;
+  gap: 5px;
+}
+
+/* Empty-state card */
+.empty-class-state {
+  text-align: center;
+  padding: 50px;
+  background: #fff;
+  border-radius: 8px;
+  color: #888;
+}

@@ -1,0 +1,70 @@
+/* Page title */
+.schedule-title {
+  color: #002D72;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+/* Container */
+.schedule-wrapper {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  overflow-x: auto;
+}
+
+/* Weekly grid table */
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 700px;
+}
+
+.schedule-table th,
+.schedule-table td {
+  border: 1px solid #ddd;
+  text-align: center;
+  padding: 6px 4px;
+}
+
+.schedule-table th {
+  background: #002D72;
+  color: #fff;
+}
+
+/* Time column */
+.schedule-time {
+  font-weight: bold;
+  background: #f8f9fa;
+  width: 80px;
+}
+
+/* Class cells */
+.class-empty {
+  background: #ffffff;
+}
+
+.class-start {
+  background: #e8f5e9;
+  border-left: 4px solid #198754;
+  font-weight: bold;
+}
+
+.class-mid {
+  background: #f1f8f5;
+}
+
+/* Class label inside cell */
+.class-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #333;
+}
+
+.class-room {
+  display: block;
+  font-size: 0.75rem;
+  color: #666;
+}

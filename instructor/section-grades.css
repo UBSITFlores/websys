@@ -1,0 +1,267 @@
+.alert-error {
+  padding: 20px;
+  color: red;
+}
+
+.grade-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.grade-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.grade-header h2 {
+  margin: 0;
+  color: #002D72;
+  font-size: 1.5rem;
+}
+
+.grade-subtitle {
+  color: #666;
+  margin: 5px 0;
+}
+
+.grade-header-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-print {
+  padding: 8px 15px;
+  cursor: pointer;
+  background: #6c757d;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+
+.btn-back {
+  padding: 8px 15px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.grade-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.grade-table th {
+  background: #f8f9fa;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 2px solid #ddd;
+  font-size: 0.85rem;
+}
+
+.grade-table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.grade-input {
+  width: 45px;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+}
+
+.grade-input:not([readonly]) {
+  background: #fff;
+  border-color: #002D72;
+  font-weight: bold;
+}
+
+.mode-tabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.mode-btn {
+  padding: 8px 15px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  border-bottom: none;
+  font-weight: bold;
+  color: #666;
+}
+
+.mode-btn.active {
+  background: #002D72;
+  color: #fff;
+  border-color: #002D72;
+}
+
+.col-behav {
+  display: none;
+}
+
+.grade-bulk {
+  background: #e7f1ff;
+  border: 1px solid #b6d4fe;
+  color: #084298;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.bulk-input {
+  flex: 1;
+  padding: 5px;
+}
+
+.bulk-apply {
+  padding: 5px 10px;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.bulk-cancel {
+  padding: 5px 10px;
+  background: #6c757d;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.grade-col-student {
+  text-align: left;
+  width: 200px;
+}
+
+.grade-student-name {
+  color: #002D72;
+  font-weight: bold;
+}
+
+.grade-student-id {
+  font-size: 0.8rem;
+}
+
+.grade-cell-nowrap {
+  white-space: nowrap;
+}
+
+.final-col-header,
+.remarks-col-header {
+  background: #e9ecef;
+}
+
+.final-grade {
+  font-weight: bold;
+  background: #f8f9fa;
+}
+
+.remarks {
+  font-size: 0.9rem;
+  background: #f8f9fa;
+}
+
+.no-students {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+}
+
+.save-bar {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.save-status {
+  margin-right: 15px;
+  font-weight: bold;
+}
+
+.btn-save {
+  padding: 12px 30px;
+}
+
+/* Print header */
+.print-header {
+  display: none;
+}
+
+/* PRINT STYLES */
+@media print {
+  .grade-header,
+  .ctrl-div,
+  .save-bar,
+  .grade-bulk,
+  .sidebar-right,
+  .header,
+  .mode-tabs {
+    display: none !important;
+  }
+
+  .print-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 20px;
+    color: black;
+  }
+
+  .print-header h1 {
+    font-size: 18pt;
+    margin: 0 0 5px 0;
+  }
+
+  .print-header h3 {
+    font-size: 14pt;
+    margin: 0;
+    font-weight: normal;
+  }
+
+  body,
+  .content-zone,
+  .grade-box {
+    background: white;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    width: 100%;
+  }
+
+  .grade-table {
+    border: 1px solid black;
+  }
+
+  .grade-table th,
+  .grade-table td {
+    border: 1px solid black !important;
+    color: black !important;
+  }
+
+  .grade-input {
+    border: none;
+    background: transparent;
+    text-align: center;
+    color: black !important;
+  }
+
+  @page {
+    size: landscape;
+    margin: 1cm;
+  }
+}

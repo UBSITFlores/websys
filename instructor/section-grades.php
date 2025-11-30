@@ -80,7 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // 3. FETCH DATA
-$sql_students = "SELECT a.id, a.account_id, a.fname, a.lname FROM enrollments e JOIN account a ON e.student_id = a.id WHERE e.section_id = ? ORDER BY a.lname ASC";
+$sql_students = "SELECT a.id, a.account_id, a.fname, a.lname
+                 FROM enrollments e
+                 JOIN account a ON e.student_id = a.id
+                 WHERE e.section_id = ?
+                 ORDER BY a.lname ASC";
 $stmt = $pdo->prepare($sql_students);
 $stmt->execute([$section_id]);
 $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -89,64 +93,49 @@ $sql_grades = "SELECT student_id, quarter, grade FROM grades WHERE section_id = 
 $stmt = $pdo->prepare($sql_grades);
 $stmt->execute([$section_id]);
 $existing_grades = [];
-while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_grades[$row['student_id']][$row['quarter']] = $row['grade']; }
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $existing_grades[$row['student_id']][$row['quarter']] = $row['grade'];
+}
 
-$sql_behav = "SELECT student_id, grading_period, attendance_score, conduct_grade FROM behavior_records WHERE section_id = ?";
+$sql_behav = "SELECT student_id, grading_period, attendance_score, conduct_grade
+              FROM behavior_records WHERE section_id = ?";
 $stmt = $pdo->prepare($sql_behav);
 $stmt->execute([$section_id]);
 $existing_behav = [];
-while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id']][$row['grading_period']] = ['att' => $row['attendance_score'], 'con' => $row['conduct_grade']]; }
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $existing_behav[$row['student_id']][$row['grading_period']] = [
+        'att' => $row['attendance_score'],
+        'con' => $row['conduct_grade']
+    ];
+}
+$col_count = count($columns);
+?>
 ?>
 
-<style>
-    .grade-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .grade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .grade-header h2 { margin: 0; color: #002D72; font-size: 1.5rem; }
-    .grade-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .grade-table th { background: #f8f9fa; padding: 10px; text-align: center; border-bottom: 2px solid #ddd; font-size: 0.85rem; }
-    .grade-table td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
-    .grade-input { width: 45px; text-align: center; padding: 5px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; }
-    .grade-input:not([readonly]) { background: #fff; border-color: #002D72; font-weight: bold; }
-    
-    .mode-tabs { display:flex; gap:5px; margin-bottom:10px; }
-    .mode-btn { padding:8px 15px; border:1px solid #ccc; background:#fff; cursor:pointer; border-radius:4px 4px 0 0; border-bottom:none; font-weight:bold; color:#666; }
-    .mode-btn.active { background:#002D72; color:white; border-color:#002D72; }
-    .col-behav { display: none; }
-    #bulk-container { background: #e7f1ff; border: 1px solid #b6d4fe; color: #084298; padding: 10px; margin-bottom: 15px; border-radius: 5px; display: none; align-items: center; gap: 10px; }
-    
-    /* PRINT STYLES */
-    .print-header { display: none; }
-    @media print {
-        .grade-header, .ctrl-div, .save-bar, #bulk-container, .sidebar-right, .header, .mode-tabs { display: none !important; }
-        .print-header { display: block !important; text-align: center; margin-bottom: 20px; color: black; }
-        .print-header h1 { font-size: 18pt; margin: 0 0 5px 0; }
-        .print-header h3 { font-size: 14pt; margin: 0; font-weight: normal; }
-        body, .content-zone, .grade-box { background: white; margin: 0; padding: 0; box-shadow: none; width: 100%; }
-        .grade-table { border: 1px solid black; }
-        .grade-table th, .grade-table td { border: 1px solid black !important; color: black !important; }
-        .grade-input { border: none; background: transparent; text-align: center; color: black !important; }
-        @page { size: landscape; margin: 1cm; }
-    }
-</style>
-
-<div class="grade-box">
+<<div class="grade-box">
     <div class="grade-header">
         <div>
             <h2><?php echo htmlspecialchars($section_name); ?></h2>
-            <p style="color:#666; margin:5px 0;">
-                <strong><?php echo htmlspecialchars($subject_code); ?></strong> | 
-                <?php echo htmlspecialchars($section_data['track']); ?> | 
+            <p class="grade-subtitle">
+                <strong><?php echo htmlspecialchars($subject_code); ?></strong> |
+                <?php echo htmlspecialchars($section_data['track']); ?> |
                 <?php echo htmlspecialchars($section_data['semester']); ?>
             </p>
         </div>
-        <div>
-            <button onclick="window.print()" style="padding:8px 15px; cursor:pointer; background:#6c757d; color:white; border:none; border-radius:4px; margin-right:5px;">Print / PDF</button>
-            <button onclick="loadZone('grading-sheet-ajax.php', this)" style="padding:8px 15px; cursor:pointer; border:1px solid #ccc; background:#fff; border-radius:4px;">Back</button>
+        <div class="grade-header-actions">
+            <button onclick="window.print()" class="btn-print">Print / PDF</button>
+            <button onclick="loadZone('grading-sheet-ajax.php', this)" class="btn-back">Back</button>
         </div>
     </div>
 
     <div class="print-header">
-        <h1><?php echo htmlspecialchars($section_data['year_level'] . " - " . $section_data['track']); ?> | <?php echo htmlspecialchars($section_name); ?> Grading Sheet</h1>
+        <h1>
+            <?php
+            echo htmlspecialchars($section_data['year_level'] . " - " . $section_data['track']);
+            ?>
+            |
+            <?php echo htmlspecialchars($section_name); ?> Grading Sheet
+        </h1>
         <h3><?php echo htmlspecialchars($subject_code . ' - ' . $section_data['description']); ?></h3>
         <p>Instructor: <?php echo htmlspecialchars($_SESSION['FNAME'] . ' ' . $_SESSION['LNAME']); ?></p>
     </div>
@@ -156,91 +145,109 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id'
 
     <div class="mode-tabs">
         <button class="mode-btn active" onclick="switchMode('academic', this)">Academic Grades</button>
-        <button class="mode-btn" onclick="switchMode('behavior', this)">Attendance & Conduct</button>
+        <button class="mode-btn" onclick="switchMode('behavior', this)">Attendance &amp; Conduct</button>
     </div>
 
-    <div id="bulk-container">
+    <div id="bulk-container" class="grade-bulk">
         <strong>Bulk Input (<span id="bulk-q-label"></span>):</strong>
-        <input type="text" id="bulk-input" placeholder="e.g. 85 90 88" style="flex:1; padding:5px;">
-        <button onclick="applyBulk()" style="padding:5px 10px; background:#0d6efd; color:white; border:none; cursor:pointer;">Apply</button>
-        <button onclick="closeBulk()" style="padding:5px 10px; background:#6c757d; color:white; border:none; cursor:pointer;">Cancel</button>
+        <input type="text" id="bulk-input" class="bulk-input" placeholder="e.g. 85 90 88">
+        <button type="button" onclick="applyBulk()" class="bulk-apply">Apply</button>
+        <button type="button" onclick="closeBulk()" class="bulk-cancel">Cancel</button>
     </div>
 
     <form id="gradingForm" onsubmit="event.preventDefault(); saveGrades();">
         <table class="grade-table">
             <thead>
-                <tr>
-                    <th style="text-align:left; width:200px;">Student Name</th>
-                    
-                    <?php 
-                    $col_count = count($columns);
-                    for($i = 0; $i < $col_count; $i++): 
-                        $label = $columns[$i];
-                        $db_key = $col_keys[$i];
-                    ?>
+            <tr>
+                <th class="grade-col-student">Student Name</th>
+
+                <?php for ($i = 0; $i < $col_count; $i++): ?>
+                    <?php $label = $columns[$i]; $db_key = $col_keys[$i]; ?>
                     <th>
                         <?php echo $label; ?><br>
-                        <div class="col-acad ctrl-div" style="margin-top:5px;">
-                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableManual('acad', <?php echo $db_key; ?>)">Edit</button>
-                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableBulk(<?php echo $db_key; ?>)">Bulk</button>
+                        <div class="col-acad ctrl-div">
+                            <button type="button" onclick="enableManual('acad', <?php echo $db_key; ?>)">Edit</button>
+                            <button type="button" onclick="enableBulk(<?php echo $db_key; ?>)">Bulk</button>
                         </div>
-                        <div class="col-behav ctrl-div" style="margin-top:5px;">
-                            <button type="button" style="font-size:0.7em; cursor:pointer;" onclick="enableManual('behav', <?php echo $db_key; ?>)">Edit</button>
+                        <div class="col-behav ctrl-div">
+                            <button type="button" onclick="enableManual('behav', <?php echo $db_key; ?>)">Edit</button>
                         </div>
                     </th>
-                    <?php endfor; ?>
-                    
-                    <th style="background:#e9ecef;">Final</th>
-                    <th style="background:#e9ecef;">Remarks</th>
-                </tr>
+                <?php endfor; ?>
+
+                <th class="final-col-header">Final</th>
+                <th class="remarks-col-header">Remarks</th>
+            </tr>
             </thead>
             <tbody>
-                <?php if(empty($students)): ?>
-                    <tr><td colspan="<?php echo $col_count + 3; ?>" style="text-align:center; padding:30px; color:#999;">No students enrolled.</td></tr>
-                <?php else: ?>
-                    <?php foreach($students as $stu): 
-                        $sid = $stu['id'];
-                    ?>
+            <?php if (empty($students)): ?>
+                <tr>
+                    <td colspan="<?php echo $col_count + 3; ?>" class="no-students">
+                        No students enrolled.
+                    </td>
+                </tr>
+            <?php else: ?>
+                <?php foreach ($students as $stu): ?>
+                    <?php $sid = $stu['id']; ?>
                     <tr class="student-row">
-                        <td style="text-align:left;">
-                            <strong style="color:#002D72;"><?php echo htmlspecialchars($stu['lname'] . ', ' . $stu['fname']); ?></strong><br>
-                            <small><?php echo htmlspecialchars($stu['account_id']); ?></small>
+                        <td class="grade-col-student">
+                            <span class="grade-student-name">
+                                <?php echo htmlspecialchars($stu['lname'] . ', ' . $stu['fname']); ?>
+                            </span><br>
+                            <span class="grade-student-id">
+                                <?php echo htmlspecialchars($stu['account_id']); ?>
+                            </span>
                         </td>
-                        
-                        <?php 
-                        for($i = 0; $i < $col_count; $i++): 
+
+                        <?php for ($i = 0; $i < $col_count; $i++): ?>
+                            <?php
                             $db_key = $col_keys[$i];
-                            $g = $existing_grades[$sid][$db_key] ?? '';
+                            $g   = $existing_grades[$sid][$db_key] ?? '';
                             $att = $existing_behav[$sid][$db_key]['att'] ?? '';
                             $con = $existing_behav[$sid][$db_key]['con'] ?? '';
-                        ?>
-                        <td style="white-space:nowrap;">
-                            <input type="text" class="grade-input col-acad score-val q<?php echo $db_key; ?>" 
-                                   name="grades[<?php echo $sid; ?>][<?php echo $db_key; ?>]" 
-                                   value="<?php echo $g; ?>" readonly oninput="calcRow(this)">
-                            
-                            <div class="col-behav">
-                                <input type="text" class="grade-input b-att q<?php echo $db_key; ?>" 
-                                       name="behavior[<?php echo $sid; ?>][<?php echo $db_key; ?>][att]" 
-                                       value="<?php echo $att; ?>" placeholder="Att" readonly style="width:35px;">
-                                <input type="text" class="grade-input b-con q<?php echo $db_key; ?>" 
-                                       name="behavior[<?php echo $sid; ?>][<?php echo $db_key; ?>][con]" 
-                                       value="<?php echo $con; ?>" placeholder="Con" readonly style="width:35px;">
-                            </div>
-                        </td>
+                            ?>
+                            <td class="grade-cell-nowrap">
+                                <input
+                                    type="text"
+                                    class="grade-input col-acad score-val q<?php echo $db_key; ?>"
+                                    name="grades[<?php echo $sid; ?>][<?php echo $db_key; ?>]"
+                                    value="<?php echo $g; ?>"
+                                    readonly
+                                    oninput="calcRow(this)"
+                                >
+
+                                <div class="col-behav">
+                                    <input
+                                        type="text"
+                                        class="grade-input b-att q<?php echo $db_key; ?>"
+                                        name="behavior[<?php echo $sid; ?>][<?php echo $db_key; ?>][att]"
+                                        value="<?php echo $att; ?>"
+                                        placeholder="Att"
+                                        readonly
+                                    >
+                                    <input
+                                        type="text"
+                                        class="grade-input b-con q<?php echo $db_key; ?>"
+                                        name="behavior[<?php echo $sid; ?>][<?php echo $db_key; ?>][con]"
+                                        value="<?php echo $con; ?>"
+                                        placeholder="Con"
+                                        readonly
+                                    >
+                                </div>
+                            </td>
                         <?php endfor; ?>
-                        
-                        <td style="font-weight:bold; background:#f8f9fa;" class="final-grade">-</td>
-                        <td style="font-size:0.9rem; background:#f8f9fa;" class="remarks">-</td>
+
+                        <td class="final-grade">-</td>
+                        <td class="remarks">-</td>
                     </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
             </tbody>
         </table>
 
-        <div class="save-bar" style="margin-top:20px; text-align:right;">
-            <span id="save_status" style="margin-right:15px; font-weight:bold;"></span>
-            <button type="submit" class="btn-save" style="padding:12px 30px;">Save All Changes</button>
+        <div class="save-bar">
+            <span id="save_status" class="save-status"></span>
+            <button type="submit" class="btn-save">Save All Changes</button>
         </div>
     </form>
 </div>
