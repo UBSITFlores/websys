@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 27, 2025 at 05:03 PM
+-- Generation Time: Nov 30, 2025 at 10:37 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -50,7 +50,7 @@ CREATE TABLE `account` (
 INSERT INTO `account` (`id`, `account_id`, `fname`, `mname`, `lname`, `date_enrolled`, `password`, `role`, `track`, `degree`, `status`, `years_active`, `last_active_date`) VALUES
 (1, 'admin', 'Admin', '', '', '2025-11-14', 'admin123', 'admin', '', 'Bachelor', 'Active', 0, NULL),
 (2, 'test', 'Ulysis', 'hankuamu', 'Libongen', '0000-00-00', '123', 'student', 'kinder', 'Bachelor', 'Active', 0, NULL),
-(3, 'prof', 'Robert', 'wap', 'Dizon', '2025-11-14', '123', 'instructor', 'junior high school', 'Bachelor', 'Active', 0, NULL),
+(3, 'prof', 'Robert', 'wap', 'Dizon', '2025-11-14', '123', 'instructor', 'junior high school', 'Bachelor', 'Active', 2, NULL),
 (4, 'management', 'management', '', '', '2025-11-21', '123', 'management', '', 'Bachelor', 'Active', 0, NULL),
 (5, '20250001', 'mac', 'mac', 'mac', '2025-11-20', '20250001', 'student', 'junior high school', 'Bachelor', 'Active', 0, NULL),
 (6, '20250002', 'mac', 'mac', 'mac', '2025-11-20', '20250002', 'student', 'junior high school', 'Bachelor', 'Active', 0, NULL),
@@ -210,7 +210,27 @@ INSERT INTO `behavior_records` (`id`, `student_id`, `section_id`, `instructor_id
 (29, 5, 1, 3, 1, 1, '3'),
 (30, 5, 1, 3, 2, 1, '3'),
 (31, 5, 1, 3, 3, 1, '3'),
-(32, 5, 1, 3, 4, 1, '3');
+(32, 5, 1, 3, 4, 1, '3'),
+(33, 5, 1, 3, 1, 1, '3'),
+(34, 5, 1, 3, 2, 1, '3'),
+(35, 5, 1, 3, 3, 1, '3'),
+(36, 5, 1, 3, 4, 1, '3'),
+(37, 6, 1, 3, 1, 1, '3'),
+(38, 6, 1, 3, 2, 1, '3'),
+(39, 6, 1, 3, 3, 1, '3'),
+(40, 6, 1, 3, 4, 1, '3'),
+(41, 7, 1, 3, 1, 2, '3'),
+(42, 7, 1, 3, 2, 1, '3'),
+(43, 7, 1, 3, 3, 1, '3'),
+(44, 7, 1, 3, 4, 1, '3'),
+(45, 9, 1, 3, 1, 1, '3'),
+(46, 9, 1, 3, 2, 1, '3'),
+(47, 9, 1, 3, 3, 1, '3'),
+(48, 9, 1, 3, 4, 1, '3'),
+(49, 11, 1, 3, 1, 1, '3'),
+(50, 11, 1, 3, 2, 1, '3'),
+(51, 11, 1, 3, 3, 1, '3'),
+(52, 11, 1, 3, 4, 1, '3');
 
 -- --------------------------------------------------------
 
@@ -294,7 +314,7 @@ CREATE TABLE `grades` (
 --
 
 INSERT INTO `grades` (`id`, `student_id`, `section_id`, `quarter`, `grade`) VALUES
-(1, 5, 1, 1, '95'),
+(1, 5, 1, 1, '90'),
 (2, 5, 1, 2, '75'),
 (3, 8, 3, 1, '80'),
 (5, 8, 3, 2, '75'),
@@ -433,7 +453,8 @@ INSERT INTO `sections` (`id`, `section`, `code`, `description`, `instructor_id`,
 (4, 'Hope', 'Reading', 'Teach to Read', 17, 'Whole Year', '2025-2026', NULL, NULL, 'MWF 8:30-9:30', '101', 'kinder', 'Kinder', NULL),
 (5, 'Santa tell me', 'CALCULUS', 'calc', NULL, '1st', '2025-2026', NULL, NULL, 'MWF 8:00-11:30', 'H308', 'senior high school', 'Grade 11', NULL),
 (6, 'Ulysis', 'TEST', 'test', 3, 'Whole Year', '2025-2026', NULL, NULL, 'MWF 9:00-10:00', '201', 'junior high school', 'Grade 7', NULL),
-(7, 'Hope', 'TEST', 'testing', 26, '1st', '2025-2026', NULL, NULL, 'TTH 13:00-14:00', 'Room 404', 'kinder', 'Kinder', NULL);
+(7, 'Hope', 'TEST', 'testing', 26, '1st', '2025-2026', NULL, NULL, 'TTH 13:00-14:00', 'Room 404', 'kinder', 'Kinder', NULL),
+(8, 'Hope', 'READING', 'testing purposes', 18, 'Whole Year', '2025-2026', NULL, NULL, 'F 8:00-10:00', '21', 'kinder', 'Kinder', NULL);
 
 -- --------------------------------------------------------
 
@@ -454,7 +475,7 @@ CREATE TABLE `section_list` (
 --
 
 INSERT INTO `section_list` (`id`, `section_name`, `year_level`, `track`, `adviser_id`) VALUES
-(1, 'Block B', 'Grade 7', 'junior high school', NULL),
+(1, 'Block B', 'Grade 7', 'junior high school', 3),
 (2, 'BLOCK B', 'Kinder', 'kinder', NULL),
 (3, '12-Edwela', 'Grade 12', 'senior high school', NULL),
 (4, 'Hope', 'Kinder', 'kinder', NULL),
@@ -549,8 +570,8 @@ INSERT INTO `students` (`student_id`, `track`, `grade_level`, `date_enrolled`, `
 (24, 'kinder', NULL, '2025-11-27', 'ra', 'ra', 'ra', '', '2025-11-27', 'ra', 'ra', 'Single', 'Filipino', 'Cisgender', 'Male', 'Yes', '', 123, 'ra@gmail.com', 'ra', 'ra', 'ra', 'ra', 2600, 0, '', '', '', '', '', 0, 'ra', 'ra', 'ra', 123, '', '', 'ra', 'ra', 'ra', 'ra', 123, 'ra', '', 'ra', 'ra', 'ra', 123, 'ra', '', '123456789999', '', 'abc', 'ra', 'ra', 'ra', '123', 'No', 0, NULL),
 (25, 'kinder', NULL, '2025-11-27', 'ran', 'ran', 'ran', '', '2025-11-27', 'ra', 'ra', 'Single', 'Filipino', 'Cisgender', 'Male', 'Yes', '', 123, 'asd@gmail.com', 'asd', 'asd', 'asd', 'asd2', 123, 0, '', '', '', '', '', 0, 'as', 'asd', 'asd', 123, '', '', 'asd', 'asd', 'as', 'dasd', 123, 'asd', '', 'asd', 'asd', 'asd', 123, 'asd', '', '246810121411', '', 'abc', 'abc', 'abc', 'abc', '2600', 'No', 0, NULL),
 (28, 'junior high school', NULL, '2025-11-27', 'Docadoc', 'Brendan', '-', '', '2025-11-27', 'idk', 'idk', 'Single', 'Filipino', 'Cisgender', 'Male', 'Yes', '', 123123, '2123dsa@gmail.com', 'asd', 'sdaji', 'sdjhio', 'sdhji', 2600, 0, '', '', '', '', '', 0, 'asd', 'da', 'asd', 123, '', '', 'as', 'asd', 'asd', 'asd', 12, 'sd', '', 'asd', 'as', 'asd', 3123, 'd', '', '123456789111', 'University of Baguio', 'idk', 'ikd', 'idk', 'abc', '2600', 'Yes', 1, NULL),
-(29, 'kinder', 'Kinder', '2025-11-27', 'ba', 'ba', 'ba', '', '2025-11-27', 'ba', 'ba', 'Single', 'Filipino', 'Cisgender', 'Male', 'Yes', '', 123, 'ba@gmail.com', 'ba', 'ba', 'ba', 'ba', 261, 0, '', '', '', '', '', 0, 'ba', 'ba', 'ba', 123, '', '', 'ba', 'ba', 'ba', 'ba', 123, 'ba', '', 'ba', 'ba', 'ba', 123, 'ba', '', '100987654321', 'ba', 'ba', 'ba', 'ba', 'ba', '123', 'No', 1, NULL),
-(30, 'kinder', 'Kinder', '2025-11-27', 'bugtong', 'eljay', '-', '', '2025-11-27', 'baguio', 'idk', 'Single', 'Filipino', 'Cisgender', 'Male', 'Yes', '', 123, 'eljaybayot@gmail.com', 'asd', 'asd', 'asd', '', 2600, 0, '', '', '', '', '', 0, 'asd', 'asd', 'asd', 123, '', '', 'asd', 'asd', 'asd', 'd', 123, 'as', '', 'asd', 'asd', 'asd', 123, 'asd', '', '100987654312', 'University of Baguio', 'abc', 'abc', 'abc', 'abc', '2500', 'No', 0, NULL);
+(29, 'kinder', 'Grade 1', '2025-11-27', 'ba', 'ba', 'ba', '', '2025-11-27', 'ba', 'ba', 'Single', 'Filipino', 'Cisgender', 'Male', 'Yes', '', 123, 'ba@gmail.com', 'ba', 'ba', 'ba', 'ba', 261, 0, '', '', '', '', '', 0, 'ba', 'ba', 'ba', 123, '', '', 'ba', 'ba', 'ba', 'ba', 123, 'ba', '', 'ba', 'ba', 'ba', 123, 'ba', '', '100987654321', 'ba', 'ba', 'ba', 'ba', 'ba', '123', 'No', 1, NULL),
+(30, 'kinder', 'Grade 1', '2025-11-27', 'bugtong', 'eljay', '-', '', '2025-11-27', 'baguio', 'idk', 'Single', 'Filipino', 'Cisgender', 'Male', 'Yes', '', 123, 'eljaybayot@gmail.com', 'asd', 'asd', 'asd', '', 2600, 0, '', '', '', '', '', 0, '', '', '', 0, '', '', '', 'asd', 'asd', '<br /><b>Warning</b>:  Undefined', 123, 'as', '', 'asd', 'asd', '<br /><b>Warning</b>:  Undefined', 123, 'asd', '', '100987654317', 'University of Baguio', 'abc', 'abc', 'abc', 'abc', '2500', 'No', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -770,7 +791,7 @@ ALTER TABLE `attendance_daily`
 -- AUTO_INCREMENT for table `behavior_records`
 --
 ALTER TABLE `behavior_records`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `enrollments`
@@ -788,7 +809,7 @@ ALTER TABLE `exams`
 -- AUTO_INCREMENT for table `grades`
 --
 ALTER TABLE `grades`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
 
 --
 -- AUTO_INCREMENT for table `payments`
@@ -812,7 +833,7 @@ ALTER TABLE `school_settings`
 -- AUTO_INCREMENT for table `sections`
 --
 ALTER TABLE `sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `section_list`
