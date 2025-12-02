@@ -51,21 +51,21 @@ if (isset($_GET['ajax_search'])) {
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if(empty($results)) {
-        echo '<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">No matching records found.</td></tr>';
+        echo '<tr><td colspan="6" class="no-results">No matching records found.</td></tr>';
     } else {
         foreach($results as $u) {
             ?>
             <tr>
-                <td style="font-weight:bold;"><?php echo htmlspecialchars($u['account_id']); ?></td>
-                <td><?php echo htmlspecialchars($u['lname'] . ', ' . $u['fname']); ?></td>
+                <td class="account-id"><?php echo htmlspecialchars($u['account_id']); ?></td>
+                <td class="account-name"><?php echo htmlspecialchars($u['lname'] . ', ' . $u['fname']); ?></td>
                 <td><span class="role-badge badge-<?php echo $u['role']; ?>"><?php echo strtoupper($u['role']); ?></span></td>
-                <td>
+                <td class="account-grade">
                     <?php 
                         if($u['role'] == 'student') echo htmlspecialchars($u['grade_level'] ?? 'N/A');
                         else echo htmlspecialchars($u['track']);
                     ?>
                 </td>
-                <td>
+                <td class="account-actions">
                     <button class="action-btn btn-edit" onclick="loadZone('manage_accounts.php?edit_id=<?php echo $u['id']; ?>')">Edit</button>
                     <button class="action-btn btn-del" onclick="deleteUser(<?php echo $u['id']; ?>)">Delete</button>
                 </td>
@@ -85,8 +85,10 @@ if (isset($_GET['edit_id'])) {
 }
 ?>
 
-<div class="form-card" style="max-width: 1000px; padding: 20px;">
-    <h2 style="color:#002D72; border-bottom:2px solid #eee; padding-bottom:10px;">Manage Accounts</h2>
+<link rel="stylesheet" href="manage_accounts.css">
+
+<div class="form-card manage-card">
+    <h2>Manage Accounts</h2>
 
     <div class="filter-container">
         <input type="hidden" id="search_role" value="">
@@ -97,8 +99,8 @@ if (isset($_GET['edit_id'])) {
         <button class="filter-btn filter-admin" onclick="setRoleFilter('admin', this)">Admins</button>
     </div>
 
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <select id="search_grade" onchange="liveSearch()" style="padding:10px; border:1px solid #ddd; border-radius:6px; min-width:150px;">
+    <div class="filter-inputs">
+        <select id="search_grade" onchange="liveSearch()" class="grade-select">
             <option value="">-- All Grades --</option>
             <option value="Kinder">Kindergarten</option>
             <option value="Grade 7">Grade 7</option>
@@ -109,35 +111,22 @@ if (isset($_GET['edit_id'])) {
             <option value="Grade 12">Grade 12</option>
         </select>
 
-        <input type="text" id="search_text" oninput="liveSearch()" placeholder="Search Name or ID..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input type="text" id="search_text" oninput="liveSearch()" placeholder="Search Name or ID..." class="search-input">
     </div>
 
-    <style>
-        .acc-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .acc-table th { background: #002D72; color: white; padding: 10px; text-align: left; }
-        .acc-table td { padding: 10px; border-bottom: 1px solid #eee; }
-        .role-badge { padding: 3px 8px; border-radius: 4px; font-size: 0.8em; text-transform: uppercase; font-weight: bold; }
-        .badge-admin { background: #2c3e50; color: white; }
-        .badge-management { background: #d35400; color: white; }
-        .badge-instructor { background: #27ae60; color: white; }
-        .badge-student { background: #2980b9; color: white; }
-        .action-btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; color: white; }
-        .btn-edit { background: #f39c12; }
-        .btn-del { background: #dc3545; }
-    </style>
-
-    <div style="overflow-x:auto;">
+    <div class="overflow-x-auto">
         <table class="acc-table">
             <thead>
                 <tr>
                     <th>User ID</th>
                     <th>Name</th>
                     <th>Role</th>
-                    <th>Track / Grade</th> <th>Action</th>
+                    <th>Track / Grade</th> 
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="account_table_body">
-                <tr><td colspan="5" style="text-align:center; padding:20px;">Loading...</td></tr>
+                <tr class="loading-row"><td colspan="5" class="loading-text">Loading...</td></tr>
             </tbody>
         </table>
     </div>

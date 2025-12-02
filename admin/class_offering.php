@@ -54,12 +54,14 @@ $config = $pdo->query("SELECT current_year FROM school_settings LIMIT 1")->fetch
 $current_sy = $config['current_year'] ?? '2025-2026';
 ?>
 
-<div class="form-card" style="max-width: 1000px;">
-    <h2 style="color:#002D72; border-bottom:2px solid #febb3f; padding-bottom:10px;">Class Assignment & Offering</h2>
+<link rel="stylesheet" href="class_offering.css">
+
+<div class="form-card class-card">
+    <h2>Class Assignment & Offering</h2>
     
     <form method="POST" onsubmit="event.preventDefault(); submitForm(this, 'class_offering.php');">
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div class="form-grid-2col">
             <div class="form-group">
                 <label>Track</label>
                 <select name="track" id="sel_track" onchange="resetYear(); filterOptions()" required>
@@ -75,57 +77,65 @@ $current_sy = $config['current_year'] ?? '2025-2026';
                 <label>Year Level</label>
                 <select name="year_level" id="sel_year" onchange="filterOptions()" required>
                     <option value="">-- Select Track First --</option>
-                    <option value="Kinder" class="opt-level opt-kinder" style="display:none;">Kindergarten</option>
-                    <option value="Grade 7" class="opt-level opt-jhs" style="display:none;">Grade 7</option>
-                    <option value="Grade 8" class="opt-level opt-jhs" style="display:none;">Grade 8</option>
-                    <option value="Grade 9" class="opt-level opt-jhs" style="display:none;">Grade 9</option>
-                    <option value="Grade 10" class="opt-level opt-jhs" style="display:none;">Grade 10</option>
-                    <option value="Grade 11" class="opt-level opt-shs" style="display:none;">Grade 11</option>
-                    <option value="Grade 12" class="opt-level opt-shs" style="display:none;">Grade 12</option>
+                    <option value="Kinder" class="opt-level opt-kinder" hidden>Kindergarten</option>
+                    <option value="Grade 7" class="opt-level opt-jhs" hidden>Grade 7</option>
+                    <option value="Grade 8" class="opt-level opt-jhs" hidden>Grade 8</option>
+                    <option value="Grade 9" class="opt-level opt-jhs" hidden>Grade 9</option>
+                    <option value="Grade 10" class="opt-level opt-jhs" hidden>Grade 10</option>
+                    <option value="Grade 11" class="opt-level opt-shs" hidden>Grade 11</option>
+                    <option value="Grade 12" class="opt-level opt-shs" hidden>Grade 12</option>
                 </select>
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #eef2ff; padding: 15px; border-radius: 8px; border: 1px solid #cce5ff;">
+        <div class="form-container">
+            <div class="form-grid-2col">
+                <div class="form-group">
+                    <label class="filter-label">Subject (Curriculum)</label>
+                    <select name="subject_id" id="sel_subject" required>
+                        <option value="">-- Select Track & Year First --</option>
+                        <?php foreach ($subjects_raw as $s): ?>
+                            <option value="<?php echo $s['id']; ?>" 
+                                    class="sub-opt" 
+                                    data-track="<?php echo htmlspecialchars($s['track']); ?>" 
+                                    data-year="<?php echo htmlspecialchars($s['year_level']); ?>" 
+                                    hidden>
+                                <?php echo htmlspecialchars($s['code'] . " - " . $s['description']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="filter-label">Target Section</label>
+                    <select name="section_id" id="sel_section" required>
+                        <option value="">-- Select Track & Year First --</option>
+                        <?php foreach ($sections_raw as $sec): ?>
+                            <option value="<?php echo $sec['id']; ?>" 
+                                    class="sec-opt" 
+                                    data-track="<?php echo htmlspecialchars($sec['track']); ?>" 
+                                    data-year="<?php echo htmlspecialchars($sec['year_level']); ?>" 
+                                    hidden>
+                                <?php echo htmlspecialchars($sec['section_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-grid-2col">
             <div class="form-group">
-                <label style="color:#002D72;">Subject (Curriculum)</label>
-                <select name="subject_id" id="sel_subject" required>
-                    <option value="">-- Select Track & Year First --</option>
-                    <?php foreach ($subjects_raw as $s): ?>
-                        <option value="<?php echo $s['id']; ?>" 
-                                class="sub-opt" 
-                                data-track="<?php echo htmlspecialchars($s['track']); ?>" 
-                                data-year="<?php echo htmlspecialchars($s['year_level']); ?>" 
-                                style="display:none;">
-                            <?php echo htmlspecialchars($s['code'] . " - " . $s['description']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <label>Schedule</label>
+                <input type="text" name="schedule" placeholder="e.g. MWF 8:00-9:30">
             </div>
-            
             <div class="form-group">
-                <label style="color:#002D72;">Target Section</label>
-                <select name="section_id" id="sel_section" required>
-                    <option value="">-- Select Track & Year First --</option>
-                    <?php foreach ($sections_raw as $sec): ?>
-                        <option value="<?php echo $sec['id']; ?>" 
-                                class="sec-opt" 
-                                data-track="<?php echo htmlspecialchars($sec['track']); ?>" 
-                                data-year="<?php echo htmlspecialchars($sec['year_level']); ?>" 
-                                style="display:none;">
-                            <?php echo htmlspecialchars($sec['section_name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <label>Room</label>
+                <input type="text" name="room" placeholder="e.g. Room 304">
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-            <div class="form-group"><label>Schedule</label><input type="text" name="schedule" placeholder="e.g. MWF 8:00-9:30"></div>
-            <div class="form-group"><label>Room</label><input type="text" name="room" placeholder="e.g. Room 304"></div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+        <div class="form-grid-3col">
             <div class="form-group">
                 <label>Instructor</label>
                 <select name="instructor_id" required>
@@ -145,10 +155,10 @@ $current_sy = $config['current_year'] ?? '2025-2026';
             
             <div class="form-group">
                 <label>School Year</label>
-                <input type="text" name="school_year" value="<?php echo htmlspecialchars($current_sy); ?>" readonly style="background:#eee;">
+                <input type="text" name="school_year" value="<?php echo htmlspecialchars($current_sy); ?>" readonly class="readonly-input">
             </div>
         </div>
 
-        <button type="submit" class="btn-save" style="margin-top: 10px;">Create Class Section</button>
-        </form>
-    </div>
+        <button type="submit" class="class-btn">Create Class Section</button>
+    </form>
+</div>

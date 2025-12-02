@@ -53,8 +53,10 @@ if(!$settings) {
 }
 ?>
 
-<div class="form-card" style="max-width: 600px;">
-    <h2 style="color:#002D72; border-bottom:2px solid #eee; padding-bottom:10px;">System Configuration</h2>
+<link rel="stylesheet" href="settings.css">
+
+<div class="form-card settings-card">
+    <h2>System Configuration</h2>
     
     <form method="POST" onsubmit="event.preventDefault(); submitForm(this, 'settings.php');">
         <input type="hidden" name="update_settings" value="1">
@@ -62,7 +64,7 @@ if(!$settings) {
         <div class="form-group">
             <label>Current School Year</label>
             <input type="text" name="current_year" value="<?php echo htmlspecialchars($settings['current_year']); ?>" placeholder="e.g. 2025-2026" required>
-            <small style="color:#666;">Changing this will update the prefix for NEW Student IDs.</small>
+            <small>Changing this will update the prefix for NEW Student IDs.</small>
         </div>
 
         <div class="form-group">
@@ -83,6 +85,6 @@ if(!$settings) {
             </select>
         </div>
 
-        <button type="submit" class="btn-save">Save Configuration</button>
+        <button type="submit" class="settings-btn">Save Configuration</button>
     </form>
 </div>
