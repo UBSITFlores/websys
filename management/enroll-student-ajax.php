@@ -4,12 +4,26 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
     http_response_code(403); echo "Session Expired."; exit;
 }
 
+// --- CHECK ENROLLMENT STATUS FROM ADMIN SETTINGS ---
+$pdo = new PDO("mysql:host=localhost;dbname=portal;charset=utf8mb4", "root", "");
+$stmt = $pdo->query("SELECT enrollment_status FROM school_settings LIMIT 1");
+$status = $stmt->fetchColumn();
+
+if ($status == 'Closed') {
+    echo "<div style='text-align:center; padding:50px; background:#fff; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1);'>";
+    echo "<h1 style='color:#dc3545; font-size:3rem;'>⛔</h1>";
+    echo "<h2 style='color:#333;'>Enrollment is Closed</h2>";
+    echo "<p style='color:#666;'>The system administrator has disabled new registrations.</p>";
+    echo "<p style='color:#666;'>Please contact the Administrator to open enrollment.</p>";
+    echo "</div>";
+    exit; // STOP HERE
+}
+
 $tracks = ['kinder', 'junior high school', 'senior high school'];
 ?>
 
 <div class="form-card">
     <h2>Register & Enroll Student</h2>
-    
     <form id="enrollForm" method="POST" autocomplete="off" onsubmit="event.preventDefault(); submitForm(this, 'register_student.php');">
         
         <!-- SECTION 1: Personal Information -->

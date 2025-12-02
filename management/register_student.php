@@ -1,21 +1,25 @@
 <?php
+require_once '../functions/db.php'; 
+// $current_sy is now ready to use.
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-$host = "localhost"; $user = "root"; $pass = ""; $db = "portal";
-
+// Check enrollment status: if Closed, reject server-side
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Connection Failed: " . $e->getMessage());
+    $en_status = $pdo->query("SELECT enrollment_status FROM school_settings WHERE id = 1")->fetchColumn();
+    if ($en_status && strtolower($en_status) === 'closed') {
+        echo "<div style='background:#f8d7da;color:#721c24;padding:12px;border-radius:6px;text-align:center;'>Enrollment is currently closed.</div>";
+        exit;
+    }
+} catch (Exception $e) {
+    // ignore missing settings table and continue
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
-        // 1. GENERATE ID
+        // 1. GENERATE ID (Existing Logic)
         $config = $pdo->query("SELECT current_year FROM school_settings LIMIT 1")->fetch();
         $sy = $config['current_year'] ?? date('Y').'-'.(date('Y')+1);
         $year_prefix = substr($sy, 0, 4);
@@ -26,15 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nextSeq = $last ? ((int)substr($last, 4) + 1) : 1;
         $new_account_id = $year_prefix . str_pad($nextSeq, 4, "0", STR_PAD_LEFT);
 
-        // 2. INSERT ACCOUNT
+        // 2. INSERT ACCOUNT (Existing Logic)
         $fname = $_POST['fname']; $mname = $_POST['mname']; $lname = $_POST['lname']; $track = $_POST['track'];
         $stmt = $pdo->prepare("INSERT INTO account (account_id, fname, mname, lname, date_enrolled, password, role, track) VALUES (?, ?, ?, ?, CURDATE(), ?, 'student', ?)");
         $stmt->execute([$new_account_id, $fname, $mname, $lname, $new_account_id, $track]);
         $pk_id = $pdo->lastInsertId();
 
-        // 3. INSERT PROFILE (REMOVED SEX COLUMN)
-        $prev_addr = trim(($_POST['prev_street']??'').' '.($_POST['prev_barangay']??'').' '.($_POST['prev_city']??'').' '.($_POST['prev_province']??'').' '.($_POST['prev_zip']??''));
-        
+        // 3. INSERT PROFILE (Existing Logic)
         $sql_student = "INSERT INTO students (
             student_id, track, grade_level, date_enrolled, 
             lrn, previous_school, prev_street, prev_barangay, prev_city, prev_province, prev_zip, 
@@ -56,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?
         )";
-        // Note: removed 'sex' from query and execution
+        
         $stmt2 = $pdo->prepare($sql_student);
         $stmt2->execute([
             $pk_id, $track, $_POST['grade_level'], 
@@ -72,19 +74,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['gLname'] ?? '', $_POST['gFname'] ?? '', $_POST['gMName'] ?? '', $_POST['gContactnum'] ?? '', $_POST['gRelationship'] ?? ''
         ]);
 
-        // 4. AUTO-ENROLL & BILLING
+        // 4. AUTO-ENROLL & BILLING (UPDATED LOGIC)
         $section_name = $_POST['section'];
         $grade_level = $_POST['grade_level'];
-        $target_track = ($track == 'junior high school' || $track == 'kinder') ? 'Regular' : $track;
+        
+        // --- KEY FIX: FILTER BY SEMESTER ---
+        // If SHS, we only enroll in '1st' or 'Whole Year' or 'Summer'. We NEVER enroll in '2nd' during initial registration.
+        $is_shs = ($track == 'senior high school' || in_array($track, ['STEM', 'ABM', 'HUMSS']));
+        
+        $semester_filter = "";
+        $params = [$section_name, $grade_level];
 
-        // Fix: Only get subjects for this specific grade
-        $sql_classes = "SELECT s.id, sub.price, sub.description 
+        if ($is_shs) {
+            // Only fetch subjects that are NOT 2nd semester
+            $semester_filter = "AND (semester = '1st' OR semester = 'Whole Year' OR semester = '' OR semester IS NULL)";
+        }
+
+        $sql_classes = "SELECT s.id, sub.price, sub.description, s.semester 
                         FROM sections s
                         JOIN subjects sub ON s.code = sub.code
-                        WHERE s.section = ? AND s.year_level = ?";
+                        WHERE s.section = ? AND s.year_level = ?
+                        $semester_filter";
         
         $cls_stmt = $pdo->prepare($sql_classes);
-        $cls_stmt->execute([$section_name, $grade_level]);
+        $cls_stmt->execute($params);
         $classes = $cls_stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $total_fee = 0;
@@ -108,6 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h2>✅ Student Registered!</h2>
                 <p>Student ID: <strong>$new_account_id</strong></p>
                 <p>Assigned to: <strong>$grade_level - $section_name</strong></p>
+                <p>Subjects Enrolled: <strong>$count</strong></p>
                 <p>Total Tuition: <strong>₱" . number_format($total_fee, 2) . "</strong></p>
                 <button class='btn-save' onclick=\"loadZone('enroll-student-ajax.php', this)\">Register Another</button>
               </div>";

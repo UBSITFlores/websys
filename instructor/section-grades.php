@@ -19,12 +19,15 @@ $section_data = $stmt->fetch(PDO::FETCH_ASSOC);
 if(!$section_data) { echo "<div style='padding:20px; color:red;'>Error: Section not found.</div>"; exit; }
 $section_id = $section_data['id'];
 
-// --- DETERMINE COLUMNS (CAVEMAN STYLE) ---
+// --- DETERMINE COLUMNS (CONSISTENT LOGIC) ---
 $track = strtolower($section_data['track']);
 $columns = [];
-$col_keys = []; // This maps the name to the database ID (1, 2, 3...)
+$col_keys = []; 
 
-if ($track == 'senior high school') {
+// FIXED: Added checks for STEM, ABM, HUMSS
+$shs_tracks = ['senior high school', 'stem', 'abm', 'humss'];
+
+if (in_array($track, $shs_tracks)) {
     // SHS = 3 Terms
     $columns = ['Prelim', 'Midterm', 'Finals'];
     $col_keys = [1, 2, 3]; 
@@ -65,12 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach($periods as $q => $data) {
                 $att = $data['att'] ?? null;
                 $con = $data['con'] ?? null;
-                // Save if not empty
                 if($att != "" || $con != "") {
-                    // Handle empty strings as null
                     if($att == "") $att = null;
                     if($con == "") $con = null;
-                    
                     $stmt->execute([':sid'=>$sid, ':sec'=>$section_id, ':iid'=>$real_inst_id, ':q'=>$q, ':att'=>$att, ':con'=>$con]);
                 }
             }
@@ -136,7 +136,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id'
             <p style="color:#666; margin:5px 0;">
                 <strong><?php echo htmlspecialchars($subject_code); ?></strong> | 
                 <?php echo htmlspecialchars($section_data['track']); ?> | 
-                <?php echo htmlspecialchars($section_data['semester']); ?>
+                <strong><?php echo htmlspecialchars($section_data['semester']); ?></strong>
             </p>
         </div>
         <div>
@@ -147,7 +147,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id'
 
     <div class="print-header">
         <h1><?php echo htmlspecialchars($section_data['year_level'] . " - " . $section_data['track']); ?> | <?php echo htmlspecialchars($section_name); ?> Grading Sheet</h1>
-        <h3><?php echo htmlspecialchars($subject_code . ' - ' . $section_data['description']); ?></h3>
+        <h3><?php echo htmlspecialchars($subject_code . ' - ' . $section_data['description']); ?> (<?php echo htmlspecialchars($section_data['semester']); ?>)</h3>
         <p>Instructor: <?php echo htmlspecialchars($_SESSION['FNAME'] . ' ' . $_SESSION['LNAME']); ?></p>
     </div>
 

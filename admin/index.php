@@ -29,15 +29,13 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'admin') {
             
             <button onclick="loadZone('curriculum.php', this)">Curriculum Setup</button>
 
-            <button onclick="loadZone('class_offering.php', this)">Class Assignment</button>
-
             <button onclick="loadZone('section_manager.php', this)">Section Manager</button>
+
+            <button onclick="loadZone('class_offering.php', this)">Class Assignment</button>
 
             <button onclick="loadZone('instructors.php', this)">Faculty List</button>
 
             <button onclick="loadZone('manage_accounts.php', this)">Manage Accounts</button>
-
-            <button onclick="loadZone('promotion.php', this)">Promotion & Graduation</button>
 
             <button onclick="loadZone('add_user.php', this)">Create New User</button>
 
@@ -123,18 +121,18 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'admin') {
 
     function liveSearch() {
         let roleInput = document.getElementById('search_role');
+        let gradeInput = document.getElementById('search_grade'); // New
         let textInput = document.getElementById('search_text');
         let tableBody = document.getElementById('account_table_body');
 
         if(!roleInput || !textInput || !tableBody) return;
 
         let r = roleInput.value;
+        let g = gradeInput ? gradeInput.value : ''; // New (Safety check)
         let s = textInput.value;
         
-        // Show loading
-        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#aaa;">Searching...</td></tr>';
-
-        fetch('manage_accounts.php?ajax_search=1&role=' + r + '&search=' + encodeURIComponent(s))
+        // Include &grade= in the URL
+        fetch('manage_accounts.php?ajax_search=1&role=' + r + '&grade=' + encodeURIComponent(g) + '&search=' + encodeURIComponent(s))
         .then(res => res.text())
         .then(html => { tableBody.innerHTML = html; });
     }
@@ -391,6 +389,86 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'admin') {
             }
         });
     }
+    function deleteSubject(id) {
+    if(!confirm('Are you sure you want to delete this subject?')) return;
+    fetch('curriculum.php', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: 'delete_id=' + encodeURIComponent(id)
+    }).then(r => r.text()).then(txt => {
+        if(txt.trim() === 'DELETED') {
+            alert('Subject deleted');
+            if(typeof loadZone === 'function') loadZone('curriculum.php');
+            else location.reload();
+        } else {
+            alert('Delete response: ' + txt);
+        }
+    }).catch(err => alert('Error: ' + err));
+    }
+    // Map track selections to visible year-level option classes
+    function resetYear(){
+        const track = document.getElementById('sel_track').value;
+        const levels = document.querySelectorAll('.opt-level');
+        levels.forEach(l => l.style.display = 'none');
+        // show relevant options
+        if(track === 'kinder') {
+            document.querySelectorAll('.opt-kinder').forEach(o => o.style.display = 'block');
+        } else if(track === 'junior high school') {
+            document.querySelectorAll('.opt-jhs').forEach(o => o.style.display = 'block');
+        } else if(track === 'STEM' || track === 'ABM' || track === 'HUMSS' || track === 'senior high school') {
+            document.querySelectorAll('.opt-shs').forEach(o => o.style.display = 'block');
+        }
+        // reset selected year
+        const selYear = document.getElementById('sel_year');
+        if(selYear) selYear.value = '';
+    }
+
+    function filterOptions(){
+        const track = document.getElementById('sel_track').value;
+        const year = document.getElementById('sel_year').value;
+
+        // subjects
+        document.querySelectorAll('.sub-opt').forEach(opt=>{
+            const optTrack = (opt.getAttribute('data-track')||'').toLowerCase();
+            const optYear  = (opt.getAttribute('data-year')||'').toLowerCase();
+            let show = false;
+            if(track === 'kinder') show = optYear.includes('kinder');
+            else if(track === 'junior high school') show = optYear.includes('grade 7')||optYear.includes('grade 8')||optYear.includes('grade 9')||optYear.includes('grade 10');
+            else if(track === 'STEM' || track === 'ABM' || track === 'HUMSS' || track === 'senior high school') show = optYear.includes('grade 11')||optYear.includes('grade 12');
+            // additionally check track if subject has specialized track
+            if(track && optTrack && !optTrack.includes(track.toLowerCase()) && !optTrack.includes('regular')) {
+                // if subject track doesn't match selected track and is not 'Regular', skip
+                show = false;
+            }
+            // if year filter set, be stricter
+            if(year) {
+                show = show && optYear.includes(year.toLowerCase());
+            }
+            opt.style.display = show ? 'block' : 'none';
+        });
+
+        // sections
+        document.querySelectorAll('.sec-opt').forEach(opt=>{
+            const optTrack = (opt.getAttribute('data-track')||'').toLowerCase();
+            const optYear  = (opt.getAttribute('data-year')||'').toLowerCase();
+            let show = false;
+            if(track === 'kinder') show = optYear.includes('kinder');
+            else if(track === 'junior high school') show = optYear.includes('grade 7')||optYear.includes('grade 8')||optYear.includes('grade 9')||optYear.includes('grade 10');
+            else if(track === 'STEM' || track === 'ABM' || track === 'HUMSS' || track === 'senior high school') show = optYear.includes('grade 11')||optYear.includes('grade 12');
+            if(track && optTrack && !optTrack.includes(track.toLowerCase()) && optTrack !== '') show = false;
+            if(year) show = show && optYear.includes(year.toLowerCase());
+            opt.style.display = show ? 'block' : 'none';
+        });
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', function(){
+        resetYear();
+        filterOptions();
+        // expose functions for inline onchange attributes
+        window.resetYear = resetYear; window.filterOptions = filterOptions;
+    });
+    
 
     // Default Load
     window.onload = function() {

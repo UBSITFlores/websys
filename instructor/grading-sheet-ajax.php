@@ -2,154 +2,85 @@
 require_once '../functions/instructor_function.php';
 session_start();
 
-// 1. SECURITY CHECK
 if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
-    echo "<div style='color:red; padding:20px;'>Session Expired. Please login again.</div>";
-    exit;
+    echo "Session Expired."; exit;
 }
 
 $account_id = $_SESSION['ACCOUNTID'] ?? null;
 $instructor = new Instructor();
 
-// 2. GET CLASSES (Now fetching Track and Year Level too)
-// Note: Ensure your Instructor class in functions/instructor_function.php is fetching * // or specifically selecting these new columns. 
-// If not, we can use a direct query here for the "Caveman" approach:
+// 1. GET CURRENT CONFIG (To know what is "Current")
 $pdo = new PDO("mysql:host=localhost;dbname=portal;charset=utf8mb4", "root", "");
-$stmt = $pdo->prepare("SELECT * FROM sections WHERE instructor_id = (SELECT id FROM account WHERE account_id = :aid) ORDER BY code ASC");
-$stmt->execute([':aid' => $account_id]);
+$config = $pdo->query("SELECT current_year FROM school_settings LIMIT 1")->fetch();
+$current_sy = $config['current_year'] ?? '2025-2026';
+
+// 2. HANDLE ARCHIVE TOGGLE
+$show_archive = isset($_GET['view']) && $_GET['view'] == 'archive';
+
+// 3. FETCH SECTIONS
+// We filter by School Year based on the toggle
+if ($show_archive) {
+    $sql = "SELECT * FROM sections WHERE instructor_id = (SELECT id FROM account WHERE account_id = ?) AND school_year != ? ORDER BY school_year DESC";
+} else {
+    $sql = "SELECT * FROM sections WHERE instructor_id = (SELECT id FROM account WHERE account_id = ?) AND school_year = ? ORDER BY code ASC";
+}
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$account_id, $current_sy]);
 $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #eee; padding-bottom:10px;">
+    <h2 style="color:#002D72; margin:0;">
+        <?php echo $show_archive ? "Archived Classes" : "My Class Loads"; ?>
+    </h2>
+    <div>
+        <?php if($show_archive): ?>
+            <button onclick="loadZone('grading-sheet-ajax.php', this)" style="padding:8px 15px; background:#198754; color:white; border:none; cursor:pointer; border-radius:4px;">View Current</button>
+        <?php else: ?>
+            <button onclick="loadZone('grading-sheet-ajax.php?view=archive', this)" style="padding:8px 15px; background:#6c757d; color:white; border:none; cursor:pointer; border-radius:4px;">View Archive</button>
+        <?php endif; ?>
+    </div>
+</div>
+
 <style>
-    .class-card-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
-        margin-top: 20px;
-    }
-    
-    .class-card {
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .class-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .cc-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 10px;
-    }
-    
-    .cc-code {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #198754; /* Green for Instructor */
-    }
-    
-    .cc-section {
-        background: #e8f5e9;
-        color: #146c43;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        font-weight: bold;
-    }
-
-    .cc-title {
-        font-size: 1rem;
-        color: #333;
-        margin-bottom: 15px;
-        line-height: 1.4;
-    }
-
-    .cc-meta {
-        font-size: 0.85rem;
-        color: #666;
-        margin-bottom: 15px;
-        padding-top: 10px;
-        border-top: 1px solid #f0f0f0;
-    }
-
-    .badge {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        margin-right: 5px;
-    }
-    .bg-track { background-color: #cfe2ff; color: #084298; }
-    .bg-year { background-color: #fff3cd; color: #664d03; }
-
-    .btn-open {
-        display: block;
-        width: 100%;
-        text-align: center;
-        background: #198754;
-        color: white;
-        padding: 10px;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-    }
-    .btn-open:hover { background: #146c43; }
+    /* ... paste your existing CSS for cards ... */
+    .class-card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+    .class-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .cc-code { font-size: 1.2rem; font-weight: bold; color: #002D72; }
+    .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-right: 5px; }
+    .bg-track { background: #e7f1ff; color: #002D72; }
+    .btn-open { display: block; width: 100%; text-align: center; background: #002D72; color: white; padding: 10px; border: none; border-radius: 6px; cursor: pointer; margin-top:10px;}
 </style>
 
-<h2 style="color:#198754; border-bottom:2px solid #eee; padding-bottom:10px;">My Class Loads</h2>
-
 <?php if (empty($sections)): ?>
-    <div style="text-align:center; padding:50px; background:#fff; border-radius:8px; color:#888;">
-        <h3>No classes assigned yet.</h3>
-        <p>Contact the Management office to have subjects assigned to you.</p>
+    <div style="text-align:center; padding:50px; color:#888;">
+        <h3>No classes found in <?php echo $show_archive ? 'Archive' : 'Current Year'; ?>.</h3>
     </div>
 <?php else: ?>
     <div class="class-card-container">
         <?php foreach ($sections as $row): ?>
             <div class="class-card">
-                <div class="cc-header">
+                <div style="display:flex; justify-content:space-between;">
                     <div class="cc-code"><?php echo htmlspecialchars($row['code']); ?></div>
-                    <div class="cc-section"><?php echo htmlspecialchars($row['section']); ?></div>
+                    <small><?php echo htmlspecialchars($row['section']); ?></small>
                 </div>
-                
-                <div class="cc-title">
-                    <?php echo htmlspecialchars($row['description']); ?>
-                </div>
-
+                <p><?php echo htmlspecialchars($row['description']); ?></p>
                 <div>
                     <span class="badge bg-track"><?php echo htmlspecialchars($row['track']); ?></span>
-                    <span class="badge bg-year"><?php echo htmlspecialchars($row['year_level']); ?></span>
+                    <span class="badge" style="background:#eee;"><?php echo htmlspecialchars($row['year_level']); ?></span>
                 </div>
-
-                <div class="cc-meta">
-                    <i class="fas fa-clock"></i> <?php echo htmlspecialchars($row['schedule_time']); ?><br>
-                    <i class="fas fa-door-open"></i> <?php echo htmlspecialchars($row['room'] ?? 'TBA'); ?>
-                </div>
-
-                <button class="btn-open" 
-                    onclick="loadZone('section-grades.php?section=<?php echo urlencode($row['section']); ?>&code=<?php echo urlencode($row['code']); ?>', null)">
+                <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                
+                <button class="btn-open" onclick="loadZone('section-grades.php?section=<?php echo urlencode($row['section']); ?>&code=<?php echo urlencode($row['code']); ?>', null)">
                     Open Gradebook
                 </button>
-                <div style="display:flex; gap:5px;">
-                    <button class="btn-open" 
-                        onclick="loadZone('section-grades.php?section=<?php echo urlencode($row['section']); ?>&code=<?php echo urlencode($row['code']); ?>', null)">
-                        Grades
-                    </button>
-                    <button class="btn-open" style="background:#ffc107; color:#333;"
+                <?php if(!$show_archive): ?>
+                <button class="btn-open" style="background:#ffc107; color:#333; margin-top:5px;" 
                         onclick="loadZone('attendance.php?section=<?php echo urlencode($row['section']); ?>&code=<?php echo urlencode($row['code']); ?>', null)">
-                        Attendance
-                    </button>
-                </div>
+                    Attendance
+                </button>
+                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     </div>

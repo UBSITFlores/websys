@@ -44,6 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
+<style>
+    .form-card { background: #fff; padding: 18px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .form-card h2 { margin-top: 0; }
+    .form-card input[type="text"], .form-card select { padding: 10px; border:1px solid #ddd; border-radius:6px; width:100%; box-sizing:border-box; }
+    .form-card .btn-save { background:#002D72; color:#fff; padding:10px 14px; border:none; border-radius:6px; cursor:pointer; }
+    @media (max-width:600px){ .form-card { padding:12px; } .form-card div[style*="grid-template-columns"]{ grid-template-columns: 1fr !important; } }
+</style>
+
 <div class="form-card">
     <h2>Create New User</h2>
     
