@@ -1,0 +1,197 @@
+.instructors-card {
+    max-width: 1200px;
+}
+
+.instructors-card h2 {
+    color: #002D72;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.filter-section {
+    background: #f8f9fa;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    flex: 1;
+    min-width: 150px;
+    font-size: 0.95rem;
+    background: white;
+}
+
+.filter-select:focus {
+    border-color: #002D72;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0,45,114,0.1);
+}
+
+.fac-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-top: 20px;
+}
+
+.fac-table th {
+    background: #002D72;
+    color: white;
+    padding: 14px 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.fac-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.fac-table tbody tr {
+    transition: background 0.15s;
+}
+
+.fac-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.fac-name-cell strong {
+    display: block;
+    color: #002D72;
+    font-weight: 600;
+}
+
+.fac-id {
+    display: block;
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 3px;
+}
+
+.track-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.track-kinder {
+    background: #e8f5e9;
+    color: #1b5e20;
+}
+
+.track-jhs {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.track-shs {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+.mini-select {
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 100%;
+    background: white;
+}
+
+.mini-select:focus {
+    border-color: #002D72;
+    outline: none;
+}
+
+.mini-input {
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 70px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.mini-input:focus {
+    border-color: #002D72;
+    outline: none;
+}
+
+.btn-mini {
+    padding: 6px 14px;
+    background: #002D72;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-mini:hover {
+    background: #004099;
+    transform: translateY(-2px);
+}
+
+.btn-mini:active {
+    transform: scale(0.98);
+}
+
+.col-name { width: 25%; }
+.col-track { width: 15%; }
+.col-degree { width: 15%; }
+.col-years { width: 10%; }
+.col-status { width: 20%; }
+.col-action { width: 15%; }
+
+.no-results-cell {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.overflow-x-auto {
+    overflow-x: auto;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .filter-section {
+        flex-direction: column;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .fac-table {
+        font-size: 0.8rem;
+    }
+
+    .fac-table th,
+    .fac-table td {
+        padding: 8px 6px;
+    }
+
+    .mini-select,
+    .mini-input,
+    .btn-mini {
+        font-size: 0.75rem;
+        padding: 4px 6px;
+    }
+}
