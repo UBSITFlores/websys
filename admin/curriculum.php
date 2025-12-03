@@ -47,20 +47,29 @@ if(isset($_GET['edit_id'])) {
 $subjects = $pdo->query("SELECT * FROM subjects ORDER BY track, year_level, code ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<div class="form-card" style="max-width: 1100px;">
-    <h2 style="color:#002D72; border-bottom:2px solid #eee; padding-bottom:10px;">Curriculum Manager</h2>
+<link rel="stylesheet" href="curriculum.css">
+
+<div class="form-card curriculum-card">
+    <h2>Curriculum Manager</h2>
 
     <!-- FORM -->
-    <div style="background:<?php echo $edit_mode?'#fff3cd':'#f8f9fa'; ?>; padding:20px; border-radius:8px; margin-bottom:30px; border:1px solid #ddd;">
-        <h3 style="margin-top:0;"><?php echo $edit_mode?'✏️ Edit Subject':'+ Add New Subject'; ?></h3>
+    <div class="form-banner <?php echo $edit_mode ? 'edit' : 'new'; ?>">
+        <h3><?php echo $edit_mode ? '✏️ Edit Subject' : '+ Add New Subject'; ?></h3>
         <form method="POST" onsubmit="event.preventDefault(); submitForm(this, 'curriculum.php');">
             <?php if($edit_mode): ?> <input type="hidden" name="update_subject" value="1"><input type="hidden" name="db_id" value="<?php echo $curr['id']; ?>">
             <?php else: ?> <input type="hidden" name="add_subject" value="1"> <?php endif; ?>
 
-            <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <div class="form-group"><label>Code</label><input type="text" name="code" value="<?php echo $curr['code']??''; ?>" required></div>
-                <div class="form-group"><label>Description</label><input type="text" name="description" value="<?php echo $curr['description']??''; ?>" required></div>
-                <div class="form-group"><label>Type</label>
+            <div class="form-grid-3col">
+                <div class="form-group">
+                    <label>Code</label>
+                    <input type="text" name="code" value="<?php echo htmlspecialchars($curr['code'] ?? ''); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" name="description" value="<?php echo htmlspecialchars($curr['description'] ?? ''); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
                     <select name="type">
                         <option <?php if(($curr['type']??'')=='Core') echo 'selected'; ?>>Core</option>
                         <option <?php if(($curr['type']??'')=='Applied') echo 'selected'; ?>>Applied</option>
@@ -69,8 +78,9 @@ $subjects = $pdo->query("SELECT * FROM subjects ORDER BY track, year_level, code
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px;">
-                <div class="form-group"><label>Track</label>
+            <div class="form-grid-4col">
+                <div class="form-group">
+                    <label>Track</label>
                     <select name="track">
                         <option <?php if(($curr['track']??'')=='Regular') echo 'selected'; ?>>Regular</option>
                         <option <?php if(($curr['track']??'')=='STEM') echo 'selected'; ?>>STEM</option>
@@ -96,20 +106,24 @@ $subjects = $pdo->query("SELECT * FROM subjects ORDER BY track, year_level, code
     </div>
 
     <!-- LIST -->
-    <div style="overflow-x:auto;">
-        <table class="curr-table" style="width:100%; border-collapse:collapse;">
-            <tr style="background:#002D72; color:white; text-align:left;">
-                <th style="padding:10px;">Track / Year</th><th>Code</th><th>Desc</th><th>Price</th><th>Action</th>
+    <div class="overflow-x-auto">
+        <table class="curr-table">
+            <tr class="curr-table-header">
+                <th>Track / Year</th>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Action</th>
             </tr>
             <?php foreach($subjects as $s): ?>
-            <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:10px;"><small><?php echo $s['track']; ?> - <?php echo $s['year_level']; ?></small></td>
-                <td style="font-weight:bold;"><?php echo $s['code']; ?></td>
-                <td><?php echo $s['description']; ?></td>
-                <td style="color:#198754; font-weight:bold;">₱<?php echo number_format($s['price'], 2); ?></td>
-                <td>
-                    <button onclick="loadZone('curriculum.php?edit_id=<?php echo $s['id']; ?>')" style="cursor:pointer;">✎</button>
-                    <button onclick="deleteSubject(<?php echo $s['id']; ?>)" style="cursor:pointer; color:red;">×</button>
+            <tr class="curr-table-row">
+                <td class="curr-table-track"><?php echo htmlspecialchars($s['track'] . ' - ' . $s['year_level']); ?></td>
+                <td class="curr-table-code"><?php echo htmlspecialchars($s['code']); ?></td>
+                <td><?php echo htmlspecialchars($s['description']); ?></td>
+                <td class="curr-table-price">₱<?php echo number_format($s['price'], 2); ?></td>
+                <td class="curr-table-action">
+                    <button class="edit" onclick="loadZone('curriculum.php?edit_id=<?php echo $s['id']; ?>')">✎</button>
+                    <button class="delete" onclick="deleteSubject(<?php echo $s['id']; ?>)">×</button>
                 </td>
             </tr>
             <?php endforeach; ?>

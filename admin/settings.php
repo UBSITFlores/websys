@@ -9,24 +9,38 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // HANDLE SAVE
 if (isset($_POST['update_settings'])) {
-    $sy = $_POST['current_year'];
-    $status = $_POST['enrollment_status'];
-    $quarter = $_POST['active_quarter'];
+    $sy = trim($_POST['current_year'] ?? '');
+    $status = trim($_POST['enrollment_status'] ?? 'Open');
+    $quarter = (int)($_POST['active_quarter'] ?? 1);
 
-    // Update the single row in school_settings
-    // We use ID=1 assuming you ran the SQL to create the table and insert the first row
-    $sql = "UPDATE school_settings SET current_year = ?, enrollment_status = ?, active_quarter = ? WHERE id = 1";
-    $stmt = $pdo->prepare($sql);
-    
-    if($stmt->execute([$sy, $status, $quarter])) {
-        echo "<script>alert('System Settings Updated!'); loadZone('settings.php');</script>";
+    try {
+        // Check if a settings row exists
+        $existing = $pdo->query("SELECT id FROM school_settings LIMIT 1")->fetchColumn();
+        if ($existing) {
+            $sql = "UPDATE school_settings SET current_year = ?, enrollment_status = ?, active_quarter = ? WHERE id = ?";
+            $stmt = $pdo->prepare($sql);
+            $ok = $stmt->execute([$sy, $status, $quarter, $existing]);
+        } else {
+            $sql = "INSERT INTO school_settings (current_year, enrollment_status, active_quarter) VALUES (?, ?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $ok = $stmt->execute([$sy, $status, $quarter]);
+        }
+
+        if ($ok) {
+            echo "<script>alert('System Settings Updated!'); loadZone('settings.php');</script>";
+        } else {
+            echo "<script>alert('Failed to save settings.');</script>";
+        }
+    } catch (Exception $e) {
+        echo "<script>alert('Error: " . addslashes($e->getMessage()) . "');</script>";
     }
+
     exit;
 }
 
 // FETCH CURRENT SETTINGS
-// We try to fetch row 1. If it doesn't exist (fresh install), we use defaults.
-$stmt = $pdo->query("SELECT * FROM school_settings WHERE id = 1");
+// Fetch the first settings row if present, otherwise use defaults.
+$stmt = $pdo->query("SELECT * FROM school_settings LIMIT 1");
 $settings = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if(!$settings) {
@@ -39,8 +53,10 @@ if(!$settings) {
 }
 ?>
 
-<div class="form-card" style="max-width: 600px;">
-    <h2 style="color:#002D72; border-bottom:2px solid #eee; padding-bottom:10px;">System Configuration</h2>
+<link rel="stylesheet" href="settings.css">
+
+<div class="form-card settings-card">
+    <h2>System Configuration</h2>
     
     <form method="POST" onsubmit="event.preventDefault(); submitForm(this, 'settings.php');">
         <input type="hidden" name="update_settings" value="1">
@@ -48,7 +64,7 @@ if(!$settings) {
         <div class="form-group">
             <label>Current School Year</label>
             <input type="text" name="current_year" value="<?php echo htmlspecialchars($settings['current_year']); ?>" placeholder="e.g. 2025-2026" required>
-            <small style="color:#666;">Changing this will update the prefix for NEW Student IDs.</small>
+            <small>Changing this will update the prefix for NEW Student IDs.</small>
         </div>
 
         <div class="form-group">
@@ -69,6 +85,6 @@ if(!$settings) {
             </select>
         </div>
 
-        <button type="submit" class="btn-save">Save Configuration</button>
+        <button type="submit" class="settings-btn">Save Configuration</button>
     </form>
 </div>

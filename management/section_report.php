@@ -9,7 +9,6 @@ $pdo = new PDO("mysql:host=localhost;dbname=portal;charset=utf8mb4", "root", "")
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // 1. FETCH ALL SECTIONS FOR DROPDOWN
-// Caveman: Simple query
 $sec_stmt = $pdo->query("SELECT * FROM sections ORDER BY track, year_level, section ASC");
 $all_sections = $sec_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -63,15 +62,14 @@ if (isset($_GET['section_id']) && $_GET['section_id'] != "") {
 }
 ?>
 
-<div class="form-card" style="max-width: 1000px;">
+<div class="form-card">
     <div class="no-print">
-        <h2 style="color:#002D72; border-bottom:2px solid #febb3f; padding-bottom:10px;">Class Record Viewer</h2>
+        <h2>Class Record Viewer</h2>
 
-        <form method="GET" style="display:flex; gap:10px; background:#f0f8ff; padding:15px; border-radius:8px;">
-            <select name="section_id" style="flex:1; padding:10px; border:1px solid #aaa; border-radius:4px;">
+        <form method="GET">
+            <select name="section_id">
                 <option value="">-- Select a Section --</option>
                 <?php 
-                // Simple Loop for Options
                 for ($i = 0; $i < count($all_sections); $i++) {
                     $s = $all_sections[$i];
                     $sel = ($s['id'] == $selected_section_id) ? 'selected' : '';
@@ -79,45 +77,30 @@ if (isset($_GET['section_id']) && $_GET['section_id'] != "") {
                 }
                 ?>
             </select>
-            <button type="button" onclick="loadZone('section_report.php?' + new URLSearchParams(new FormData(this.form)).toString())" class="btn-save" style="width:auto; padding:10px 30px;">Load Class</button>
+            <button type="button" onclick="loadZone('section_report.php?' + new URLSearchParams(new FormData(this.form)).toString())" class="btn-save">Load Class</button>
         </form>
     </div>
 
     <?php if ($selected_section_id): ?>
-        <div class="report-header" style="margin-top:30px; margin-bottom:20px; border-bottom:2px solid #002D72; padding-bottom:10px;">
-            <h1 style="margin:0; color:#002D72; font-size:1.8rem;">
+        <div class="report-header">
+            <h1>
                 <?php echo htmlspecialchars($sec_info['year_level'] . " - " . $sec_info['section']); ?>
             </h1>
-            <p style="margin:5px 0; color:#555;">
+            <p>
                 Subject: <strong><?php echo htmlspecialchars($sec_info['code'] . ' - ' . $sec_info['description']); ?></strong><br>
                 Track: <?php echo htmlspecialchars(ucfirst($sec_info['track'])); ?> | SY: <?php echo htmlspecialchars($sec_info['school_year']); ?>
             </p>
         </div>
         
-        <div style="text-align:right; margin-bottom:15px;" class="no-print">
-            <button onclick="window.print()" class="btn-save" style="background:#6c757d;">🖨️ Print Class Record</button>
+        <div class="print-button-container no-print">
+            <button onclick="window.print()" class="btn-save secondary">🖨️ Print Class Record</button>
         </div>
-
-        <style>
-            .rec-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-            .rec-table th { background: #002D72; color: white; padding: 10px; text-align: center; border: 1px solid #001f52; }
-            .rec-table td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-            .rec-table th:first-child, .rec-table td:first-child { text-align: left; }
-            
-            @media print {
-                .no-print, .sidebar-right, .header { display: none !important; }
-                body, .content-zone, .form-card { background: white; margin: 0; padding: 0; width: 100%; box-shadow: none; }
-                .rec-table th { background: #eee !important; color: black !important; border: 1px solid black; -webkit-print-color-adjust: exact; }
-                .rec-table td { border: 1px solid black; }
-            }
-        </style>
 
         <table class="rec-table">
             <thead>
                 <tr>
-                    <th style="width:30%;">Student Name</th>
+                    <th>Student Name</th>
                     <?php 
-                    // Loop Columns
                     for ($c = 0; $c < count($columns); $c++) {
                         echo "<th>" . $columns[$c] . "</th>";
                     }
@@ -131,10 +114,9 @@ if (isset($_GET['section_id']) && $_GET['section_id'] != "") {
                     <tr><td colspan="7" style="text-align:center; padding:20px;">No students found in this section.</td></tr>
                 <?php else: ?>
                     <?php 
-                    // Loop Students
                     for ($i = 0; $i < count($students); $i++) {
                         $stu = $students[$i];
-                        $sid = $stu['student_id']; // Account ID PK
+                        $sid = $stu['student_id'];
                         
                         echo "<tr>";
                         echo "<td><strong>" . htmlspecialchars($stu['lname'] . ", " . $stu['fname']) . "</strong></td>";
@@ -142,10 +124,8 @@ if (isset($_GET['section_id']) && $_GET['section_id'] != "") {
                         $total = 0;
                         $count = 0;
 
-                        // Loop Grades
                         for ($k = 0; $k < count($col_keys); $k++) {
                             $q_key = $col_keys[$k];
-                            // Manual check if key exists
                             $val = isset($grades_map[$sid][$q_key]) ? $grades_map[$sid][$q_key] : '';
                             
                             echo "<td>$val</td>";
@@ -156,22 +136,20 @@ if (isset($_GET['section_id']) && $_GET['section_id'] != "") {
                             }
                         }
 
-                        // Calculate Final
                         $final = "-";
                         $status = "-";
                         if ($count > 0) {
-                            $avg = $total / count($col_keys); // Strict average (divide by total quarters)
-                            // Or $avg = $total / $count; (divide by filled quarters) - Let's do strict.
+                            $avg = $total / count($col_keys);
                             $final = number_format($avg, 2);
                             if ($avg >= 75) {
-                                $status = "<span style='color:green; font-weight:bold;'>PASSED</span>";
+                                $status = "<span class='passed'>PASSED</span>";
                             } else {
-                                $status = "<span style='color:red; font-weight:bold;'>FAILED</span>";
+                                $status = "<span class='failed'>FAILED</span>";
                             }
                         }
 
-                        echo "<td style='font-weight:bold;'>$final</td>";
-                        echo "<td>$status</td>";
+                        echo "<td>" . $final . "</td>";
+                        echo "<td>" . $status . "</td>";
                         echo "</tr>";
                     }
                     ?>

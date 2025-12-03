@@ -1,0 +1,332 @@
+.edit-search {
+    background: #f0f8ff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #cce5ff;
+    display: flex;
+    gap: 10px;
+}
+
+.edit-search input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+
+.edit-search button {
+    padding: 10px 20px;
+    background: #002D72;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.edit-search button:hover {
+    background: #004099;
+}
+
+.student-list {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.student-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.student-item:hover {
+    background-color: #f8f9fa;
+}
+
+.student-item:last-child {
+    border-bottom: none;
+}
+
+.student-info {
+    flex: 1;
+}
+
+.student-name {
+    font-weight: bold;
+    color: #002D72;
+    font-size: 1.05rem;
+    margin-bottom: 5px;
+}
+
+.student-details {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.edit-form {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.edit-form h3 {
+    color: #002D72;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.form-section {
+    margin-bottom: 25px;
+}
+
+.form-section h4 {
+    color: #002D72;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.edit-form .form-group {
+    margin-bottom: 15px;
+}
+
+.edit-form label {
+    font-weight: 600;
+    color: #444;
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+}
+
+.edit-form input,
+.edit-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+}
+
+.edit-form input:focus,
+.edit-form select:focus {
+    border-color: #002D72;
+    outline: none;
+    background: #fafaff;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.button-group button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.btn-save {
+    background: #002D72;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    width: auto;
+}
+
+.btn-save:hover {
+    background: #004099;
+}
+
+.btn-update {
+    flex: 1;
+    background: #002D72;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.btn-update:hover {
+    background: #004099;
+}
+
+.btn-cancel {
+    flex: 1;
+    background: #ddd;
+    color: #333;
+}
+
+.btn-cancel:hover {
+    background: #ccc;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #e74c3c;
+}
+
+.student-display-box {
+    background: #eee;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #333;
+}
+
+.success-msg {
+    color: #198754;
+    background: #d4edda;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border-left: 4px solid #198754;
+}
+
+.error-msg {
+    color: #dc3545;
+    background: #f8d7da;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border-left: 4px solid #dc3545;
+}
+
+.warning-msg {
+    color: #856404;
+    background: #fff3cd;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border-left: 4px solid #ffc107;
+}
+
+.form-card {
+    max-width: 900px;
+}
+
+.form-card h2 {
+    color: #002D72;
+    border-bottom: 2px solid #febb3f;
+    padding-bottom: 10px;
+}
+
+h3 {
+    color: #002D72;
+    margin-top: 20px;
+}
+
+h3:first-of-type {
+    margin-top: 0;
+}
+
+.form-grid-3col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+}
+
+.form-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.family-box {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background: #fafafa;
+}
+
+.family-label {
+    display: block;
+    font-weight: bold;
+    color: #002D72;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.grid-3-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.grid-3-col input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.grid-2-col input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.not-found-message {
+    padding: 30px;
+    text-align: center;
+    color: red;
+}
+
+@media (max-width: 768px) {
+    .edit-search {
+        flex-direction: column;
+    }
+
+    .form-grid-3col,
+    .form-grid-2col,
+    .grid-3-col,
+    .grid-2-col {
+        grid-template-columns: 1fr;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+}

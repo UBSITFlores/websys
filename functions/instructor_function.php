@@ -3,19 +3,8 @@ class Instructor {
     private $pdo;
 
     public function __construct() {
-        $host = "localhost";
-        $username = "root";
-        $password = "";
-        $dbname = "portal";
-        $charset = "utf8mb4";
-
-        try {
-            $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
-            $this->pdo = new PDO($dsn, $username, $password);
-            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e) {
-            die("Connection Failed! " . $e->getMessage());
-        }
+        require __DIR__ . '/db.php';
+        $this->pdo = $pdo;
     }
 
     // Sections: all or filtered by semester/year

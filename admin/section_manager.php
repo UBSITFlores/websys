@@ -73,17 +73,17 @@ $sections = $pdo->query("SELECT s.*, a.fname, a.lname FROM section_list s LEFT J
 $instructors = $pdo->query("SELECT * FROM account WHERE role='instructor' ORDER BY lname ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<div class="form-card" style="max-width: 1000px;">
-    <h2 style="color:#002D72; border-bottom:2px solid #febb3f; padding-bottom:10px;">Section Manager</h2>
+<link rel="stylesheet" href="section_manager.css">
 
-    <div style="background:<?php echo $edit_mode ? '#fff3cd' : '#f8f9fa'; ?>; padding:20px; border-radius:8px; border:1px solid <?php echo $edit_mode ? '#ffecb5' : '#e9ecef'; ?>; margin-bottom:30px;">
+<div class="form-card section-card">
+    <h2>Section Manager</h2>
+
+    <div class="<?php echo $edit_mode ? 'edit-banner' : 'new-banner'; ?>">
         
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin-top:0; color:<?php echo $edit_mode ? '#856404' : '#002D72'; ?>;">
-                <?php echo $edit_mode ? '✏️ Edit Section' : '+ Create New Section'; ?>
-            </h3>
+        <div class="banner-header">
+            <h3><?php echo $edit_mode ? '✏️ Edit Section' : '+ Create New Section'; ?></h3>
             <?php if($edit_mode): ?>
-                <button onclick="loadZone('section_manager.php')" style="background:#6c757d; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Cancel</button>
+                <button onclick="loadZone('section_manager.php')" class="banner-cancel-btn">Cancel</button>
             <?php endif; ?>
         </div>
 
@@ -95,7 +95,7 @@ $instructors = $pdo->query("SELECT * FROM account WHERE role='instructor' ORDER 
                 <input type="hidden" name="add_section" value="1">
             <?php endif; ?>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; align-items: end;">
+            <div class="section-form-grid">
                 <div class="form-group">
                     <label>Track</label>
                     <select name="track" required>
@@ -136,26 +136,13 @@ $instructors = $pdo->query("SELECT * FROM account WHERE role='instructor' ORDER 
                     </select>
                 </div>
             </div>
-            <button type="submit" class="btn-save" style="margin-top:10px; width:100%;">
+            <button type="submit" class="section-btn-save">
                 <?php echo $edit_mode ? 'Save Changes' : 'Create Section'; ?>
             </button>
         </form>
     </div>
 
-    <style>
-        .sec-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .sec-table th { background: #002D72; color: white; padding: 10px; text-align: left; }
-        .sec-table td { padding: 10px; border-bottom: 1px solid #eee; }
-        .sec-table tr:hover { background: #f0f8ff; }
-        
-        .action-icon { width: 30px; height: 30px; border-radius: 50%; border: none; color: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; margin: 0 2px; }
-        .btn-edit-icon { background: #ffc107; color: #000; }
-        .btn-del-icon { background: #dc3545; }
-        .btn-edit-icon:hover { background: #e0a800; }
-        .btn-del-icon:hover { background: #a71d2a; }
-    </style>
-
-    <div style="overflow-x:auto;">
+    <div class="overflow-x-auto">
         <table class="sec-table">
             <thead>
                 <tr>

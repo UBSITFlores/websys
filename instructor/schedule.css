@@ -1,70 +1,61 @@
-/* Page title */
 .schedule-title {
-  color: #002D72;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 10px;
+    color: #002D72;
+    border-bottom: 2px solid #febb3f;
+    padding-bottom: 10px;
+    margin-top: 0;
 }
 
-/* Container */
-.schedule-wrapper {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  overflow-x: auto;
+.schedule-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    background: #fff; 
 }
 
-/* Weekly grid table */
-.schedule-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-  min-width: 700px;
+.schedule-table th { 
+    background: #002D72; 
+    color: white; 
+    padding: 10px; 
+    text-align: center; 
+    border: 1px solid #001f52; 
 }
 
-.schedule-table th,
-.schedule-table td {
-  border: 1px solid #ddd;
-  text-align: center;
-  padding: 6px 4px;
+.schedule-table td { 
+    border: 1px solid #eee; 
+    padding: 0; 
+    height: 40px; 
+    text-align: center; 
+    vertical-align: middle; 
 }
 
-.schedule-table th {
-  background: #002D72;
-  color: #fff;
+.time-col { 
+    background: #f8f9fa; 
+    font-weight: bold; 
+    color: #555; 
+    width: 100px; 
+    border-right: 2px solid #ddd !important; 
 }
 
-/* Time column */
-.schedule-time {
-  font-weight: bold;
-  background: #f8f9fa;
-  width: 80px;
+/* Class blocks */
+.class-start { 
+    background-color: #d1e7dd; 
+    border-left: 4px solid #198754 !important; 
+    color: #0f5132; 
+    font-weight: bold; 
+    font-size: 0.85rem; 
+    padding: 5px; 
+    border-bottom: none !important; 
 }
 
-/* Class cells */
-.class-empty {
-  background: #ffffff;
+.class-mid { 
+    background-color: #d1e7dd; 
+    border-left: 4px solid #198754 !important; 
+    border-top: none !important; 
+    border-bottom: none !important; 
 }
 
-.class-start {
-  background: #e8f5e9;
-  border-left: 4px solid #198754;
-  font-weight: bold;
-}
-
-.class-mid {
-  background: #f1f8f5;
-}
-
-/* Class label inside cell */
-.class-label {
-  display: block;
-  font-size: 0.8rem;
-  color: #333;
-}
-
-.class-room {
-  display: block;
-  font-size: 0.75rem;
-  color: #666;
+.room-text { 
+    display: block; 
+    font-size: 0.75rem; 
+    font-weight: normal; 
+    color: #146c43; 
 }

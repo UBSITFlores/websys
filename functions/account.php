@@ -2,20 +2,10 @@
     class account{
         public $pdo;
         function __construct(){
-            $host = "localhost";
-            $user = "root";
-            $pass = "";
-            $dbname = "portal";
-            $charset = "utf8mb4";
-
-            try{
-                $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
-                $connection = new PDO($dsn,$user,$pass);
-                $this->pdo = $connection;
-            }catch(PDOException $e){
-                die("Connection Failed!" . $e->getMessage());
-            }
-        }
+        // Note: We use __DIR__ to ensure it finds the file in the same folder
+        require __DIR__ . '/db.php'; 
+        $this->pdo = $pdo; 
+    }
 
         public function login($account_id, $password) {
             $fetch = $this->pdo->prepare("SELECT * FROM account WHERE account_id= :account_id AND password= :password");
@@ -23,11 +13,11 @@
             $user = $fetch->fetch(PDO::FETCH_ASSOC);
             
             if (!$user) {
-                echo "<script>alert('Invalid Credentials.'); window.location.href = 'index.php';</script>";
+                echo "<script>alert('Invalid Credentials.'); window.location.href = 'login.php';</script>";
             } else {
                 // --- 1. STATUS CHECK ---
                 if ($user['status'] === 'Inactive') {
-                    echo "<script>alert('Access Denied: Your account is Inactive.'); window.location.href = 'index.php';</script>";
+                    echo "<script>alert('Access Denied: Your account is Inactive.'); window.location.href = 'login.php';</script>";
                     exit;
                 }
 
@@ -44,7 +34,7 @@
                         $update = $this->pdo->prepare("UPDATE account SET status = 'Inactive' WHERE id = ?");
                         $update->execute([$user['id']]);
                         
-                        echo "<script>alert('Access Expired: Your 3-month grace period after graduation has ended.'); window.location.href = 'index.php';</script>";
+                        echo "<script>alert('Access Expired: Your 3-month grace period after graduation has ended.'); window.location.href = 'login.php';</script>";
                         exit;
                     }
                 }

@@ -1,0 +1,35 @@
+.form-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-grid-3col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+}
+
+.filter-label {
+    display: block;
+    color: #002D72;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.readonly-input {
+    background: #eee;
+}
+
+@media (max-width: 900px) {
+    .form-grid-2col {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .form-grid-3col {
+        grid-template-columns: 1fr;
+    }
+}
