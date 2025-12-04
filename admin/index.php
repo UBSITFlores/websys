@@ -405,6 +405,24 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'admin') {
         }
     }).catch(err => alert('Error: ' + err));
     }
+
+    function filterTrack(track, btn) {
+    // Update active button
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Filter rows
+    const rows = document.querySelectorAll('#subject-tbody tr[data-track]');
+    rows.forEach(row => {
+        const rowTrack = row.getAttribute('data-track');
+        if (track === 'all' || rowTrack === track) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    }
+
     // Map track selections to visible year-level option classes
     function resetYear(){
         const track = document.getElementById('sel_track').value;
