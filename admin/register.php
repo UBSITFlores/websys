@@ -28,36 +28,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <title>Student Registration</title>
+    <link rel="stylesheet" href="register.css">
 </head>
-<body style="font-family: Arial, sans-serif; background-color:#f9f9f9; text-align:center; padding:40px;">
+<body>
     <h2>Student Registration</h2>
     <?php if($message): ?>
-        <div style="margin-bottom: 15px; font-weight: bold; color: <?php echo strpos($message,'Error')===0?'red':'green'; ?>">
+        <div class="message <?php echo strpos($message,'Error')===0?'error':'success'; ?>">
             <?php echo htmlspecialchars($message); ?>
         </div>
     <?php endif; ?>
-    <form method="post" action="" style="display:inline-block; background:white; padding: 20px; border-radius: 8px; text-align:left; min-width:320px;">
-        <label>Student ID</label><br>
-        <input style="width:100%; padding: 8px; margin-bottom: 10px;" type="text" name="account_id"><br>
-        <label>First Name</label><br>
-        <input style="width:100%; padding: 8px; margin-bottom: 10px;" type="text" name="fname"><br>
-        <label>Middle Name</label><br>
-        <input style="width:100%; padding: 8px; margin-bottom: 10px;" type="text" name="mname"><br>
-        <label>Last Name</label><br>
-        <input style="width:100%; padding: 8px; margin-bottom: 10px;" type="text" name="lname"><br>
-        <label>Password</label><br>
-        <input style="width:100%; padding: 8px; margin-bottom: 15px;" type="password" name="password"><br>
-        <label>Track</label><br>
-        <select name="track" style="width:100%; padding: 8px; margin-bottom: 15px;">
+    <form method="post" action="" class="form-container">
+        <label>Student ID</label>
+        <input type="text" name="account_id">
+        
+        <label>First Name</label>
+        <input type="text" name="fname">
+        
+        <label>Middle Name</label>
+        <input type="text" name="mname">
+        
+        <label>Last Name</label>
+        <input type="text" name="lname">
+        
+        <label>Password</label>
+        <input type="password" name="password">
+        
+        <label>Track</label>
+        <select name="track">
             <option value="kinder">Kinder</option>
             <option value="junior high school">Junior High School</option>
             <option value="senior high school">Senior High School</option>
             <option value="">None</option>
-        </select><br>
-        <button style="background:#27ae60; color:white; padding: 10px 20px; border:none; border-radius: 4px;" type="submit">
-            Register
-        </button>
+        </select>
+        
+        <button type="submit">Register</button>
     </form>
-    <p style="margin-top: 15px;"><a href="index.php">Back to login</a></p>
+    <div class="back-link">
+        <p><a href="index.php">Back to login</a></p>
+    </div>
 </body>
 </html>

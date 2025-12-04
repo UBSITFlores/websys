@@ -204,13 +204,13 @@ $current_sy = $config['current_year'] ?? '2025-2026';
                 <label>Year Level</label>
                 <select name="year_level" id="sel_year" onchange="filterOptions()" required>
                     <option value="">-- Select Track First --</option>
-                    <option value="Kinder" class="opt-level opt-kinder" style="display:none;">Kindergarten</option>
-                    <option value="Grade 7" class="opt-level opt-jhs" style="display:none;">Grade 7</option>
-                    <option value="Grade 8" class="opt-level opt-jhs" style="display:none;">Grade 8</option>
-                    <option value="Grade 9" class="opt-level opt-jhs" style="display:none;">Grade 9</option>
-                    <option value="Grade 10" class="opt-level opt-jhs" style="display:none;">Grade 10</option>
-                    <option value="Grade 11" class="opt-level opt-shs" style="display:none;">Grade 11</option>
-                    <option value="Grade 12" class="opt-level opt-shs" style="display:none;">Grade 12</option>
+                    <option value="Kinder" class="opt-level opt-kinder" hidden>Kindergarten</option>
+                    <option value="Grade 7" class="opt-level opt-jhs" hidden>Grade 7</option>
+                    <option value="Grade 8" class="opt-level opt-jhs" hidden>Grade 8</option>
+                    <option value="Grade 9" class="opt-level opt-jhs" hidden>Grade 9</option>
+                    <option value="Grade 10" class="opt-level opt-jhs" hidden>Grade 10</option>
+                    <option value="Grade 11" class="opt-level opt-shs" hidden>Grade 11</option>
+                    <option value="Grade 12" class="opt-level opt-shs" hidden>Grade 12</option>
                 </select>
             </div>
         </div>
