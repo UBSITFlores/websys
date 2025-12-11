@@ -1,11 +1,9 @@
 <?php
+require_once '../functions/db.php';
 session_start();
 if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
     http_response_code(403); echo "Session Expired."; exit;
 }
-
-$pdo = new PDO("mysql:host=localhost;dbname=portal;charset=utf8mb4", "root", "");
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // FETCH DATA
 $student = null;

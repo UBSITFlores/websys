@@ -4,16 +4,18 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
     http_response_code(403); echo "Session Expired."; exit;
 }
 
-$pdo = new PDO("mysql:host=localhost;dbname=portal;charset=utf8mb4", "root", "");
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// Use centralized connection
+require_once '../functions/db.php';
 
 // --- HANDLE: ADD ASSESSMENT (Set Tuition) ---
 if (isset($_POST['btn_assess'])) {
     $sid = $_POST['hidden_sid'];
     $amount = $_POST['assess_amount'];
     
-    $config = $pdo->query("SELECT current_year FROM school_settings LIMIT 1")->fetch();
-    $sy = $config['current_year'] ?? '2025-2026';
+    // Fetch School Year from centralized $current_sy if available, or query
+    // Since we required db.php, $current_sy is available
+    global $current_sy; 
+    $sy = $current_sy ?? '2025-2026';
 
     $stmt = $pdo->prepare("INSERT INTO assessments (student_id, total_amount, school_year) VALUES (?, ?, ?)");
     if($stmt->execute([$sid, $amount, $sy])) {
@@ -24,65 +26,49 @@ if (isset($_POST['btn_assess'])) {
 ?>
 
 <style>
-/* --- INLINE STYLES FOR AJAX LOADED CONTENT --- */
+/* --- Main Card --- */
 .form-card {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 0 auto;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.print-header {
-    display: none;
-    text-align: center;
-    margin-bottom: 40px;
-    border-bottom: 2px solid #002D72;
-    padding-bottom: 20px;
-}
-
-.print-header h1 {
-    margin: 0;
-    color: #002D72;
-    font-size: 24pt;
-}
-
-.print-header p {
-    margin: 5px 0 0;
-    color: #555;
-    font-size: 10pt;
-}
-
+/* --- Search Box --- */
 .search-box {
-    background: #f0f8ff;
-    padding: 20px;
+    background: #f0f8ff; /* Lightest blue */
+    padding: 25px;
     border-radius: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     border: 1px solid #cce5ff;
 }
 
 .search-box label {
-    font-weight: bold;
+    font-weight: 700;
     color: #002D72;
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    font-size: 1rem;
 }
 
-.search-box > div {
+.search-flex {
     display: flex;
-    gap: 10px;
-    align-items: stretch;
+    gap: 15px;
+    align-items: center; 
 }
 
 .search-box input {
-    padding: 12px 15px;
-    border: 1px solid #aaa;
-    border-radius: 6px;
     flex: 1;
+    padding: 0 15px; 
+    height: 45px;    
+    border: 1px solid #ced4da;
+    border-radius: 6px;
     font-size: 1rem;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
-    height: 48px;
     box-sizing: border-box;
 }
 
@@ -91,379 +77,218 @@ if (isset($_POST['btn_assess'])) {
     box-shadow: 0 0 0 3px rgba(0, 45, 114, 0.1);
 }
 
-#bill_check_status {
-    margin-top: 8px;
-    font-weight: bold;
-    font-size: 0.9rem;
+/* --- SEARCH BUTTON FIX --- */
+#btn_bill_search {
+    height: 45px; 
+    padding: 0 20px;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    color:white;
+    background:#002D72;
+    border:none;
+    border-radius:6px;
 }
 
-#billing_dashboard {
-    display: none;
+#bill_check_status {
+    margin-top: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
 }
+
+/* --- Student Header --- */
+#billing_dashboard { display: none; }
 
 .student-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #eee;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e1e8ed;
 }
 
 .student-header h1 {
-    margin: 0 0 8px 0;
+    margin: 0 0 5px 0;
     color: #333;
-    font-size: 1.8rem;
+    font-size: 2rem;
 }
 
 .student-header-info {
-    background: #eee;
-    padding: 4px 10px;
+    background: #eef4fb;
+    color: #002D72;
+    padding: 6px 12px;
     border-radius: 4px;
-    font-size: 0.9em;
-    color: #555;
+    font-size: 0.95rem;
+    font-weight: 600;
     display: inline-block;
 }
 
-.student-header-actions {
-    text-align: right;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-end;
-}
-
+/* --- Money Cards Grid --- */
 .money-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 20px;
+    margin-bottom: 35px;
 }
 
 .money-card {
-    padding: 20px;
-    border-radius: 8px;
+    padding: 25px;
+    border-radius: 10px;
     color: white;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.mc-blue {
-    background: #002D72;
-}
-
-.mc-green {
-    background: #198754;
-}
-
-.mc-red {
-    background: #dc3545;
-}
+.mc-blue { background: linear-gradient(135deg, #002D72, #004099); }
+.mc-green { background: linear-gradient(135deg, #198754, #20c997); }
+.mc-red { background: linear-gradient(135deg, #dc3545, #f06595); }
 
 .mc-title {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     opacity: 0.9;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     display: block;
     letter-spacing: 1px;
     text-transform: uppercase;
+    font-weight: 600;
 }
 
 .mc-val {
-    font-size: 1.8rem;
-    font-weight: bold;
+    font-size: 2rem;
+    font-weight: 700;
     display: block;
 }
 
+/* --- Billing Content Layout --- */
 .billing-content {
     display: grid;
     grid-template-columns: 1fr 2fr;
-    gap: 20px;
+    gap: 25px;
 }
 
+/* --- Left Panel (Form) --- */
 .billing-left {
-    border: 1px solid #ddd;
-    padding: 20px;
+    border: 1px solid #e1e8ed;
+    padding: 25px;
     border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background: #f9fbfd;
 }
 
 .billing-left h4 {
     margin-top: 0;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     color: #002D72;
-    border-bottom: 2px solid #eee;
+    font-size: 1.1rem;
+    border-bottom: 2px solid #e1e8ed;
     padding-bottom: 10px;
 }
 
-.form-group {
-    margin-bottom: 15px;
-}
-
+.form-group { margin-bottom: 15px; }
 .form-group label {
     display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
+    font-weight: 600;
+    margin-bottom: 8px;
     color: #555;
+    font-size: 0.9rem;
 }
-
 .form-group input {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-sizing: border-box;
-    font-size: 1rem;
-    transition: border-color 0.2s;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    box-sizing: border-box; 
 }
 
-.form-group input:focus {
-    border-color: #002D72;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 45, 114, 0.1);
-}
-
+/* --- Right Panel (Table) --- */
 .billing-right {
-    grid-column: span 2 / auto;
-    border: 1px solid #ddd;
-    padding: 20px;
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    grid-column: span 2 / auto; /* Fallback */
 }
 
 .billing-right h3 {
     margin-top: 0;
     margin-bottom: 15px;
-    color: #555;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
+    color: #444;
+    font-size: 1.2rem;
 }
 
 .history-table-container {
-    border: 1px solid #ddd;
+    border: 1px solid #e1e8ed;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .history-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     background: white;
 }
 
-.history-table thead tr {
+.history-table th {
     background: #002D72;
     color: white;
+    padding: 15px;
     text-align: left;
-}
-
-.history-table th {
-    padding: 12px;
     font-weight: 600;
-    border: 1px solid #001f52;
 }
 
 .history-table td {
-    padding: 12px;
-    border: 1px solid #ddd;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    color: #333;
 }
 
-.history-table tbody tr:hover {
-    background: #f8f9fa;
+.history-table tbody tr:hover { background: #f8f9fa; }
+
+/* --- Buttons --- */
+.btn-save {
+    background: #002D72;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: background 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
+.btn-save:hover { background: #004099; }
+
+.btn-save.secondary {
+    background: #6c757d;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+}
+.btn-save.secondary:hover { background: #5a6268; }
 
 .signature-line {
-    display: none;
     margin-top: 80px;
     width: 250px;
     border-top: 2px solid black;
     padding-top: 10px;
     text-align: center;
     font-weight: bold;
-}
-
-.signature-line span {
-    font-weight: normal;
-    font-size: 0.8rem;
-    color: #666;
-}
-
-.btn-save {
-    background: #002D72;
-    color: white;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: background 0.2s, transform 0.1s;
-    height: 48px;
-    white-space: nowrap;
-}
-
-.btn-save:hover {
-    background: #004099;
-    transform: translateY(-1px);
-}
-
-.btn-save:active {
-    transform: translateY(0);
-}
-
-.btn-save.secondary {
-    background: #6c757d;
-}
-
-.btn-save.secondary:hover {
-    background: #5a6268;
-}
-
-@media print {
-    .no-print {
-        display: none !important;
-    }
-
-    body {
-        background: white !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .form-card {
-        box-shadow: none !important;
-        max-width: 100% !important;
-        padding: 20px !important;
-    }
-
-    .print-header {
-        display: block !important;
-    }
-
-    .billing-content {
-        display: block !important;
-    }
-
-    .billing-left {
-        display: none !important;
-    }
-
-    .billing-right {
-        border: none !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-    }
-
-    .money-grid {
-        display: flex;
-        justify-content: space-between;
-        border: 1px solid #000;
-        padding: 10px;
-        margin-bottom: 20px;
-        page-break-inside: avoid;
-    }
-
-    .money-card {
-        background: white !important;
-        color: black !important;
-        border: none;
-        box-shadow: none;
-        text-align: left;
-    }
-
-    .mc-title {
-        color: black !important;
-    }
-
-    .mc-val {
-        color: black !important;
-    }
-
-    .history-table {
-        border: 1px solid #000;
-    }
-
-    .history-table th {
-        background: #e0e0e0 !important;
-        color: black !important;
-        border: 1px solid #000;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .history-table td {
-        border: 1px solid #000;
-        color: black !important;
-    }
-
-    .signature-line {
-        display: block !important;
-    }
+    display: none; /* Only for old print method, can keep hidden */
 }
 
 @media (max-width: 768px) {
-    .money-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .billing-content {
-        grid-template-columns: 1fr;
-    }
-
-    .billing-right {
-        grid-column: auto;
-    }
-
-    .student-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .student-header-actions {
-        width: 100%;
-        align-items: stretch;
-    }
-
-    .btn-save {
-        width: 100%;
-    }
-
-    .search-box > div {
-        flex-direction: column;
-    }
-
-    .history-table {
-        font-size: 0.75rem;
-    }
-
-    .history-table th,
-    .history-table td {
-        padding: 8px 6px;
-    }
+    .money-grid, .billing-content, .search-flex { grid-template-columns: 1fr; flex-direction: column; }
+    .billing-right { grid-column: auto; }
 }
 </style>
 
 <div class="form-card">
     
-    <div class="print-header">
-        <h1>University of Saint Louis</h1>
-        <p>OFFICIAL STATEMENT OF ACCOUNT</p>
-        <p>Finance Department | School Year 2025-2026</p>
-    </div>
-
-    <div class="search-box no-print">
+    <div class="search-box">
         <label>Search Student ID:</label>
-        <div>
+        <div class="search-flex">
             <input type="text" id="bill_search" 
                    placeholder="e.g. 20260001" 
                    oninput="checkBillingID()">
             
-            <button onclick="loadBilling()" id="btn_bill_search" class="btn-save">View Ledger</button>
+            <button onclick="loadBilling()" id="btn_bill_search">View Ledger</button>
         </div>
         <div id="bill_check_status"></div>
     </div>
@@ -478,7 +303,7 @@ if (isset($_POST['btn_assess'])) {
             
             <div class="student-header-actions">
                 <div id="lbl_status"></div>
-                <button onclick="window.print()" class="btn-save secondary no-print">🖨️ Print Statement</button>
+                <button onclick="openPDF()" class="btn-save secondary">🖨️ Print Statement (PDF)</button>
             </div>
         </div>
 
@@ -499,9 +324,8 @@ if (isset($_POST['btn_assess'])) {
 
         <div class="billing-content">
             
-            <div class="billing-left no-print">
+            <div class="billing-left">
                 <h4>+ Add Tuition / Fee</h4>
-                
                 <form method="POST" onsubmit="event.preventDefault(); submitForm(this, 'billing.php');">
                     <input type="hidden" name="hidden_sid" class="target_sid">
                     
@@ -510,7 +334,7 @@ if (isset($_POST['btn_assess'])) {
                         <input type="number" name="assess_amount" placeholder="0.00" step="0.01" required>
                     </div>
                     
-                    <button type="submit" name="btn_assess" class="btn-save">Save Fee</button>
+                    <button type="submit" name="btn_assess" class="btn-save" style="width:100%">Save Fee</button>
                 </form>
             </div>
 
@@ -527,15 +351,9 @@ if (isset($_POST['btn_assess'])) {
                             </tr>
                         </thead>
                         <tbody id="history_table">
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
-
-                <div class="signature-line">
-                    Cashier / Finance Officer<br>
-                    <span>Date Printed: <?php echo date('Y-m-d'); ?></span>
-                </div>
-
             </div>
 
         </div>

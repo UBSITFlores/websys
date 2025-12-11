@@ -15,7 +15,10 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
 <body>
 
     <div class="header">
-        <div>Saint Louis University - Pacdal (Management)</div>
+        <div style="display: flex; align-items: center;">
+            <img src="../assets/slu.png" alt="School Logo" style="height: 50px; margin-right: 15px;">
+            <span style="font-weight: bold; font-size: 1.2rem;">Saint Louis School of Pacdal, Inc. (Management)</span>
+        </div>
         <div style="font-size: 14px;">
             Logged in as: <strong><?php echo htmlspecialchars($_SESSION['FNAME'] ?? 'Manager'); ?></strong>
             &nbsp;|&nbsp; 
@@ -30,6 +33,7 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'management') {
             <button onclick="loadZone('re_enroll.php', this)">Re-enrollment / Promotion</button>
             <button onclick="loadZone('billing.php', this)">Student Accounts</button>
             <button onclick="loadZone('student_records.php', this)">Student Records</button>
+            <button onclick="loadZone('honor_list.php', this)">Honor List & Ranking</button>
         </div>
 
         <div class="content-zone" id="main-content">
@@ -200,6 +204,49 @@ function loadZone(url, btn) {
                 document.getElementById('billing_dashboard').style.display = 'block';
             }
         });
+    }
+    function updatePeriodOptions() {
+        var levelSelect = document.getElementById('hl_level');
+        var periodSelect = document.getElementById('hl_period');
+        var level = levelSelect.value;
+        
+        // Define Options
+        var jhsOptions = [
+            {v:'1', t:'1st Quarter'}, {v:'2', t:'2nd Quarter'},
+            {v:'3', t:'3rd Quarter'}, {v:'4', t:'4th Quarter'},
+            {v:'5', t:'General Average (Final)'}
+        ];
+        
+        var shsOptions = [
+            {v:'1st Sem', t:'1st Semester'}, {v:'2nd Sem', t:'2nd Semester'}
+        ];
+
+        // Determine Set
+        var optionsToUse = [];
+        if (level === 'Grade 11' || level === 'Grade 12') {
+            optionsToUse = shsOptions;
+        } else if (level === "") {
+            optionsToUse = [{v:'', t:'-- Select Level First --'}];
+        } else {
+            optionsToUse = jhsOptions;
+        }
+
+        // Rebuild Dropdown
+        periodSelect.innerHTML = "";
+        for (var i = 0; i < optionsToUse.length; i++) {
+            var opt = document.createElement('option');
+            opt.value = optionsToUse[i].v;
+            opt.text = optionsToUse[i].t;
+            periodSelect.add(opt);
+        }
+    }
+    function openPDF() {
+        var id = document.getElementById('bill_search').value;
+        if(id && id.trim() !== "") {
+            window.open('print_billing.php?student_id=' + id, '_blank');
+        } else {
+            alert("Please search for a student first.");
+        }
     }
 
     // Default Load

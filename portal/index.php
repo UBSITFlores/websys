@@ -69,7 +69,10 @@ if (!in_array($page, $allowed_pages)) {
 </head>
 <body>
     <div class="header">
-        <div class="logo">University of Saint Louis</div>
+        <div style="display: flex; align-items: center;">
+            <img src="../assets/slu.png" alt="School Logo" style="height: 50px; margin-right: 15px;">
+            <span style="font-weight: bold; font-size: 1.2rem;">Saint Louis School of Pacdal, Inc. (Student)</span>
+        </div>
         <div style="display:flex; align-items:center; gap:12px;">
             <div class="user-info">
                 <div><?php echo htmlspecialchars(trim($fname . ' ' . $lname)); ?></div>

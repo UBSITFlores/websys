@@ -21,6 +21,178 @@ if ($status == 'Closed') {
 
 $tracks = ['kinder', 'junior high school', 'senior high school'];
 ?>
+<style>
+    /* --- Main Card --- */
+    .form-card {
+        max-width: 1100px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .form-card h2 {
+        color: #002D72; /* Royal Blue */
+        border-bottom: 3px solid #febb3f; /* Gold accent */
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+        font-size: 1.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* --- Form Sections --- */
+    .form-section {
+        margin-bottom: 35px;
+        padding: 25px;
+        background: #f9fbfd; /* Very light blue background */
+        border: 1px solid #e1e8ed;
+        border-radius: 8px;
+    }
+
+    .form-section h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: #444;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-left: 4px solid #002D72;
+        padding-left: 10px;
+    }
+
+    /* --- Grid Layouts --- */
+    .grid-4col {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+
+    .grid-3-col {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+
+    .grid-2col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+
+    /* --- Address Grid Specifics --- */
+    .address-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr; /* Street is wider */
+        gap: 10px;
+        row-gap: 10px;
+    }
+    
+    /* Make the address grid wrap for the second row (Province/Zip) */
+    .address-grid input:nth-last-child(-n+2) {
+        grid-column: span 1; /* Default span */
+    }
+    /* Force last row items to fill nicely if needed, or stick to grid */
+
+    /* --- Form Elements --- */
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 6px;
+    }
+
+    .form-group input, 
+    .form-group select {
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background-color: #fff;
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus {
+        border-color: #002D72;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 45, 114, 0.1);
+    }
+
+    .form-group small {
+        color: #777;
+        font-size: 0.8rem;
+        margin-top: 4px;
+        font-style: italic;
+    }
+
+    /* --- Family Background Styling --- */
+    .family-subsection {
+        border-top: 1px dashed #ccc;
+        padding-top: 15px;
+        margin-top: 10px;
+    }
+    .family-subsection:first-child {
+        border-top: none;
+        padding-top: 0;
+        margin-top: 0;
+    }
+
+    .family-label {
+        display: block;
+        color: #002D72;
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 1rem;
+        background: #eef4fb;
+        padding: 5px 10px;
+        border-radius: 4px;
+        width: fit-content;
+    }
+
+    /* --- Submit Button --- */
+    .btn-submit-large {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        font-size: 1.2rem;
+        background: #002D72;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s;
+        margin-top: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-submit-large:hover {
+        background: #004099;
+        box-shadow: 0 4px 10px rgba(0, 45, 114, 0.3);
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+        .grid-4col, .grid-3-col, .grid-2col, .address-grid {
+            grid-template-columns: 1fr; /* Stack everything on mobile */
+        }
+        
+        .form-card {
+            padding: 20px;
+        }
+    }
+</style>
 
 <div class="form-card">
     <h2>Register & Enroll Student</h2>

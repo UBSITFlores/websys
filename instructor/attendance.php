@@ -1,223 +1,280 @@
 <?php
 session_start();
 if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
-    http_response_code(403); echo "Session Expired."; exit;
+    die("Access Denied");
 }
 
-$pdo = new PDO("mysql:host=localhost;dbname=portal;charset=utf8mb4", "root", "");
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+require_once '../functions/db.php';
 
-$section_name = $_GET['section'] ?? '';
-$subject_code = $_GET['code'] ?? '';
-$month = $_GET['month'] ?? date('Y-m'); 
+// ---------------------------------------------------------
+// 1. RESOLVE INSTRUCTOR ID (THE FIX)
+// ---------------------------------------------------------
+$sess_id = $_SESSION['ACCOUNTID'] ?? $_SESSION['ACCOUNT_ID'] ?? '';
+$instructor_id = 0;
 
-// 1. GET SECTION ID
-$stmt = $pdo->prepare("SELECT id FROM sections WHERE section = ? AND code = ? LIMIT 1");
-$stmt->execute([$section_name, $subject_code]);
-$sec = $stmt->fetch(PDO::FETCH_ASSOC);
+// FIX: Removed 'username' column check to prevent crash
+// We only check 'id' (Primary Key) or 'account_id' (String ID)
+$stmt = $pdo->prepare("SELECT id FROM account WHERE id = ? OR account_id = ? LIMIT 1");
+$stmt->execute([$sess_id, $sess_id]);
+$instructor_id = $stmt->fetchColumn();
 
-if(!$sec) { 
-    echo "<div style='padding:20px; color:red;'>Error: Class Section not found.</div>"; 
+if (!$instructor_id) {
+    // Fallback: If session is empty or invalid, try to proceed if we have a section parameter
+    // This allows the page to load "No classes" message instead of crashing
+    $instructor_id = 0; 
+}
+
+// ---------------------------------------------------------
+// HANDLE SAVE REQUEST (AJAX POST)
+// ---------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        $section_id = $_POST['section_id'];
+        $month = $_POST['month'];
+        $att_data = $_POST['att'] ?? []; 
+
+        $pdo->beginTransaction();
+
+        foreach ($att_data as $sid => $days) {
+            $check = $pdo->prepare("SELECT id FROM attendance_daily WHERE student_id=? AND section_id=? AND month_year=?");
+            $check->execute([$sid, $section_id, $month]);
+            $exists = $check->fetchColumn();
+
+            $set_parts = [];
+            $params = [];
+            
+            foreach ($days as $day_num => $status) {
+                if ($day_num >= 1 && $day_num <= 31) {
+                    $set_parts[] = "day_{$day_num} = ?";
+                    $params[] = $status; 
+                }
+            }
+
+            if (empty($set_parts)) continue;
+
+            if ($exists) {
+                $sql = "UPDATE attendance_daily SET " . implode(', ', $set_parts) . " WHERE id = ?";
+                $params[] = $exists;
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
+            } else {
+                $cols = "student_id, section_id, month_year, " . implode(', ', array_map(function($d){ return "day_$d"; }, array_keys($days)));
+                $vals = "?, ?, ?, " . implode(', ', array_fill(0, count($days), '?'));
+                $insert_params = array_merge([$sid, $section_id, $month], array_values($days));
+                $stmt = $pdo->prepare("INSERT INTO attendance_daily ($cols) VALUES ($vals)");
+                $stmt->execute($insert_params);
+            }
+        }
+
+        $pdo->commit();
+        echo "SAVED"; 
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        echo "Error: " . $e->getMessage();
+    }
     exit; 
 }
-$sid = $sec['id'];
 
-// 2. HANDLE SAVE
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $month_save = $_POST['month_key'];
-    
-    $sql = "INSERT INTO attendance_daily (student_id, section_id, month_year, 
-            day_1, day_2, day_3, day_4, day_5, day_6, day_7, day_8, day_9, day_10,
-            day_11, day_12, day_13, day_14, day_15, day_16, day_17, day_18, day_19, day_20,
-            day_21, day_22, day_23, day_24, day_25, day_26, day_27, day_28, day_29, day_30, day_31) 
-            VALUES (:uid, :sec, :mo, 
-            :d1, :d2, :d3, :d4, :d5, :d6, :d7, :d8, :d9, :d10,
-            :d11, :d12, :d13, :d14, :d15, :d16, :d17, :d18, :d19, :d20,
-            :d21, :d22, :d23, :d24, :d25, :d26, :d27, :d28, :d29, :d30, :d31)
-            ON DUPLICATE KEY UPDATE 
-            day_1=:d1, day_2=:d2, day_3=:d3, day_4=:d4, day_5=:d5, day_6=:d6, day_7=:d7, day_8=:d8, day_9=:d9, day_10=:d10,
-            day_11=:d11, day_12=:d12, day_13=:d13, day_14=:d14, day_15=:d15, day_16=:d16, day_17=:d17, day_18=:d18, day_19=:d19, day_20=:d20,
-            day_21=:d21, day_22=:d22, day_23=:d23, day_24=:d24, day_25=:d25, day_26=:d26, day_27=:d27, day_28=:d28, day_29=:d29, day_30=:d30, day_31=:d31";
-    
-    $stmt = $pdo->prepare($sql);
+// ---------------------------------------------------------
+// DISPLAY VIEW (GET)
+// ---------------------------------------------------------
 
-    if(isset($_POST['att'])) {
-        foreach($_POST['att'] as $uid => $days) {
-            $params = [':uid' => $uid, ':sec' => $sid, ':mo' => $month_save];
-            for($i=1; $i<=31; $i++) {
-                $params[":d$i"] = empty($days[$i]) ? null : strtoupper($days[$i]);
-            }
-            $stmt->execute($params);
+// 2. GET URL PARAMETERS
+$section_name = $_GET['section'] ?? '';
+$subject_code = $_GET['code'] ?? '';
+$month = $_GET['month'] ?? date('Y-m');
+
+// 3. FETCH DATA
+$students = [];
+$att_data = [];
+$subject_info = null;
+$my_classes = [];
+
+// A. Always fetch the list of classes for this instructor (for the dropdown)
+if ($instructor_id) {
+    $stmt = $pdo->prepare("SELECT * FROM sections WHERE instructor_id = ? ORDER BY school_year DESC, section ASC");
+    $stmt->execute([$instructor_id]);
+    $my_classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// B. If a specific class is selected (via URL from Dashboard), fetch its data
+if ($section_name && $subject_code && $instructor_id) {
+    // Verify Ownership & Get Section ID
+    $stmt = $pdo->prepare("SELECT * FROM sections WHERE section = ? AND code = ? AND instructor_id = ?");
+    $stmt->execute([$section_name, $subject_code, $instructor_id]);
+    $subject_info = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($subject_info) {
+        $sec_id = $subject_info['id'];
+
+        // Get Students
+        $stmt = $pdo->prepare("SELECT a.id, a.lname, a.fname 
+                               FROM enrollments e 
+                               JOIN account a ON e.student_id = a.id 
+                               WHERE e.section_id = ? 
+                               ORDER BY a.lname ASC");
+        $stmt->execute([$sec_id]);
+        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get Saved Attendance
+        $stmt = $pdo->prepare("SELECT * FROM attendance_daily WHERE section_id = ? AND month_year = ?");
+        $stmt->execute([$sec_id, $month]);
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $att_data[$row['student_id']] = $row;
         }
     }
-    echo "SAVED"; exit;
 }
 
-// 3. FETCH STUDENTS
-$students = $pdo->prepare("SELECT a.id, a.lname, a.fname FROM enrollments e JOIN account a ON e.student_id=a.id WHERE e.section_id=? ORDER BY a.lname");
-$students->execute([$sid]);
-$list = $students->fetchAll(PDO::FETCH_ASSOC);
-
-// 4. FETCH ATTENDANCE DATA
-$att_data = [];
-$stmt = $pdo->prepare("SELECT * FROM attendance_daily WHERE section_id=? AND month_year=?");
-$stmt->execute([$sid, $month]);
-while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $att_data[$row['student_id']] = $row;
-}
-
-// 5. CALCULATE DAYS
-$days_in_month = date('t', strtotime($month));
+// Helper: Get days in selected month
+$days_in_month = date('t', strtotime($month . '-01'));
 ?>
 
 <style>
-    /* --- WEB VIEW --- */
-    .att-container { background: #fff; padding: 20px; border-radius: 8px; overflow-x: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .att-table { border-collapse: collapse; font-size: 0.8rem; width: 100%; min-width: max-content; }
-    .att-table th, .att-table td { border: 1px solid #ddd; text-align: center; padding: 4px 2px; }
-    .att-table th { background: #002D72; color: white; height: 30px; min-width: 25px; }
+    /* --- Layout --- */
+    .att-container { max-width: 100%; overflow-x: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     
-    .att-name { 
-        text-align: left; padding: 5px 10px !important; min-width: 150px; font-weight: bold; 
-        position: sticky; left: 0; background: #fff; z-index: 2; 
-    }
+    /* --- Controls --- */
+    .att-controls { display: flex; gap: 15px; margin-bottom: 20px; align-items: end; flex-wrap: wrap; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6; }
+    .att-controls label { font-weight: bold; font-size: 0.9rem; display: block; margin-bottom: 5px; color: #002D72; }
+    .att-controls select, .att-controls input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-width: 200px; }
     
+    /* --- Table --- */
+    .att-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 1200px; margin-top: 15px; }
+    .att-table th { background: #002D72; color: white; padding: 8px; text-align: center; border: 1px solid #001f52; white-space: nowrap; }
+    .att-table td { border: 1px solid #ddd; padding: 0; text-align: center; height: 30px; }
+    
+    /* Sticky Name Column */
+    .col-name { position: sticky; left: 0; background: #fff; z-index: 2; width: 200px; text-align: left !important; padding-left: 10px !important; border-right: 2px solid #ccc !important; }
+    .att-table th.col-name { background: #002D72; color: white; z-index: 3; }
+
+    /* --- Inputs --- */
     .att-input { 
-        width: 25px; height: 25px; border: none; text-align: center; text-transform: uppercase; 
-        font-weight: bold; font-size: 0.85rem; cursor: pointer;
+        width: 100%; height: 100%; border: none; text-align: center; 
+        text-transform: uppercase; font-weight: bold; cursor: pointer;
     }
-    .att-input:focus { background: #eef2ff; outline: none; }
+    .att-input:focus { background: #e8f0fe; outline: none; }
     
-    .att-input[value="A"] { color: red; background: #ffe6e6; }
-    .att-input[value="P"] { color: green; }
-    .att-input[value="L"] { color: orange; }
-
-    .btn-save { background: #198754; color: white; padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; }
-    .month-sel { padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
-
-    /* --- PRINT STYLES --- */
-    @media print {
-        @page { size: landscape; margin: 0.5cm; }
-        
-        /* Hide UI */
-        .no-print, .sidebar-right, .header, .btn-save, .month-sel, #save_msg { 
-            display: none !important; 
-        }
-
-        /* Reset Layout */
-        body, .content-zone, .att-container, .container { 
-            background: white !important; 
-            margin: 0 !important; 
-            padding: 0 !important; 
-            width: 100% !important; 
-            height: auto !important;
-            box-shadow: none !important; 
-            display: block !important; 
-            zoom: 85%; /* Scale down to fit */
-        }
-
-        /* Table Styling */
-        .att-table { 
-            width: 100% !important; 
-            border: 2px solid black; 
-            font-size: 9pt; 
-            page-break-inside: avoid;
-        }
-        .att-table th { 
-            background-color: #eee !important; 
-            color: black !important; 
-            border: 1px solid black !important; 
-            -webkit-print-color-adjust: exact; 
-        }
-        .att-table td { 
-            border: 1px solid black !important; 
-        }
-
-        /* Name Column */
-        .att-name { 
-            position: static !important; 
-            white-space: nowrap;
-            border-right: 2px solid black !important;
-        }
-        
-        /* Inputs */
-        .att-input { 
-            color: black !important; 
-            background: transparent !important; 
-            border: none !important;
-            padding: 0 !important;
-            height: auto !important;
-        }
-
-        /* Colors */
-        .att-input[value="A"] { color: red !important; font-weight: bold; -webkit-print-color-adjust: exact; }
-        .att-input[value="P"] { color: green !important; font-weight: bold; -webkit-print-color-adjust: exact; }
-    }
+    /* --- Buttons --- */
+    .btn-action { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
+    .btn-save { background: #198754; }
+    .btn-print { background: #002D72; }
+    .btn-save:hover { background: #157347; }
+    .btn-print:hover { background: #001f52; }
+    
+    #save_msg { margin-left: 10px; font-weight: bold; }
 </style>
 
 <div class="att-container">
-    <div class="no-print" style="display:flex; justify-content:space-between; margin-bottom:15px;">
-        <div>
-            <h2 style="margin:0; color:#002D72;">Attendance Sheet</h2>
-            <p style="margin:0; color:#666;"><?php echo htmlspecialchars($section_name . ' | ' . $subject_code); ?></p>
-        </div>
-        <div style="display:flex; gap:10px;">
-            <button onclick="window.print()" style="padding:8px 15px; background:#6c757d; color:white; border:none; border-radius:4px; cursor:pointer;">Print / PDF</button>
-            <input type="month" id="month_picker" value="<?php echo $month; ?>" class="month-sel" onchange="changeMonth()">
-            <button onclick="loadZone('grading-sheet-ajax.php', this)" style="padding:8px 15px; cursor:pointer; border:1px solid #ccc; background:#fff; border-radius:4px;">Back</button>
-        </div>
-    </div>
-
-    <input type="hidden" id="att_sec_name" value="<?php echo htmlspecialchars($section_name); ?>">
-    <input type="hidden" id="att_sub_code" value="<?php echo htmlspecialchars($subject_code); ?>">
-
-    <form id="attForm" onsubmit="event.preventDefault(); saveAttendance();">
-        <input type="hidden" name="month_key" value="<?php echo $month; ?>">
+    <h2 style="color:#002D72; margin-top:0; border-bottom: 2px solid #febb3f; padding-bottom: 10px;">Class Attendance</h2>
+    
+    <form id="controlForm" class="att-controls">
         
-        <?php if(empty($list)): ?>
-            <div style="text-align:center; padding:30px; color:#999;">No students enrolled.</div>
-        <?php else: ?>
+        <div>
+            <label>Select Class:</label>
+            <select onchange="loadZone('attendance.php?section=' + encodeURIComponent(this.options[this.selectedIndex].getAttribute('data-sec')) + '&code=' + encodeURIComponent(this.options[this.selectedIndex].getAttribute('data-code')) + '&month=' + document.getElementById('month_picker').value)">
+                <option value="">-- Choose a Subject --</option>
+                <?php foreach($my_classes as $cls): 
+                    $isSelected = ($cls['section'] == $section_name && $cls['code'] == $subject_code) ? 'selected' : '';
+                    $label = $cls['code'] . " - " . $cls['section'];
+                ?>
+                    <option value="<?php echo $cls['id']; ?>" 
+                            data-sec="<?php echo htmlspecialchars($cls['section']); ?>" 
+                            data-code="<?php echo htmlspecialchars($cls['code']); ?>"
+                            <?php echo $isSelected; ?>>
+                        <?php echo htmlspecialchars($label); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <input type="hidden" id="att_sec_name" value="<?php echo htmlspecialchars($section_name); ?>">
+        <input type="hidden" id="att_sub_code" value="<?php echo htmlspecialchars($subject_code); ?>">
+
+        <div>
+            <label>Month:</label>
+            <input type="month" id="month_picker" name="month" value="<?php echo $month; ?>" onchange="changeMonth()">
+        </div>
+
+        <div style="flex:1;"></div>
+
+        <?php if($subject_info): ?>
+            <span id="save_msg"></span>
+            <button type="button" onclick="saveAttendance()" class="btn-action btn-save">💾 Save Changes</button>
+            <button type="button" onclick="printAttendancePDF()" class="btn-action btn-print">🖨️ Print Record</button>
+        <?php endif; ?>
+    </form>
+
+    <?php if(!$subject_info): ?>
+        <div style="text-align:center; padding:40px; color:#666;">
+            <h3>Please select a class from the dropdown above.</h3>
+            <?php if(empty($my_classes)): ?>
+                <p style="color:red;">No classes found for this instructor account. Please contact admin.</p>
+            <?php endif; ?>
+        </div>
+    <?php else: ?>
+        
+        <form id="attForm">
+            <input type="hidden" name="section_id" value="<?php echo $sec_id; ?>">
+            <input type="hidden" name="month" value="<?php echo $month; ?>">
+
             <table class="att-table">
                 <thead>
                     <tr>
-                        <th class="att-name">Student Name</th>
-                        <?php for($i=1; $i<=$days_in_month; $i++): ?>
-                            <th><?php echo $i; ?></th>
+                        <th class="col-name">Student Name</th>
+                        <?php for($d=1; $d<=$days_in_month; $d++): ?>
+                            <th style="width: 25px;"><?php echo $d; ?></th>
                         <?php endfor; ?>
                         <th style="background:#444;">P</th>
                         <th style="background:#444;">A</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach($list as $stu): 
-                        $uid = $stu['id'];
-                        $p_count = 0; $a_count = 0;
-                    ?>
-                    <tr>
-                        <td class="att-name"><?php echo htmlspecialchars($stu['lname'] . ', ' . $stu['fname']); ?></td>
-                        <?php for($d=1; $d<=$days_in_month; $d++): 
-                            $val = $att_data[$uid]["day_$d"] ?? '';
-                            if($val == 'P') $p_count++;
-                            if($val == 'A') $a_count++;
+                    <?php if(empty($students)): ?>
+                        <tr><td colspan="<?php echo $days_in_month + 3; ?>" style="padding:20px;">No students enrolled in this section.</td></tr>
+                    <?php else: ?>
+                        <?php foreach($students as $s): 
+                            $sid = $s['id'];
+                            $row_data = $att_data[$sid] ?? [];
+                            
+                            $p_total = 0; $a_total = 0;
+                            for($d=1; $d<=$days_in_month; $d++) {
+                                $val = $row_data['day_'.$d] ?? '';
+                                if($val == 'P') $p_total++;
+                                if($val == 'A') $a_total++;
+                            }
                         ?>
-                        <td>
-                            <input type="text" class="att-input" maxlength="1" 
-                                   name="att[<?php echo $uid; ?>][<?php echo $d; ?>]" 
-                                   value="<?php echo $val; ?>"
-                                   oninput="updateCounts(this)"> </td>
-                        <?php endfor; ?>
-                        
-                        <td class="count-p" style="background:#f9f9f9; font-weight:bold;"><?php echo $p_count; ?></td>
-                        <td class="count-a" style="background:#f9f9f9; font-weight:bold; color:red;"><?php echo $a_count; ?></td>
-                    </tr>
-                    <?php endforeach; ?>
+                        <tr>
+                            <td class="col-name">
+                                <strong><?php echo htmlspecialchars($s['lname'] . ', ' . $s['fname']); ?></strong>
+                            </td>
+                            
+                            <?php for($d=1; $d<=$days_in_month; $d++): 
+                                $val = $row_data['day_'.$d] ?? '';
+                                $style = '';
+                                if($val === 'P') $style = 'color:green; background-color:#e6ffe6;';
+                                elseif($val === 'A') $style = 'color:red; background-color:#ffe6e6;';
+                                elseif($val === 'L') $style = 'color:#856404; background-color:#fff3cd;';
+                            ?>
+                                <td>
+                                    <input type="text" 
+                                           name="att[<?php echo $sid; ?>][<?php echo $d; ?>]" 
+                                           value="<?php echo $val; ?>" 
+                                           class="att-input" 
+                                           style="<?php echo $style; ?>"
+                                           maxlength="1"
+                                           onfocus="this.select()"
+                                           oninput="updateCounts(this)" 
+                                           autocomplete="off">
+                                </td>
+                            <?php endfor; ?>
+                            
+                            <td class="count-p" style="font-weight:bold; color:green; background:#f9f9f9;"><?php echo $p_total; ?></td>
+                            <td class="count-a" style="font-weight:bold; color:red; background:#f9f9f9;"><?php echo $a_total; ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
-            
-            <div class="no-print" style="margin-top:20px; text-align:right;">
-                <span id="save_msg" style="margin-right:10px; font-weight:bold;"></span>
-                <button type="submit" class="btn-save">Save Attendance</button>
-            </div>
-        <?php endif; ?>
-    </form>
+        </form>
+    <?php endif; ?>
 </div>

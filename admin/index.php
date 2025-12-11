@@ -15,7 +15,10 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'admin') {
 <body>
 
     <div class="header">
-        <div>University of Saint Louis - Admin</div>
+        <div style="display: flex; align-items: center;">
+            <img src="../assets/slu.png" alt="School Logo" style="height: 50px; margin-right: 15px;">
+            <span style="font-weight: bold; font-size: 1.2rem;">Saint Louis School of Pacdal, Inc. (Management)</span>
+        </div>
         <div style="font-size: 14px;">
             Logged in as: <strong><?php echo htmlspecialchars($_SESSION['FNAME'] ?? 'Admin'); ?></strong>
             &nbsp;|&nbsp; 

@@ -15,7 +15,10 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
 <body>
 
     <div class="header">
-        <div>University of Saint Louis - Instructor Panel</div>
+        <div style="display: flex; align-items: center;">
+            <img src="../assets/slu.png" alt="School Logo" style="height: 50px; margin-right: 15px;">
+            <span style="font-weight: bold; font-size: 1.2rem;">Saint Louis School of Pacdal, Inc. (Management)</span>
+        </div>
         <div style="font-size: 14px;">
             Logged in as: <strong><?php echo htmlspecialchars($_SESSION['FNAME'] ?? 'Instructor'); ?></strong>
             &nbsp;|&nbsp; 
@@ -25,17 +28,20 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
 
     <div class="container">
         <div class="sidebar-right">
-            <button onclick="loadZone('welcome.php', null)">Dashboard Home</button>
+            <button onclick="loadZone('welcome.php', this)">Dashboard Home</button>
             <button onclick="loadZone('schedule.php', this)">My Schedule</button>
             <button onclick="loadZone('grading-sheet-ajax.php', this)">My Class Loads</button>
-            <button onclick="loadZone('advisory.php', this)">My Advisory Class</button> </div>
+            <button onclick="loadZone('advisory.php', this)">My Advisory Class</button>
+        </div>
 
         <div class="content-zone" id="main-content">
-            </div>
+        </div>
     </div>
 
     <script>
+    // ===============================================
     // 1. CORE NAVIGATION
+    // ===============================================
     function loadZone(url, btn) {
         if(btn) {
             document.querySelectorAll('.sidebar-right button').forEach(b => b.classList.remove('active'));
@@ -57,16 +63,58 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
             })
             .catch(err => {
                 document.getElementById('main-content').innerHTML = "<div style='color:red; padding:20px;'>Error loading content.</div>";
+                console.error(err);
             });
     }
 
-    // 2. ATTENDANCE LOGIC (New!)
+    // ===============================================
+    // 2. PDF DOWNLOAD FUNCTIONS (FPDF)
+    // ===============================================
+    
+    // Download Class Loads PDF
+    function downloadClassesPDF(view) {
+        const url = 'generate_grading_pdf.php' + (view === 'archive' ? '?view=archive' : '');
+        window.open(url, '_blank');
+    }
+
+    // Print Attendance PDF
+    // OLD (immediate execution)
+function printAttendancePDF() {
+    const section = document.getElementById('att_sec_name')?.value;
+    // ...
+}
+
+// NEW (with timeout for DOM readiness)
+function printAttendancePDF() {
+    setTimeout(() => {
+        const section = document.getElementById('att_sec_name')?.value;
+        const code = document.getElementById('att_sub_code')?.value;
+        const month = document.getElementById('month_picker')?.value || '<?php echo date('Y-m'); ?>';
+        
+        console.log('PDF Debug - Section:', section, 'Code:', code, 'Month:', month);
+        
+        if (!section || !code) {
+            alert('Error: Missing section or code information.\n\nPlease make sure the attendance page is fully loaded.');
+            return;
+        }
+        
+        const url = 'print_attendance_pdf.php?section=' + encodeURIComponent(section) + 
+                    '&code=' + encodeURIComponent(code) + 
+                    '&month=' + encodeURIComponent(month);
+        
+        console.log('Opening PDF:', url);
+        window.open(url, '_blank');
+    }, 100); // Wait 100ms for DOM to be ready
+}
+
+    // ===============================================
+    // 3. ATTENDANCE LOGIC
+    // ===============================================
     function changeMonth() {
         let m = document.getElementById('month_picker').value;
         let sec = document.getElementById('att_sec_name').value;
         let code = document.getElementById('att_sub_code').value;
         
-        // Reload the page with the new month
         loadZone('attendance.php?section=' + encodeURIComponent(sec) + '&code=' + encodeURIComponent(code) + '&month=' + m);
     }
 
@@ -75,14 +123,13 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
         let fd = new FormData(form);
         let msg = document.getElementById('save_msg');
         
-        // Get current context from hidden inputs
         let sec = document.getElementById('att_sec_name').value;
         let code = document.getElementById('att_sub_code').value;
         let month = document.getElementById('month_picker').value;
 
         msg.innerText = "Saving...";
+        msg.style.color = "#856404";
         
-        // Post to the same URL structure to ensure logic runs
         let url = 'attendance.php?section=' + encodeURIComponent(sec) + '&code=' + encodeURIComponent(code) + '&month=' + month;
 
         fetch(url, { method: 'POST', body: fd })
@@ -93,13 +140,60 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
                 msg.innerText = "✅ Saved!";
                 setTimeout(() => { msg.innerText = ""; }, 2000);
             } else {
-                alert("Error saving. Check console.");
+                msg.style.color = "red";
+                msg.innerText = "❌ Error saving";
                 console.error(data);
             }
+        })
+        .catch(err => {
+            msg.style.color = "red";
+            msg.innerText = "❌ Network error";
+            console.error(err);
         });
     }
 
-    // 3. GRADING LOGIC (Existing)
+    function updateCounts(input) {
+        // Force uppercase & style
+        let val = input.value.toUpperCase();
+        input.value = val;
+        
+        // Color coding
+        if(val === 'A') { 
+            input.style.color = 'red'; 
+            input.style.backgroundColor = '#ffe6e6'; 
+        }
+        else if(val === 'P') { 
+            input.style.color = 'green'; 
+            input.style.backgroundColor = '#e6ffe6'; 
+        }
+        else if(val === 'L') { 
+            input.style.color = '#856404'; 
+            input.style.backgroundColor = '#fff3cd'; 
+        }
+        else { 
+            input.style.color = 'black'; 
+            input.style.backgroundColor = ''; 
+        }
+
+        // Recalculate totals for this row
+        let row = input.closest('tr');
+        let allInputs = row.querySelectorAll('.att-input');
+        let p = 0;
+        let a = 0;
+
+        allInputs.forEach(box => {
+            if(box.value === 'P') p++;
+            if(box.value === 'A') a++;
+        });
+
+        // Update cells
+        row.querySelector('.count-p').innerText = p;
+        row.querySelector('.count-a').innerText = a;
+    }
+
+    // ===============================================
+    // 4. GRADING LOGIC
+    // ===============================================
     function initGrades() {
         let rows = document.querySelectorAll('.student-row');
         if(rows.length > 0) {
@@ -112,14 +206,12 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
 
     function calcRow(input) {
         var row = input.closest('tr');
-        // This works for both 3 columns and 4 columns automatically
         var inputs = row.querySelectorAll('.score-val');
         
         var total = 0;
         var count = 0;
         var filled = 0;
 
-        // Basic Loop
         for(var i = 0; i < inputs.length; i++) {
             var val = inputs[i].value;
             if(val != "" && !isNaN(val)) {
@@ -132,12 +224,7 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
         var finalCell = row.querySelector('.final-grade');
         var remarkCell = row.querySelector('.remarks');
 
-        // Show average if at least one grade is entered (or wait for all? let's show current avg)
         if(filled > 0) {
-            // In real school systems, blank usually means 0, but for display we average what is there
-            // OR strict mode: total / count (dividing by 3 or 4 even if some are empty)
-            // Let's use strict mode:
-            
             var avg = total / count;
             var final = avg.toFixed(2);
             
@@ -219,53 +306,44 @@ if (!isset($_SESSION['ROLE']) || $_SESSION['ROLE'] !== 'instructor') {
         var sec = document.getElementById('hidden_sec_name').value;
         var code = document.getElementById('hidden_subj_code').value;
 
-        status.style.display = 'inline'; status.innerHTML = 'Saving...';
+        status.style.display = 'inline'; 
+        status.innerHTML = 'Saving...';
+        status.style.color = '#856404';
 
         fetch('section-grades.php?section=' + encodeURIComponent(sec) + '&code=' + encodeURIComponent(code), {
-            method: 'POST', body: formData
+            method: 'POST', 
+            body: formData
         })
         .then(res => res.text())
         .then(data => {
             if(data.includes("SAVED")) {
-                status.style.color = '#198754'; status.innerHTML = '✅ Saved!';
+                status.style.color = '#198754'; 
+                status.innerHTML = '✅ Saved!';
                 setTimeout(() => { status.innerHTML = ""; }, 3000);
             } else {
-                alert("Error saving.");
+                status.style.color = '#dc3545';
+                status.innerHTML = '❌ Error';
+                console.error(data);
             }
+        })
+        .catch(err => {
+            status.style.color = '#dc3545';
+            status.innerHTML = '❌ Network Error';
+            console.error(err);
         });
     }
-    // 4. REAL-TIME ATTENDANCE CALC
-    function updateCounts(input) {
-        // 1. Force Uppercase & Style
-        let val = input.value.toUpperCase();
-        input.value = val;
-        
-        // Color Coding
-        if(val === 'A') { input.style.color = 'red'; input.style.backgroundColor = '#ffe6e6'; }
-        else if(val === 'P') { input.style.color = 'green'; input.style.backgroundColor = ''; }
-        else { input.style.color = 'black'; input.style.backgroundColor = ''; }
 
-        // 2. Recalculate Totals for this Row
-        let row = input.closest('tr');
-        let allInputs = row.querySelectorAll('.att-input');
-        let p = 0;
-        let a = 0;
-
-        allInputs.forEach(box => {
-            if(box.value === 'P') p++;
-            if(box.value === 'A') a++;
-        });
-
-        // 3. Update Cells
-        row.querySelector('.count-p').innerText = p;
-        row.querySelector('.count-a').innerText = a;
-    }
+    // ===============================================
     // 5. ADVISORY LOGIC
+    // ===============================================
     function loadAdvisory() {
         let p = document.getElementById('adv_period').value;
         loadZone('advisory.php?period=' + p);
     }
-
+    
+    // ===============================================
+    // 6. INITIALIZE ON LOAD
+    // ===============================================
     window.onload = function() {
         loadZone('welcome.php', null);
     };

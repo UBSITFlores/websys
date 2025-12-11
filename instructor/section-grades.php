@@ -156,7 +156,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $existing_behav[$row['student_id'
 
     <div class="mode-tabs">
         <button class="mode-btn active" onclick="switchMode('academic', this)">Academic Grades</button>
-        <button class="mode-btn" onclick="switchMode('behavior', this)">Attendance & Conduct</button>
+        <!-- <button class="mode-btn" onclick="switchMode('behavior', this)">Attendance & Conduct</button> -->
     </div>
 
     <div id="bulk-container">
